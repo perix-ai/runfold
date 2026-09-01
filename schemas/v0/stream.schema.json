@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "stream.schema.json",
+  "title": "Perix Runtime Data V0 Stream",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "namespace_id",
+    "execution_id",
+    "session_id",
+    "stream_id",
+    "kind",
+    "creation_command_id",
+    "created_event_id",
+    "schema_version",
+    "created_at"
+  ],
+  "properties": {
+    "namespace_id": {
+      "$ref": "common.schema.json#/$defs/opaqueId"
+    },
+    "execution_id": {
+      "$ref": "common.schema.json#/$defs/opaqueId"
+    },
+    "session_id": {
+      "$ref": "common.schema.json#/$defs/opaqueId"
+    },
+    "stream_id": {
+      "$ref": "common.schema.json#/$defs/opaqueId"
+    },
+    "kind": {
+      "enum": ["root", "child"]
+    },
+    "creation_command_id": {
+      "$ref": "common.schema.json#/$defs/opaqueId"
+    },
+    "created_event_id": {
+      "$ref": "common.schema.json#/$defs/opaqueId"
+    },
+    "schema_version": {
+      "$ref": "common.schema.json#/$defs/schemaVersion"
+    },
+    "created_at": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parent_stream_id",
+        "parent_seq",
+        "checkpoint_id"
+      ],
+      "properties": {
+        "parent_stream_id": {
+          "$ref": "common.schema.json#/$defs/opaqueId"
+        },
+        "parent_seq": {
+          "$ref": "common.schema.json#/$defs/sequence"
+        },
+        "checkpoint_id": {
+          "$ref": "common.schema.json#/$defs/opaqueId"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "child"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "required": ["lineage"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "root"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "not": {
+          "required": ["lineage"]
+        }
+      }
+    }
+  ]
+}

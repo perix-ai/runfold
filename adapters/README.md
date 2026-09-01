@@ -1,6 +1,7 @@
 # Adapters
 
-Adapters isolate Perix Runtime Data from concrete harnesses, storage engines and observability backends.
+Adapters isolate Perix Runtime Data from concrete harnesses, storage engines and
+observability backends.
 
 ## Categories
 

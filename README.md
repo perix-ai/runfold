@@ -1,37 +1,39 @@
 # Perix Runtime Data
 
-**The Agent Data Plane for durable agent execution.**
+**The agent data plane for durable agent execution.**
 
-`perix-runtime-data` defines and implements the durable runtime-data layer for Perix agents.
+`perix-runtime-data` defines the durable runtime-data layer for Perix agents.
 
 It owns the semantics and lifecycle of:
 
+- **Stream** — an ordered root or lineage-aware child history
 - **Event** — canonical append-only execution facts
 - **State** — materialized logical runtime state
 - **Checkpoint** — durable recovery boundaries
-- **Fork** — lineage-aware branching from valid recovery points
 - **Artifact** — versioned metadata and references for generated files/data
 - **Effect** — externally committed side effects and idempotency records
 - **Projection** — derived views such as OpenTelemetry and analytics exports
 
 ## Design principle
 
-One logical source of truth; multiple projections.
+One canonical logical history; multiple materializations and projections.
 
 ```text
-Canonical Event
+Canonical Event Stream
       |
-      +--> State Materializer
+      +--> State --> Checkpoint --> Forked Stream
       |
-      +--> Checkpoint / Fork
+      +--> Artifact index / Effect ledger
       |
-      +--> Artifact / Effect references
-      |
-      +--> OTel / Analytics projections
+      `--> OTel / Analytics projections
 ```
 
 Runtime-data semantics are independent from any specific harness, model provider,
 sandbox, database, or observability backend.
+
+V0 uses one root stream per session, optimistic concurrency through
+`expected_seq`, and exact `(stream_id, seq)` revisions. See
+[`RFC 0001`](rfcs/0001-runtime-data-model.md) for the current model.
 
 ## Repository layout
 
@@ -40,17 +42,22 @@ perix-runtime-data/
 ├── docs/
 ├── spec/
 │   ├── ids/
+│   ├── stream/
 │   ├── event/
 │   ├── state/
 │   ├── checkpoint/
 │   ├── artifact/
 │   ├── effect/
 │   └── projection/
+├── schemas/
+│   └── v0/
 ├── adapters/
 │   ├── harness/
 │   ├── storage/
 │   └── observability/
-├── tests/
+├── conformance/
+│   ├── cases/
+│   └── fixtures/
 └── rfcs/
 ```
 
@@ -70,3 +77,6 @@ Those belong to separate Perix planes.
 ## Status
 
 Architecture bootstrap / pre-alpha.
+
+The repository currently defines contracts and conformance requirements. A
+reference implementation has not yet been added.

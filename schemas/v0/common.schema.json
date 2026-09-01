@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common.schema.json",
+  "title": "Perix Runtime Data V0 Common Types",
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stream_id", "seq"],
+      "properties": {
+        "stream_id": {
+          "$ref": "#/$defs/opaqueId"
+        },
+        "seq": {
+          "$ref": "#/$defs/sequence"
+        }
+      }
+    },
+    "digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "value"],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
