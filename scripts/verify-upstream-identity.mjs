@@ -110,6 +110,32 @@ const SPECIFIER_MAPPINGS = new Map([
   ['client/ui-renderer/src/client/bind.ts', [
     { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
   ]],
+  ['client/ui-primitives/tests/tooltip.client.spec.tsx', [
+    { from: '@deepseek-ai/dsh-client-ui-primitives', target: 'ui/trajectory/src/ui-primitives.ts' },
+  ]],
+  ['client/ui-primitives/tests/json-tree.client.spec.tsx', [
+    { from: '@deepseek-ai/dsh-client-ui-primitives', target: 'ui/trajectory/src/ui-primitives.ts' },
+    { from: './labels.client.ts', target: 'test-support/ui-primitives.tsx' },
+  ]],
+  ['client/ui-primitives/tests/code-block.client.spec.tsx', [
+    { from: './labels.client.ts', target: 'test-support/ui-primitives.tsx' },
+  ]],
+  ['client/ui-primitives/tests/streaming-code-block.client.spec.tsx', [
+    { from: './labels.client.ts', target: 'test-support/ui-primitives.tsx' },
+  ]],
+  ['client/ui-primitives/tests/markdown-plain-text.client.spec.ts', [
+    { from: '@deepseek-ai/dsh-client-ui-primitives', target: 'ui/trajectory/src/ui-primitives.ts' },
+  ]],
+  ['client/ui-primitives/tests/markdown-dom-parity.client.spec.tsx', [
+    { from: './markdown-test-components.tsx', target: 'test-support/ui-primitives.tsx' },
+  ]],
+  ['client/ui-primitives/tests/markdown-incremental.client.spec.tsx', [
+    { from: './markdown-test-components.tsx', target: 'test-support/ui-primitives.tsx' },
+  ]],
+  ['client/ui-primitives/tests/markdown-render-units.client.spec.tsx', [
+    { from: './markdown-test-components.tsx', target: 'test-support/ui-primitives.tsx' },
+    { from: './labels.client.ts', target: 'test-support/ui-primitives.tsx' },
+  ]],
   ['client/ui-trajectory/src/client/trajectory-tool-definition.ts', [
     { from: '@deepseek-ai/cordis', target: 'ui/trajectory/src/conversation-client.ts' },
     { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
@@ -155,9 +181,20 @@ const SPECIFIER_MAPPINGS = new Map([
   ['client/ui-trajectory/src/client/TrajectoryTable.tsx', [
     { from: '@deepseek-ai/dsh-attachment', target: 'runtime/src/messages.ts' },
     { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-primitives', target: 'ui/trajectory/src/ui-primitives.ts' },
   ]],
   ['client/ui-trajectory/src/client/TrajectoryToolbar.tsx', [
     { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-primitives', target: 'ui/trajectory/src/ui-primitives.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/TrajectoryTimeline.tsx', [
+    { from: '@deepseek-ai/dsh-client-ui-primitives', target: 'ui/trajectory/src/ui-primitives.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/duration-store.ts', [
+    { from: '@deepseek-ai/dsh-client-store', target: 'packages/client/store/src/index.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-preview.ts', [
+    { from: '@deepseek-ai/dsh-client-ui-primitives', target: 'ui/trajectory/src/ui-primitives.ts' },
   ]],
   ['client/ui-trajectory/src/client/locales.ts', [
     { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
@@ -170,6 +207,7 @@ const SPECIFIER_MAPPINGS = new Map([
   ['client/ui-trajectory/src/client/TrajectoryView.tsx', [
     { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
     { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
+    { from: '@deepseek-ai/dsh-client-store', target: 'packages/client/store/src/index.ts' },
   ]],
 ])
 
@@ -191,6 +229,7 @@ const ALLOWED_DIFFERENCES = new Set([
   'session/session-persistence/tsconfig.json',
   'session/session-persistence-jsonl/tsconfig.json',
   'client/ui-trajectory/tsconfig.json',
+  'client/ui-primitives/tsconfig.json',
 ])
 
 async function walk(directory) {

@@ -1,7 +1,7 @@
 # 任务：彻底移除 TypeScript 侧对 DeepSeek Harness 的一切依赖
 
 > 对应清单：[`../tasks.md`](../tasks.md) 第 3.2 节 R25–R29。
-> 执行者：Codex。状态：进行中（R25–R27 已完成，R28–R29 待执行）。
+> 执行者：Codex。状态：进行中（R25–R28 已完成，R29 待执行）。
 >
 > 本文自包含；执行前先读 [`../architecture.md`](../architecture.md)（抽离原则）、
 > [`../tasks.md`](../tasks.md) 第 3 节（已完成的解耦）、
@@ -162,6 +162,12 @@ cast，并删除不用的浏览器插件入口与 invariants companion。完整 
 数据形状未丢。
 
 ### 第 4 步（R28）：UI 闭包的运行时依赖裁入仓库
+
+**完成（2026-09-02）。** 静态 import 图确认并裁入 2 个 store 源文件、23 个
+UI-primitives 源文件，以及对应的 9 个上游套件和 48 份 DOM 基线；新增 182 个测试。
+25 个 DSH devDependencies、根 overrides 和 lockfile 中全部 DSH 包已删除，第三方
+依赖改为直接声明。完整 `npm run verify` 通过；身份审计为 207 个保留文件、10 个
+文档化差异、87 个声明映射，`npm ls --all` 与发布物扫描均无 DSH registry namespace。
 
 1. 从快照裁入 `packages/client/store/src`（3 个文件）；`immer`、`zustand`
    加入 `@perix/event-ui` 的 dependencies（打包进 bundle 时可放 devDependencies，

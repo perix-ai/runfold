@@ -136,28 +136,30 @@ await context.dispose()
 
   await assertExportFiles(join(consumer, 'node_modules/@perix/event-sdk'))
   await assertExportFiles(join(consumer, 'node_modules/@perix/event-ui'))
-  // No DSH package may be required at runtime or referenced by the public
-  // types. JavaScript must not mention the namespace at all; declarations may
-  // keep upstream `@module` provenance comments but never import, re-export,
-  // or augment a DSH module.
+  // No DSH package may be listed, required at runtime, or mentioned by a
+  // published JavaScript/declaration artifact. Generated declaration comments
+  // carry source-path provenance without registry package names.
   const installedSdk = JSON.parse(await readFile(
     join(consumer, 'node_modules/@perix/event-sdk/package.json'),
     'utf8',
   ))
-  for (const field of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
-    for (const name of Object.keys(installedSdk[field] ?? {})) {
-      assert.equal(name.startsWith('@deepseek-ai/'), false, `SDK ${field} still lists ${name}`)
+  const installedUi = JSON.parse(await readFile(
+    join(consumer, 'node_modules/@perix/event-ui/package.json'),
+    'utf8',
+  ))
+  for (const [label, manifest] of [['SDK', installedSdk], ['UI', installedUi]]) {
+    for (const field of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
+      for (const name of Object.keys(manifest[field] ?? {})) {
+        assert.equal(name.startsWith('@deepseek-ai/'), false, `${label} ${field} still lists ${name}`)
+      }
     }
   }
-  const codeReference = /(?:from\s*|import\s*\(?\s*|require\(\s*|declare\s+module\s+)['"]@deepseek-ai\//
-  for (const file of await generatedTextFiles(
-    join(consumer, 'node_modules/@perix/event-sdk/lib'),
-  )) {
-    const content = await readFile(file, 'utf8')
-    if (file.endsWith('.js')) {
+  for (const packageName of ['event-sdk', 'event-ui']) {
+    for (const file of await generatedTextFiles(
+      join(consumer, `node_modules/@perix/${packageName}/lib`),
+    )) {
+      const content = await readFile(file, 'utf8')
       assert.equal(content.includes('@deepseek-ai'), false, `DSH namespace leaked into ${file}`)
-    } else {
-      assert.equal(codeReference.test(content), false, `DSH module referenced from ${file}`)
     }
   }
   const uiDeclaration = await readFile(

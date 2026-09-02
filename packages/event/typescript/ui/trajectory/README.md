@@ -8,6 +8,9 @@ It accepts `SessionEvent[]` from `@perix/event-sdk/session/types`, feeds them
 through DSH's original conversation assembler and Trajectory projection, and
 renders DSH's original `TrajectoryView`.
 The host supplies only the services that normally come from the full DSH shell.
+Its store, Tooltip, JsonTree, Markdown/KaTeX/Shiki pipeline, and selected icons
+are the exact runtime import closure copied from the same pinned DSH source;
+no DSH registry package is installed or bundled.
 
 ```bash
 npm install
@@ -51,7 +54,8 @@ is unchanged.
 The public declaration contains no `@deepseek-ai/*` imports or `Dsh*` names.
 Tests for projection, rendering, localization, pagination, replacement, and a
 20,000-event history live in `../../tests/ui`, alongside the port of the
-upstream view test cases that do not need the DSH shell.
+upstream view test cases that do not need the DSH shell. The retained store and
+selected UI-primitives add 182 upstream cases and 48 DOM compatibility fixtures.
 
 Source provenance and the exact extraction boundary are documented in
 `packages/event/typescript/README.md`. The untouched upstream reference

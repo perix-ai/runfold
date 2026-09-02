@@ -35,11 +35,8 @@ export default defineConfig({
       { find: /^@deepseek-ai\/dsh-client-locale\/src\/locales\/zh\.ts$/, replacement: source('./packages/event/typescript/packages/client/locale/src/locales/zh.ts') },
     ],
   },
-  ssr: {
-    noExternal: ['@deepseek-ai/dsh-client-ui-primitives'],
-  },
   test: {
-    setupFiles: ['./packages/event/typescript/test-support/jsdom-storage.ts'],
+    setupFiles: [source('./packages/event/typescript/test-support/jsdom-storage.ts')],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

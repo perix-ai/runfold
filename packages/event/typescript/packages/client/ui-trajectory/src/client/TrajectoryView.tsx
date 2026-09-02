@@ -5,7 +5,7 @@ import type {
   AssistantBlock, AssistantMessageNode, ConvViewProps, MessageImageLoader, RenderMessageImages,
 } from '../../../../../ui/trajectory/src/conversation-client.ts'
 import type { InjectFace, PropsLocale, PropsRenderSlots } from '../../../../../runtime/src/ui-types.ts'
-import type { SnapshotStore } from '@deepseek-ai/dsh-client-store'
+import type { SnapshotStore } from '../../../store/src/index.ts'
 import {
   TrajectoryTable,
   type TrajectoryRequestNumber,

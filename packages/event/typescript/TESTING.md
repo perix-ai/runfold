@@ -1,10 +1,11 @@
 # Event verification matrix
 
-The Event implementations are verified at eight independent layers.
+The Event implementations are verified at nine independent layers.
 
 | Layer | Location | What it proves |
 | --- | --- | --- |
 | Upstream Event regression | `packages/core/session/tests`, `packages/session/**/tests` | Retained Session and persistence behavior still matches the pinned source |
+| Upstream UI-runtime regression | `packages/client/store/tests`, selected `packages/client/ui-primitives/tests` | The locally retained store, Tooltip, JsonTree, Markdown parser/renderer, streaming highlighter, and 48 DOM baselines match the pinned implementation |
 | Upstream Trajectory regression | `packages/client/ui-trajectory/tests` | Retained projection, layout, table, timeline, and view behavior remains intact |
 | Perix SDK | `tests/sdk` | Public exports, lifecycle, immutability, replay, fork, JSONL round-trip/restart, raw/suffix reads, and isolation work through `@perix/*` imports |
 | Perix UI | `tests/ui` | `EventTrajectory` projects, renders, localizes, pages, replaces input, and handles 20,000 events; the ported upstream view cases cover ledger, inspector, timeline, and duration state on the standalone host |
@@ -19,9 +20,10 @@ Run the complete matrix:
 npm run verify
 ```
 
-Focused commands are also available: `test:upstream`, `test:sdk`, `test:ui`,
-`test:system`, `test:conformance`, `test:types`, `test:python`, `test:package`,
-and `test:python:package`.
+Focused commands are also available: `test:upstream`,
+`test:upstream:ui-runtime`, `test:sdk`, `test:ui`, `test:system`,
+`test:conformance`, `test:types`, `test:python`, `test:package`, and
+`test:python:package`.
 
 ## Known gaps
 

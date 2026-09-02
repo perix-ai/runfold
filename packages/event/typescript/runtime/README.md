@@ -19,8 +19,8 @@ Core and UI source imports under `../packages/` are rewritten only through the
 per-file mappings enforced by `../../../../scripts/verify-upstream-identity.mjs`.
 They resolve directly to these modules, the retained implementation, or the
 public `@perix/event-sdk` type path. Original DSH module names remain only in
-upstream tests and provenance text while R28 localizes the final two UI runtime
-packages.
+upstream tests and provenance text; the UI store and primitive runtime closure
+now resolves to the retained local source as well.
 
 `EventHost` reproduces the one Cordis behavior the retained lifecycle relies
 on: a service read through a scope (`scope.sessions`) is a proxy view whose

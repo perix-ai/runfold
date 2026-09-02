@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 import type { SessionSnapshot } from '../../../runtime/src/ui-types.ts'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore } from '../../../packages/client/store/src/index.ts'
 import type { MessageImageLoader } from './conversation-client.js'
 import type { SessionEvent, SessionId } from '@perix/event-sdk/session/types'
 import { bindSnapshotSelector } from '../../../packages/client/ui-renderer/src/client/bind.ts'

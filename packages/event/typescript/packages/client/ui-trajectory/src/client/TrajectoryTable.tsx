@@ -11,8 +11,8 @@ import {
   JsonTree,
   MarkdownText,
   Tooltip,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { JsonTreeLabels, MarkdownLabels } from '@deepseek-ai/dsh-client-ui-primitives'
+} from '../../../../../ui/trajectory/src/ui-primitives.ts'
+import type { JsonTreeLabels, MarkdownLabels } from '../../../../../ui/trajectory/src/ui-primitives.ts'
 import { structuredPatch } from 'diff'
 import type { ImageAttachmentRef } from '../../../../../runtime/src/messages.ts'
 import type {

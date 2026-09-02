@@ -27,6 +27,8 @@ The implementation is cut from DeepSeek Harness `0.1.2-alpha.3`, commit
 | `packages/client/ui-trajectory` | `packages/client/ui-trajectory` | Reusable source and 94 shell-independent tests retained; type-only imports are mapped locally, while the DSH plugin entry and invariants companion are omitted |
 | `packages/client/ui-conversation` | same path | Assembler, location index, and four transitive contract files retained; their dependency specifiers alone are mapped locally |
 | `packages/client/ui-renderer` | same path | Snapshot binding retained with its type-only store specifier mapped locally |
+| `packages/client/store` | same path | The two-file observable store implementation and its complete 20-case upstream test retained; Cordis invariants companion omitted |
+| `packages/client/ui-primitives` | same path | Exact 23-file runtime closure reached by Trajectory, 8 focused upstream suites, and 48 DOM fixtures retained; unrelated atoms omitted |
 | `packages/client/ui-theme` | same path | Unchanged Trajectory theme styles retained |
 | `packages/client/locale` | same path | Unchanged English and Chinese dictionaries retained |
 | `packages/test-support/client-runtime` | same path | Unchanged translation helper retained |
@@ -44,9 +46,9 @@ All consumer-facing package, component, and test names use the Perix namespace:
 persistence implementation imports and retained UI type imports use explicit
 local relative paths; every such import-only rewrite is declared and checked
 against the audited upstream bytes by `scripts/verify-upstream-identity.mjs`.
-DSH module specifiers remain in unchanged retained upstream tests, the two UI
-runtime imports scheduled for R28, and provenance text—not in the public SDK
-surface.
+DSH module specifiers remain only in unchanged retained upstream tests and
+source provenance text—not in implementation imports, package manifests,
+lockfiles, installed dependencies, or published artifacts.
 
 ## Necessary local changes
 
@@ -99,22 +101,30 @@ surface.
   their original bytes remain in the pinned `third_party` snapshot. The
   extraction registers the same definitions through
   `ui/trajectory/src/trajectory-runtime.ts`.
+- **Trajectory runtime closure.** The original two-file client store and the
+  exact 23-file UI-primitives import closure are retained under their DSH paths.
+  `ui/trajectory/src/ui-primitives.ts` is only a standalone barrel for the
+  selected exports; algorithms, styles, Markdown parsing, Shiki highlighting,
+  KaTeX rendering, JSON inspection, Tooltip behavior, and icons are unchanged.
+  The retained store/primitive regression subset contributes 182 tests and 48
+  byte-identical DOM fixtures. Its test-only locale/component bridge contains
+  only the two upstream helper fragments those suites need.
 - The other retained directories under `packages/client/` and
   `packages/test-support/` are source-only: their files are imported by
   relative path from `ui/trajectory/src`, and their `package.json` and
   `tsdown.config.ts` are kept byte-identical to upstream because npm and Vite
-  never read them. The one exception is
-  `packages/client/ui-trajectory/tsconfig.json`: Vite's esbuild transform reads
-  the nearest `tsconfig.json`, and the upstream file references monorepo
-  directories that do not exist here, so its `references` array is removed.
-  Compiler options are unchanged.
+  never read them. The `ui-trajectory` and `ui-primitives` tsconfigs are read by
+  Vite's per-file esbuild transform; their unavailable monorepo project
+  references are therefore removed while compiler options stay unchanged.
 - `ui/trajectory/src/conversation-client.ts` re-exports the unchanged
   conversation runtime modules and contracts needed by Trajectory, and houses
   the smallest standalone registration and image-slot type seam whose original
   files depend on the full DSH browser host.
 - `ui/trajectory` contains all reusable standalone host wiring and
   supplies the services that the unchanged DSH Trajectory view normally
-  receives from the complete DSH shell.
+  receives from the complete DSH shell. Its manifest directly declares the
+  third-party packages used by the retained closure; it has no DSH package
+  dependency, and the repository no longer needs npm `overrides` for DSH.
 - `runtime/` is Perix-authored code that replaces the DSH utility packages the
   retained sources import: `brand.ts` (`@deepseek-ai/dsh-brand`), `values.ts`
   (`@deepseek-ai/dsh-util-values`), `timeout.ts` (`@deepseek-ai/dsh-timeout`),
@@ -135,10 +145,10 @@ surface.
   trees and mechanically rewrites only their internal declaration import paths,
   so an installed package never falls back to registry copies of those Event
   packages.
-- The published declarations keep the upstream `@module @deepseek-ai/...`
-  JSDoc lines as provenance. They import, re-export, or augment no DSH module,
-  and the published JavaScript does not mention the namespace at all;
-  `tests/package` enforces both.
+- The SDK declaration build converts upstream package-name JSDoc into pinned
+  source-path provenance. Published SDK/UI JavaScript and declarations contain
+  no DSH registry namespace at all; the blank-consumer package test scans every
+  generated `.js` and `.d.ts` file and enforces that boundary.
 - `ui/trajectory/index.d.ts` intentionally exposes only the browser component
   boundary. Internal DSH shell and projection types remain implementation
   details rather than leaking the full Harness type graph to consumers.
@@ -155,7 +165,9 @@ Trajectory; both execute the
 
 ## Test layout
 
-- `packages/**/tests`: unchanged upstream behavioral regression tests;
+- `packages/**/tests`: upstream behavioral regression tests, including 626
+  Event, 182 selected UI-runtime, and 94 Trajectory cases; import-only test
+  rewrites are identity-checked against the fixed snapshot;
 - `tests/sdk`: Perix public exports, lifecycle, fork, immutability, JSONL,
   restart, suffix/raw reads, and concurrent-session isolation;
 - `tests/ui`: Perix component API, projection, localization,

@@ -4,9 +4,9 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R27、R30–R31 已完成，`npm run verify` 全绿，
-> SDK 发布产物不依赖任何 DSH 包。待执行的是 R28–R29（彻底移除 UI 代码中的
-> DSH 名称与仓库开发时的注册表依赖）、R32（生产验收文档收口）、R33
+> 总体状态（2026-09-02）：R01–R28、R30–R31 已完成，`npm run verify` 全绿，
+> SDK 与 UI 发布产物均不依赖任何 DSH 包。待执行的是 R29（同步来源、决策与
+> 验收文档）、R32（生产验收文档收口）、R33
 > （Nexent 真实接入验收）和第 7 节总验收。
 
 ## 任务生命周期
@@ -288,10 +288,23 @@
     71 个声明映射；Event 626/626、Trajectory 94/94、Runtime 11/11、SDK 15/15、
     UI 33/33、Python 35/35、系统 1/1、跨语言 5/5，以及 TS/Python 空白消费者通过。
 
-- [ ] **R28** · 难度 难 · 风险 中 · 位置 `packages/client/store`、`packages/client/ui-primitives` 子集、`ui/trajectory/package.json`、根 `package.json`
+- [x] **R28** · 难度 难 · 风险 中 · 位置 `packages/client/store`、`packages/client/ui-primitives` 子集、`ui/trajectory/package.json`、根 `package.json`
   - **问题**：运行时真正用到的只有 `dsh-client-store`（3 个文件）与 `dsh-client-ui-primitives` 的图标、Tooltip、JsonTree、MarkdownText、`extractMarkdownPlainText` 闭包，却因此拖着 25 个注册表包与根 `overrides`。
   - **处理**：从快照裁入这两个包的闭包；第三方依赖（shiki、mdast、micromark、katex、anser、clsx、immer、zustand）直接声明；删除全部 `@deepseek-ai/*` devDependencies 与 `overrides`；打包测试断言产物连注释都不含 `@deepseek-ai`。
   - **依赖**：R27。
+  - **结果**：已完成（2026-09-02）：按静态 import 图裁入 store 的 2 个实际
+    源文件（未裁 Cordis invariants companion）和 UI primitives 的 23 个运行时
+    文件，全部保持固定快照字节；本地 barrel 只导出 Trajectory 使用的符号。另保留
+    1 个完整 store 套件、8 个相关 primitives 套件及 48 份原始 DOM 基线，共新增
+    182 个上游回归测试。删除 UI manifest 的 25 个 DSH devDependencies、根
+    `overrides` 及 lockfile 中全部 DSH 包，改为直接声明闭包所需第三方依赖；闭包未
+    使用 `anser`，因此未引入。SDK 声明生成将包名注释改成固定 commit 的源码路径，
+    空白消费者逐文件断言 SDK/UI 发布产物不含 DSH namespace。
+  - **验证**：`npm run verify` 全绿；身份审计为 207 个保留文件、10 个必要差异、
+    87 个声明映射；Event 626/626、UI runtime 182/182、Trajectory 94/94、Runtime
+    11/11、SDK 15/15、UI 33/33、Python 35/35、系统 1/1、跨语言 5/5，以及
+    TS/Python 空白消费者通过。`npm ls --all`、manifest/lockfile 与发布物扫描均无
+    `@deepseek-ai`。
 
 - [ ] **R29** · 难度 易 · 风险 低 · 位置 `third_party/deepseek-harness/README.md`、TS README、本清单、`docs/event/decisions.md`
   - **问题**：完成后文档中"仅注册表引用"、"名字仍在保留源码中"等描述过期。

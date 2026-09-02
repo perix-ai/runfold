@@ -2,7 +2,7 @@ import type {
   SessionEventLikeEntry,
   SessionLiveEventEntry,
 } from '../../../runtime/src/ui-types.ts'
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
+import type { ObservableSnapshot } from '../../../runtime/src/ui-types.ts'
 import type {
   ConversationNodeDefinition,
   ConversationViewDefinition,
