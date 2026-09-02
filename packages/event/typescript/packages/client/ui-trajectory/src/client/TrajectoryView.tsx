@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   AssistantBlock, AssistantMessageNode, ConvViewProps, MessageImageLoader, RenderMessageImages,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type { InjectFace, PropsLocale, PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
+} from '../../../../../ui/trajectory/src/conversation-client.ts'
+import type { InjectFace, PropsLocale, PropsRenderSlots } from '../../../../../runtime/src/ui-types.ts'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-store'
 import {
   TrajectoryTable,

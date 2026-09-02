@@ -84,6 +84,93 @@ const SPECIFIER_MAPPINGS = new Map([
     { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
     { from: '@deepseek-ai/dsh-session-persistence', target: 'packages/session/session-persistence/src/index.ts' },
   ]],
+  ['client/ui-conversation/src/client/conversation/location-index.ts', [
+    { from: '@deepseek-ai/dsh-api-session-controller/client', target: 'runtime/src/ui-types.ts' },
+    { from: '@deepseek-ai/dsh-session/types', target: 'sdk/src/session-types.ts' },
+  ]],
+  ['client/ui-conversation/src/client/conversation/assembler.ts', [
+    { from: '@deepseek-ai/dsh-api-session-controller/client', target: 'runtime/src/ui-types.ts' },
+  ]],
+  ['client/ui-conversation/src/client/contract/conversation.ts', [
+    { from: '@deepseek-ai/dsh-api-session-controller/client', target: 'runtime/src/ui-types.ts' },
+    { from: '@deepseek-ai/dsh-session/types', target: 'sdk/src/session-types.ts' },
+  ]],
+  ['client/ui-conversation/src/client/contract/records.ts', [
+    { from: '@deepseek-ai/dsh-commands/brand', target: 'runtime/src/event-types.ts' },
+    { from: '@deepseek-ai/dsh-llm/brand', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-llm/types', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-attachment', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-llm-retry/types', target: 'runtime/src/event-types.ts' },
+    { from: '@deepseek-ai/dsh-tool-todo/client', target: 'runtime/src/event-types.ts' },
+  ]],
+  ['client/ui-conversation/src/client/contract/request-inspection.ts', [
+    { from: '@deepseek-ai/dsh-llm/types', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-session/types', target: 'sdk/src/session-types.ts' },
+  ]],
+  ['client/ui-renderer/src/client/bind.ts', [
+    { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-tool-definition.ts', [
+    { from: '@deepseek-ai/cordis', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-tools/types', target: 'runtime/src/event-types.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-contract.ts', [
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/layout.ts', [
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-attachment', target: 'runtime/src/messages.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-event-projection.ts', [
+    { from: '@deepseek-ai/dsh-llm/types', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-definition-common.ts', [
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-record.ts', [
+    { from: '@deepseek-ai/dsh-attachment', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-message-definitions.ts', [
+    { from: '@deepseek-ai/cordis', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-agent/types', target: 'runtime/src/event-types.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-request-header-definition.ts', [
+    { from: '@deepseek-ai/cordis', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-compaction-definition.ts', [
+    { from: '@deepseek-ai/cordis', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-compaction/types', target: 'runtime/src/event-types.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-snapshot-builder.ts', [
+    { from: '@deepseek-ai/cordis', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/TrajectoryTable.tsx', [
+    { from: '@deepseek-ai/dsh-attachment', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/TrajectoryToolbar.tsx', [
+    { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/locales.ts', [
+    { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/trajectory-assistant-definition.ts', [
+    { from: '@deepseek-ai/cordis', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-api-session-controller/types', target: 'runtime/src/ui-types.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/src/client/TrajectoryView.tsx', [
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
+  ]],
 ])
 
 /**

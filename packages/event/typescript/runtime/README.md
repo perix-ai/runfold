@@ -12,12 +12,15 @@ each file states what it was copied or reduced from and why.
 | `src/messages.ts` | `@deepseek-ai/dsh-llm` (`.`, `/brand`, `/types`), `ImageAttachmentRef` from `@deepseek-ai/dsh-attachment` | Ids, content blocks, message shapes and constructors, stream chunks, `LlmCallConfig`, `callConfigEquals` — copied types and functions; no LLM runtime |
 | `src/host.ts` | `@deepseek-ai/cordis` `Context`/`Service`, `@deepseek-ai/dsh-scope` carriers | `EventHost`: an event bus for the four `session/*` events (plus the `internal/dispatch` instrumentation hook), ownership scopes with reverse-order disposal, and `provide`/`get` composition slots. No plugin registry, no scope-filtered dispatch, no Typert |
 | `src/create.ts` | DSH plugin composition (`ctx.plugin(SessionStore)` + a persistence plugin) | `createEventRuntime()`: one host, one Session store, an optional persistence backend, `restore(id)`, and `dispose()` |
+| `src/ui-types.ts` | Session controller, client store, UI slots, locale, and attachment type outlets listed in the file header | Type-only contracts consumed by the standalone Trajectory host; fields are copied from the pinned source and host-bound declarations are reduced only to the members the retained UI reads |
+| `src/event-types.ts` | Agent, tools, compaction, retry, commands, and todo event type outlets listed in the file header | The retained Trajectory event-map augmentations, with their module target changed to the public Perix Session types path |
 
-The retained sources under `../packages/` keep their upstream `@deepseek-ai/*`
-import specifiers for utilities and messages, and import the host as
-`@perix/event-sdk/runtime`. Build and test configuration resolves both to
-these modules, so the published `@perix/event-sdk` bundles this directory and
-depends on none of the replaced packages.
+Core and UI source imports under `../packages/` are rewritten only through the
+per-file mappings enforced by `../../../../scripts/verify-upstream-identity.mjs`.
+They resolve directly to these modules, the retained implementation, or the
+public `@perix/event-sdk` type path. Original DSH module names remain only in
+upstream tests and provenance text while R28 localizes the final two UI runtime
+packages.
 
 `EventHost` reproduces the one Cordis behavior the retained lifecycle relies
 on: a service read through a scope (`scope.sessions`) is a proxy view whose

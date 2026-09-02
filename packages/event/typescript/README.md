@@ -24,9 +24,9 @@ The implementation is cut from DeepSeek Harness `0.1.2-alpha.3`, commit
 | `packages/core/session` | `packages/core/session` | Complete `src/` and `tests/` retained; `src/index.ts` host seam edited (see below) |
 | `packages/session/session-persistence` | `packages/session/session-persistence` | Complete `src/` and `tests/` retained; `src/index.ts` and `src/coordinator.ts` host seam edited |
 | `packages/session/session-persistence-jsonl` | `packages/session/session-persistence-jsonl` | Complete `src/` and `tests/` retained; `src/index.ts` host seam edited |
-| `packages/client/ui-trajectory` | `packages/client/ui-trajectory` | Complete package source and tests retained unchanged |
-| `packages/client/ui-conversation` | same path | Only the unchanged assembler, location index, and four transitive contract files retained |
-| `packages/client/ui-renderer` | same path | Only unchanged snapshot binding retained |
+| `packages/client/ui-trajectory` | `packages/client/ui-trajectory` | Reusable source and 94 shell-independent tests retained; type-only imports are mapped locally, while the DSH plugin entry and invariants companion are omitted |
+| `packages/client/ui-conversation` | same path | Assembler, location index, and four transitive contract files retained; their dependency specifiers alone are mapped locally |
+| `packages/client/ui-renderer` | same path | Snapshot binding retained with its type-only store specifier mapped locally |
 | `packages/client/ui-theme` | same path | Unchanged Trajectory theme styles retained |
 | `packages/client/locale` | same path | Unchanged English and Chinese dictionaries retained |
 | `packages/test-support/client-runtime` | same path | Unchanged translation helper retained |
@@ -41,11 +41,12 @@ The publishable boundaries added around this source are:
 
 All consumer-facing package, component, and test names use the Perix namespace:
 `@perix/event-sdk`, `@perix/event-ui`, and `EventTrajectory`. Core Session and
-persistence implementation imports use explicit local relative paths; every
-such import-only rewrite is declared and checked against the audited upstream
-bytes by `scripts/verify-upstream-identity.mjs`. DSH module specifiers remain in
-unchanged retained upstream tests and provenance comments, not in the public
-SDK surface.
+persistence implementation imports and retained UI type imports use explicit
+local relative paths; every such import-only rewrite is declared and checked
+against the audited upstream bytes by `scripts/verify-upstream-identity.mjs`.
+DSH module specifiers remain in unchanged retained upstream tests, the two UI
+runtime imports scheduled for R28, and provenance text—not in the public SDK
+surface.
 
 ## Necessary local changes
 
@@ -74,6 +75,15 @@ SDK surface.
   the retained packages or `runtime/`. The identity verifier derives those
   relative paths from an explicit per-file mapping and requires the resulting
   file to be otherwise byte-identical to the pinned snapshot.
+- **Trajectory type closure.** Retained UI source files replace only their DSH
+  type specifiers with paths to the retained conversation contracts, SDK
+  Session types, `runtime/ui-types.ts`, or `runtime/event-types.ts`. The latter
+  two copy the exact host-facing fields and Event-map augmentations used by
+  Trajectory from the source paths named in their headers. The local
+  `TrajectoryRegistrationContext` exposes only event/view registration and
+  request inspection, eliminating the Cordis cast without changing any
+  definition or projection algorithm. All import-only rewrites remain covered
+  by the identity verifier.
 - **Retained tests kept unmodified.** `vitest.config.ts` aliases
   `@deepseek-ai/cordis` and `@deepseek-ai/dsh-scope` to `test-support/`, a
   test-only shim that provides `ctx.plugin` / `fiber.dispose` on top of host
@@ -83,6 +93,12 @@ SDK surface.
   (the invariants plugin). The three corresponding `src/invariant.ts`
   companions are also not retained. All six original files remain available
   in `third_party/deepseek-harness/upstream/`.
+- The DSH browser-plugin entry
+  `packages/client/ui-trajectory/src/client/index.ts` and its package-level
+  `src/invariant.ts` are not part of the standalone component and are omitted;
+  their original bytes remain in the pinned `third_party` snapshot. The
+  extraction registers the same definitions through
+  `ui/trajectory/src/trajectory-runtime.ts`.
 - The other retained directories under `packages/client/` and
   `packages/test-support/` are source-only: their files are imported by
   relative path from `ui/trajectory/src`, and their `package.json` and
@@ -92,9 +108,10 @@ SDK surface.
   the nearest `tsconfig.json`, and the upstream file references monorepo
   directories that do not exist here, so its `references` array is removed.
   Compiler options are unchanged.
-- `ui/trajectory/src/conversation-client.ts` only
-  re-exports the two unchanged conversation runtime modules needed by
-  Trajectory.
+- `ui/trajectory/src/conversation-client.ts` re-exports the unchanged
+  conversation runtime modules and contracts needed by Trajectory, and houses
+  the smallest standalone registration and image-slot type seam whose original
+  files depend on the full DSH browser host.
 - `ui/trajectory` contains all reusable standalone host wiring and
   supplies the services that the unchanged DSH Trajectory view normally
   receives from the complete DSH shell.
@@ -103,12 +120,12 @@ SDK surface.
   (`@deepseek-ai/dsh-util-values`), `timeout.ts` (`@deepseek-ai/dsh-timeout`),
   and `messages.ts` (the Event-facing subset of `@deepseek-ai/dsh-llm` plus the
   `ImageAttachmentRef` shape from `@deepseek-ai/dsh-attachment`). Core and
-  persistence sources import these modules by relative path; the SDK bundles
-  those imports directly. `vitest.config.ts` still resolves the original DSH
-  names used by unchanged upstream tests. The TypeScript test and Trajectory
-  configs temporarily retain only the Session, LLM, and attachment type aliases
-  needed by the UI closure; R27 removes them when those UI types become local.
-  The published SDK depends on none of the replaced packages.
+  persistence sources import these modules by relative path; `ui-types.ts` and
+  `event-types.ts` provide the host-bound UI contracts and Event augmentations.
+  The SDK bundles its imports directly. `vitest.config.ts` still resolves the
+  original DSH names used by unchanged upstream tests; TypeScript and
+  Trajectory compiler configs contain no DSH aliases. The published SDK depends
+  on none of the replaced packages.
   `runtime/README.md` records each file's provenance.
 - `sdk/` adds only package exports; the implementation remains in the retained
   DSH package trees above and in `runtime/`. `@perix/event-sdk/runtime` is the

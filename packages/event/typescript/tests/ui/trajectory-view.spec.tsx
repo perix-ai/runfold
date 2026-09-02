@@ -12,14 +12,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import React, { createElement, type ComponentProps } from 'react'
-import type {
-  ConversationSnapshot, InputActions, InputState, RequestView,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { RequestView } from '../../ui/trajectory/src/conversation-client.ts'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type {
-  SessionListState, SessionProjectionMap, SessionSnapshot, UseProjection,
-} from '@deepseek-ai/dsh-api-session-controller/client'
-import type { SessionPendingInteractionSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
+import type { SessionSnapshot } from '../../runtime/src/ui-types.ts'
 import type { SessionId } from '@perix/event-sdk/session/types'
 import { bindSnapshotSelector } from '../../packages/client/ui-renderer/src/client/bind.ts'
 import type { TrajectoryTurnModel } from '../../packages/client/ui-trajectory/src/client/layout.ts'
@@ -28,7 +23,7 @@ import { TrajectoryView } from '../../packages/client/ui-trajectory/src/client/T
 import { createTrajectoryDurationStore } from '../../packages/client/ui-trajectory/src/client/duration-store.ts'
 import type { TrajectorySnapshot } from '../../packages/client/ui-trajectory/src/client/trajectory-contract.ts'
 import { deriveTrajectoryTimeline } from '../../packages/client/ui-trajectory/src/client/timeline.ts'
-import { t as tTrajectory, tZh } from '../../packages/client/ui-trajectory/tests/locale.client.ts'
+import { t as tTrajectory, tZh } from '../../test-support/trajectory-locale.ts'
 
 function TrajectoryTimeline(
   props: Omit<ComponentProps<typeof LocalizedTrajectoryTimeline>, 't'>,
@@ -100,16 +95,6 @@ function sessionSnapshot(nodes: ConversationNodes): SessionSnapshot {
   }
 }
 
-function conversationSnapshot(trajectory: TrajectorySnapshot): ConversationSnapshot {
-  return {
-    // The standalone host registers no Conversation views (see EventTrajectory).
-    views: { get: () => undefined },
-    activeTargets: trajectory.eventNodes.length === 0
-      ? new Set()
-      : new Set(['trajectory']),
-  }
-}
-
 function standaloneHistory(
   snapshot: TrajectorySnapshot,
 ): Pick<ComponentProps<typeof TrajectoryView>, 'useSession' | 'useTrajectory' | 'loadOlder'> {
@@ -132,30 +117,6 @@ function standaloneDuration(): Pick<
   }
 }
 
-/** Empty sessions-list hook; breadcrumbs therefore fall back to the raw id. */
-function emptySessions() {
-  const store = createSnapshotStore<SessionListState>(
-    { ids: [], byId: {}, current: undefined, phase: 'ready', subagentsByParent: {}, jobsBySession: {}, currentAddress: undefined })
-  return bindSnapshotSelector(store)
-}
-
-function emptyProjection<Key extends Extract<keyof SessionProjectionMap, string>>(
-  key: Key,
-): SessionProjectionMap[Key] | undefined
-function emptyProjection<Key extends Extract<keyof SessionProjectionMap, string>, Selected>(
-  key: Key,
-  selector: (value: SessionProjectionMap[Key] | undefined) => Selected,
-  eq?: (left: Selected, right: Selected) => boolean,
-): Selected
-function emptyProjection<Key extends Extract<keyof SessionProjectionMap, string>, Selected>(
-  _key: Key,
-  selector?: (value: SessionProjectionMap[Key] | undefined) => Selected,
-): SessionProjectionMap[Key] | Selected | undefined {
-  return selector === undefined ? undefined : selector(undefined)
-}
-
-const useProjection: UseProjection = emptyProjection
-
 type StandaloneBaseProps = Omit<
   ComponentProps<typeof TrajectoryView>,
   'useSession' | 'useTrajectory' | 'useDuration' | 'loadOlder' | 'setActualDuration'
@@ -163,34 +124,12 @@ type StandaloneBaseProps = Omit<
 
 /** Standalone view props: the session-scope standard kit the outlet would bake. */
 function standaloneProps(nodes: ConversationNodes): StandaloneBaseProps {
-  const trajectory = historySnapshot(nodes)
-  const input = createSnapshotStore<InputState>({
-    draft: '', imageIds: [], draftRev: 0, phase: 'plain', occurrences: [], queue: [],
-  })
-  const inputActions: InputActions = {
-    setDraft: () => {},
-    addImages: () => false,
-    removeImage: () => {},
-    pruneImages: () => {},
-    submit: () => {},
-  }
+  void nodes
   return {
-    sessionId: SID,
-    useSessions: emptySessions(),
-    useSessionPendingInteraction: bindSnapshotSelector(
-      createSnapshotStore<SessionPendingInteractionSnapshot>(new Map()),
-    ),
-    // The workspace list is a shell concern; the standalone host has none.
-    useWorkspaces: (() => undefined) as never,
-    useConversation: bindSnapshotSelector(createSnapshotStore(conversationSnapshot(trajectory))),
-    useInput: bindSnapshotSelector(input),
-    inputActions,
-    useProjection,
     viewRequest: null,
     openView: () => {},
     completeViewRequest: () => {},
     renderSlot: () => null,
-    SessionProvider: ({ children }) => <>{children}</>,
     loadImage: () => Promise.reject(new Error('standalone views load no images')),
     t: tZh,
   }

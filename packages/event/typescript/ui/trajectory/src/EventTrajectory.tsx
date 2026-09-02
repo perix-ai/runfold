@@ -1,18 +1,8 @@
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
-import type {
-  SessionProjectionMap,
-  SessionSnapshot,
-  UseProjection,
-} from '@deepseek-ai/dsh-api-session-controller/client'
+import type { SessionSnapshot } from '../../../runtime/src/ui-types.ts'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type {
-  ConversationSnapshot,
-  InputActions,
-  InputState,
-  MessageImageLoader,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { MessageImageLoader } from './conversation-client.js'
 import type { SessionEvent, SessionId } from '@perix/event-sdk/session/types'
 import { bindSnapshotSelector } from '../../../packages/client/ui-renderer/src/client/bind.ts'
 import { makeTranslate } from '../../../packages/test-support/client-runtime/src/translate.ts'
@@ -73,31 +63,6 @@ function sessionSnapshot(hasMore: boolean): SessionSnapshot {
   }
 }
 
-function emptyProjection<Key extends Extract<keyof SessionProjectionMap, string>>(
-  key: Key,
-): SessionProjectionMap[Key] | undefined
-function emptyProjection<Key extends Extract<keyof SessionProjectionMap, string>, Selected>(
-  key: Key,
-  selector: (value: SessionProjectionMap[Key] | undefined) => Selected,
-  eq?: (left: Selected, right: Selected) => boolean,
-): Selected
-function emptyProjection<Key extends Extract<keyof SessionProjectionMap, string>, Selected>(
-  _key: Key,
-  selector?: (value: SessionProjectionMap[Key] | undefined) => Selected,
-): SessionProjectionMap[Key] | Selected | undefined {
-  return selector === undefined ? undefined : selector(undefined)
-}
-
-const useProjection: UseProjection = emptyProjection
-
-const inputActions: InputActions = {
-  setDraft: () => {},
-  addImages: () => false,
-  removeImage: () => {},
-  pruneImages: () => {},
-  submit: () => {},
-}
-
 /** Perix host for the retained upstream Trajectory view over a SessionEvent log. */
 export function EventTrajectory({
   events,
@@ -115,23 +80,9 @@ export function EventTrajectory({
     [hasMore],
   )
   const duration = useMemo(() => createSnapshotStore(false), [])
-  const conversation = useMemo(() => createSnapshotStore<ConversationSnapshot>({
-    views: { get: () => undefined },
-    activeTargets: new Set(['trajectory']),
-  }), [])
-  const input = useMemo(() => createSnapshotStore<InputState>({
-    draft: '',
-    imageIds: [],
-    draftRev: 0,
-    phase: 'plain',
-    occurrences: [],
-    queue: [],
-  }), [])
   const useTrajectory = useMemo(() => bindSnapshotSelector(runtime), [runtime])
   const useSession = useMemo(() => bindSnapshotSelector(session), [session])
   const useDuration = useMemo(() => bindSnapshotSelector(duration), [duration])
-  const useConversation = useMemo(() => bindSnapshotSelector(conversation), [conversation])
-  const useInput = useMemo(() => bindSnapshotSelector(input), [input])
   const t = useMemo(
     () => locale === 'zh'
       ? makeTranslate(zh, commonZh)
@@ -141,16 +92,7 @@ export function EventTrajectory({
 
   return (
     <TrajectoryView
-      sessionId={'standalone-trajectory' as SessionId}
-      useSessions={(() => undefined) as never}
-      useSessionPendingInteraction={(() => undefined) as never}
-      useWorkspaces={(() => undefined) as never}
-      SessionProvider={({ children }) => <>{children}</>}
       useSession={useSession}
-      useProjection={useProjection}
-      useConversation={useConversation}
-      useInput={useInput}
-      inputActions={inputActions}
       useTrajectory={useTrajectory}
       useDuration={useDuration}
       loadOlder={loadOlder}

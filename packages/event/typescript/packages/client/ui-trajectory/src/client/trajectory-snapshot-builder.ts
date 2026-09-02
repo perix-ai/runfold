@@ -1,8 +1,8 @@
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '../../../../../ui/trajectory/src/conversation-client.ts'
 import type {
   AssistantMessageNode, ConversationNode, ConversationPromptSnapshot, ConversationViewBuilder,
   ConversationViewDefinition, RequestPromptChange, RequestView, ToolCallBlock,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '../../../../../ui/trajectory/src/conversation-client.ts'
 import { COMPACTION_INTERRUPTED_ERROR } from './copy-codes.ts'
 import type {
   TrajectoryConversationViewNode, TrajectoryRequestHeaderState,

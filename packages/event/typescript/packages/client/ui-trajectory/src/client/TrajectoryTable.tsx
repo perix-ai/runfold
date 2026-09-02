@@ -14,10 +14,10 @@ import {
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { JsonTreeLabels, MarkdownLabels } from '@deepseek-ai/dsh-client-ui-primitives'
 import { structuredPatch } from 'diff'
-import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
+import type { ImageAttachmentRef } from '../../../../../runtime/src/messages.ts'
 import type {
   AssistantRequestConfig, ConversationPromptSnapshot, RenderMessageImages,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '../../../../../ui/trajectory/src/conversation-client.ts'
 import type {
   AssistantMetricDetail, TrajectoryCellKind, TrajectoryCellProps, TrajectorySourceBlock,
 } from './trajectory-record.ts'

@@ -4,8 +4,8 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R26、R30–R31 已完成，`npm run verify` 全绿，
-> SDK 发布产物不依赖任何 DSH 包。待执行的是 R27–R29（彻底移除 UI 代码中的
+> 总体状态（2026-09-02）：R01–R27、R30–R31 已完成，`npm run verify` 全绿，
+> SDK 发布产物不依赖任何 DSH 包。待执行的是 R28–R29（彻底移除 UI 代码中的
 > DSH 名称与仓库开发时的注册表依赖）、R32（生产验收文档收口）、R33
 > （Nexent 真实接入验收）和第 7 节总验收。
 
@@ -274,10 +274,19 @@
     26 个声明映射；Event 626/626、Trajectory 94/94、Runtime 11/11、SDK 15/15、
     UI 33/33、Python 35/35、系统 1/1、跨语言 5/5，以及 TS/Python 空白消费者通过。
 
-- [ ] **R27** · 难度 中 · 风险 中 · 位置 `runtime/src/ui-types.ts`、`runtime/src/event-types.ts`、UI 闭包约 30 个文件
+- [x] **R27** · 难度 中 · 风险 中 · 位置 `runtime/src/ui-types.ts`、`runtime/src/event-types.ts`、UI 闭包约 30 个文件
   - **问题**：UI 闭包从 20 多个注册表包只取类型（`SessionSnapshot`、`ConversationNodeDefinition`、`InjectFace` 等）以及六处 `import type {}` 的事件数据形状增强。
   - **处理**：可裁的纯类型文件从快照裁入并纳入比对；其余按上游逐字段复制到本地类型模块；`register*Definition(ctx: Context)` 改为两成员的本地接口；增强目标改为 `@perix/event-sdk/session/types`。
   - **依赖**：R26。
+  - **结果**：已完成（2026-09-02）：新增 `runtime/src/ui-types.ts` 与
+    `event-types.ts`，按固定快照复制 Trajectory 实际使用的宿主类型和六组 Event
+    数据增强；保留的 UI 算法文件只改模块 specifier，并以本地最小注册接口替代
+    Cordis cast。删除独立组件不使用的 DSH 浏览器插件入口和 invariants companion，
+    原件仍在 `third_party` 快照。TypeScript 与 Trajectory tsconfig 不再含 DSH 别名；
+    源码中只剩 R28 要裁入的 store 与 UI primitives 两类运行时导入。
+  - **验证**：`npm run verify` 全绿；身份审计为 124 个保留文件、9 个既有差异、
+    71 个声明映射；Event 626/626、Trajectory 94/94、Runtime 11/11、SDK 15/15、
+    UI 33/33、Python 35/35、系统 1/1、跨语言 5/5，以及 TS/Python 空白消费者通过。
 
 - [ ] **R28** · 难度 难 · 风险 中 · 位置 `packages/client/store`、`packages/client/ui-primitives` 子集、`ui/trajectory/package.json`、根 `package.json`
   - **问题**：运行时真正用到的只有 `dsh-client-store`（3 个文件）与 `dsh-client-ui-primitives` 的图标、Tooltip、JsonTree、MarkdownText、`extractMarkdownPlainText` 闭包，却因此拖着 25 个注册表包与根 `overrides`。

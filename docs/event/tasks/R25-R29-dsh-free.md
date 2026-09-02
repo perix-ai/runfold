@@ -1,7 +1,7 @@
 # 任务：彻底移除 TypeScript 侧对 DeepSeek Harness 的一切依赖
 
 > 对应清单：[`../tasks.md`](../tasks.md) 第 3.2 节 R25–R29。
-> 执行者：Codex。状态：进行中（R25–R26 已完成，R27–R29 待执行）。
+> 执行者：Codex。状态：进行中（R25–R27 已完成，R28–R29 待执行）。
 >
 > 本文自包含；执行前先读 [`../architecture.md`](../architecture.md)（抽离原则）、
 > [`../tasks.md`](../tasks.md) 第 3 节（已完成的解耦）、
@@ -131,6 +131,11 @@ Cordis：把它们从保留树中删除（源码在快照里可查），并在 T
 注明"未保留"。同时删除 `sdk/src/*` 中不再需要的入口（当前已无 invariant 入口）。
 
 ### 第 3 步（R27）：UI 闭包的类型依赖本地化
+
+**完成（2026-09-02）。** 新增本地 UI 类型与 Event 增强模块，保留 UI 源码的
+45 条新增 specifier 映射由身份脚本逐字节约束；独立宿主以最小注册接口取代 Cordis
+cast，并删除不用的浏览器插件入口与 invariants companion。完整 `npm run verify`
+通过；身份审计结果为 124 个保留文件、9 个文档化差异、71 个声明映射。
 
 新建 `packages/event/typescript/runtime/src/ui-types.ts`（或按来源拆成几个文件），
 承接上表"仅类型导入"的全部类型。做法二选一，按每个类型的来源决定：

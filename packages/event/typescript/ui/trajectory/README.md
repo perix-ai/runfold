@@ -30,18 +30,19 @@ export function Trajectory({ events }: { events: readonly SessionEvent[] }) {
 
 ## Known limitations of the standalone host
 
-The retained `TrajectoryView` expects services that only the complete DSH
-shell provides. `EventTrajectory` stubs them, so the following upstream
-capabilities are intentionally unavailable here:
+The complete DSH Conversation shell provides capabilities outside the retained
+`TrajectoryView`'s Event-derived data path. The standalone component omits
+those shell contracts, so the following capabilities are intentionally
+unavailable here:
 
 | Upstream prop / service | Standalone behavior | Effect |
 | --- | --- | --- |
-| `useSessions`, `useWorkspaces`, `useSessionPendingInteraction` | return `undefined` | no session list, workspace, or pending-interaction affordances |
+| `useSessions`, `useWorkspaces`, `useSessionPendingInteraction` | not part of the standalone component contract | no session list, workspace, or pending-interaction affordances |
 | `renderSlot` | returns `null` | no shell-registered slot content inside the view |
 | `viewRequest`, `openView`, `completeViewRequest` | `null` / no-op | no cross-view navigation |
-| `inputActions` | no-op | the composer cannot submit, queue, or attach images |
-| `useProjection` | always `undefined` | no non-Trajectory projections |
-| `sessionId` | fixed `standalone-trajectory` | one session per component instance |
+| `inputActions`, `useInput` | not part of the standalone component contract | the component does not host a composer |
+| `useProjection` | not part of the standalone component contract | no non-Trajectory projections |
+| Session snapshot identity | fixed `standalone-trajectory` internally | one session per component instance |
 
 Everything the projection derives from the Event log itself (turns, steps,
 tool calls, chunks, compaction, request headers, search, timeline, pagination)

@@ -33,9 +33,6 @@ export default defineConfig({
       { find: /^@deepseek-ai\/dsh-client-ui-conversation\/client$/, replacement: source('./packages/event/typescript/ui/trajectory/src/conversation-client.ts') },
       { find: /^@deepseek-ai\/dsh-client-locale\/src\/locales\/en\.ts$/, replacement: source('./packages/event/typescript/packages/client/locale/src/locales/en.ts') },
       { find: /^@deepseek-ai\/dsh-client-locale\/src\/locales\/zh\.ts$/, replacement: source('./packages/event/typescript/packages/client/locale/src/locales/zh.ts') },
-      { find: /^@deepseek-ai\/dsh-client-ui-trajectory$/, replacement: source('./packages/event/typescript/packages/client/ui-trajectory/src/index.ts') },
-      { find: /^@deepseek-ai\/dsh-client-ui-trajectory\/client$/, replacement: source('./packages/event/typescript/packages/client/ui-trajectory/src/client/index.ts') },
-      { find: /^@deepseek-ai\/dsh-client-ui-trajectory\/invariant$/, replacement: source('./packages/event/typescript/packages/client/ui-trajectory/src/invariant.ts') },
     ],
   },
   ssr: {

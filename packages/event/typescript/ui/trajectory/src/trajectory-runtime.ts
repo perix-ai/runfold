@@ -1,13 +1,13 @@
-import type { Context } from '@deepseek-ai/cordis'
 import type {
   SessionEventLikeEntry,
   SessionLiveEventEntry,
-} from '@deepseek-ai/dsh-api-session-controller/client'
+} from '../../../runtime/src/ui-types.ts'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import type {
   ConversationNodeDefinition,
   ConversationViewDefinition,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+  TrajectoryRegistrationContext,
+} from './conversation-client.js'
 import type { SessionEvent } from '@perix/event-sdk/session/types'
 import {
   ConversationNodeAssembler,
@@ -25,7 +25,7 @@ import {
 import { registerTrajectoryToolDefinition } from '../../../packages/client/ui-trajectory/src/client/trajectory-tool-definition.ts'
 
 const definitions: ConversationNodeDefinition[] = []
-const registrationContext = {
+const registrationContext: TrajectoryRegistrationContext = {
   uiConversation: {
     events: {
       register: (definition: ConversationNodeDefinition) => {
@@ -33,9 +33,12 @@ const registrationContext = {
         return () => {}
       },
     },
+    views: {
+      register: () => () => {},
+    },
     inspectRequestPrompt,
   },
-} as unknown as Context
+}
 
 registerTrajectoryMessageDefinitions(registrationContext)
 registerTrajectoryRequestHeaderDefinition(registrationContext)
