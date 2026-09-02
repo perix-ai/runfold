@@ -476,7 +476,13 @@ class SessionStore:
         return session
 
     def resume(self, session_id: str) -> Session:
-        """Restore a persisted Session and continue its append lifecycle."""
+        """Alias of :meth:`restore`.
+
+        DSH has no separate resume API: a restored Session already continues
+        its append lifecycle. The alias exists only so callers can use the
+        ``resume`` vocabulary of ``docs/event/contract.md``; it adds no
+        behavior and is Python-only.
+        """
 
         return self.restore(session_id)
 
