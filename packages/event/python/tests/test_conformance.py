@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
-from perix_event import EventValidationError, Session
+from perix_event import KNOWN_SESSION_EVENT_TYPES, EventValidationError, Session
 from perix_event import interrupted_turn_closers
 
 
@@ -18,6 +18,7 @@ CASES = (
     / "session-validation.json"
 )
 REPAIR = CASES.with_name("repair.json")
+KNOWN_TYPES = CASES.with_name("known-event-types.json")
 
 
 class ConformanceTests(unittest.TestCase):
@@ -39,6 +40,10 @@ class ConformanceTests(unittest.TestCase):
     def test_shared_interrupted_turn_repair_result(self) -> None:
         case = json.loads(REPAIR.read_text(encoding="utf-8"))
         self.assertEqual(interrupted_turn_closers(case["events"]), case["expected"])
+
+    def test_shared_known_event_type_vocabulary(self) -> None:
+        shared = json.loads(KNOWN_TYPES.read_text(encoding="utf-8"))
+        self.assertEqual(sorted(KNOWN_SESSION_EVENT_TYPES), shared["types"])
 
 
 if __name__ == "__main__":

@@ -11,6 +11,8 @@ valid JSON key order and Zstandard frame bytes may differ.
 
 `v0/cases/session-validation.json` is the shared valid/invalid Session corpus,
 and `v0/cases/repair.json` fixes the exact deterministic crash-repair result.
+`v0/cases/known-event-types.json` is the single source of the known Event
+type vocabulary that both `KNOWN_SESSION_EVENT_TYPES` constants must equal.
 Both implementations execute every case. `v0/fixtures/session.jsonl` is the
 shared packed wire-format fixture and `session.expected.json` is its normalized
 projection.
