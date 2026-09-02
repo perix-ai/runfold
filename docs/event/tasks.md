@@ -89,13 +89,14 @@
 - [x] 共享 schema 与 conformance 数据分别放在 `schemas/event/` 和 `conformance/event/`。
 - [x] 未修改的 DSH 来源快照独立保存在 `third_party/deepseek-harness/`。
 
-- [ ] **R07** · 难度 易 · 风险 低 · 位置 根 `package.json`、新增 `scripts/verify-upstream-identity.mjs`
+- [x] **R07** · 难度 易 · 风险 低 · 位置 根 `package.json`、新增 `scripts/verify-upstream-identity.mjs`
   - **问题**：没有脚本校验 `packages/event/typescript/packages/**/{src,tests}`
     与 `third_party/.../upstream/packages/**` 逐字节一致，"保持原样"只靠
     人工。
   - **处理**：新增脚本并纳入 `npm run verify`；维护一份"允许差异清单"，
     R17–R19 修改保留源码后，清单之外的文件必须逐字节一致。
   - **依赖**：无（R17–R19 完成后更新允许差异清单）。
+  - **结果**：已完成（2026-09-01）：新增 `scripts/verify-upstream-identity.mjs`，纳入 `npm run verify` 首步；当前 132 个保留文件，7 处登记差异（3 个 workspace manifest、4 个 tsconfig）。
 
 ## 3. TypeScript 解耦
 
@@ -120,13 +121,14 @@
 | `session-persistence-jsonl` | `static inject = ['sessions']`；`static Config = z.object(...)`（schemastery）；`ctx.logger` |
 | 上游测试 | `new Context()`、`ctx.plugin`、`ctx.fiber.dispose`、`ctx.on`、`ctx.sessions`、`ctx.sessionPersistence`、`ctx.logger`；`ctx.typert` 2 处、`ctx.emit` 3 处、`ctx.parallel` 1 处 |
 
-- [ ] **R13** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/sdk/package.json`、`sdk/src/*-invariant.ts`、`sdk/vite.config.ts`
+- [x] **R13** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/sdk/package.json`、`sdk/src/*-invariant.ts`、`sdk/vite.config.ts`
   - **问题**：`session/invariant`、`persistence/invariant`、
     `persistence-jsonl/invariant` 是 Cordis companion plugin，依赖
     `dsh-invariants` 服务，对 Event 行为无贡献，却是 SDK 公共出口。
   - **处理**：从 `exports`、vite entry 与 `public-api.spec.ts` 中删除三个子路径；
     源码留在 `packages/` 供审计，不进入 SDK 构建。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-01）：删除三个子路径的 exports、vite entry、源文件、测试别名与 README 条目；同时移除 sdk 对 `@deepseek-ai/dsh-invariants` 的依赖（只有 invariant 模块引用它）。
 
 - [ ] **R14** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/packages/util/`
   - **问题**：核心源码依赖 `dsh-brand`（`brandString/Branded`）、
@@ -254,11 +256,12 @@
 - [x] Python 轨迹可由 TypeScript Trajectory UI 投影和渲染。
 - [x] 规范化后的 header、Event、surface、messages 和 repair 结果等价。
 
-- [ ] **R08** · 难度 易 · 风险 低 · 位置 `conformance/event/v0/cases/`、TS `known-event-types.ts`、Python `types.py`
+- [x] **R08** · 难度 易 · 风险 低 · 位置 `conformance/event/v0/cases/`、TS `known-event-types.ts`、Python `types.py`
   - **问题**：`KNOWN_SESSION_EVENT_TYPES` 两份手抄副本，没有测试保证相同。
   - **处理**：新增 `known-event-types.json` 作为唯一来源，两边各加断言集合相等
     的测试。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-01）：新增 `conformance/event/v0/cases/known-event-types.json`（51 个类型），TS `public-api.spec.ts` 与 Python `test_conformance.py` 各加一条集合相等断言。
 
 ## 6. 测试与交付
 
