@@ -4,7 +4,8 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R37 与第 7 节总验收全部完成，`npm run verify`
+> 总体状态（2026-09-02）：R01–R37 与第 7 节总验收全部完成；R38 正在补充
+> Nexent 20 Turn 长轨迹的冷恢复、fork 和详情面板全景验收。`npm run verify`
 > 全绿，SDK、UI、保留测试和构建配置均不依赖任何 DSH 包名解析。R33 已在与官方 tag
 > 逐文件一致的 Nexent v2.5.0 本地快照上完成真实进程、wheel 和轨迹 UI 验收；
 > R37 又完成了 Nexent 产品界面的读取、resume、fork 与浏览器验收。按用户约定，
@@ -579,6 +580,17 @@
     fork 第 3 Turn 均通过，证据见任务书。主仓 `npm run verify` 通过 969 个
     Vitest、36 个 Python 测试、全部构建/类型检查及两种空白消费者安装。
 
+- [ ] **R38** · 难度 中 · 风险 低 · 位置 Nexent 本地实验分支、
+  `docs/event/evidence/r38/`
+  - **问题**：R37 的真实浏览器轨迹只有 3 个 Turn，现有证据图没有展示 DSH
+    右侧事件详情中的参数、结果、Schema 与计时，也未把 20 Turn 长轨迹的冷恢复
+    和 fork 串成一条可复核验收链路。
+  - **处理**：按
+    [`R38 任务书`](tasks/R38-nexent-long-trajectory.md) 由独立 Nexent 进程生成并
+    恢复至少 20 个完整 Turn，验证稳定前缀 fork 与父子独立续写；在 Nexent 同页
+    轨迹视图中完成长列表、右侧详情和 fork lineage 的全景浏览器验收并保存证据。
+  - **依赖**：R37。
+
 ## 7. 总体验收
 
 - [x] **R33** · 难度 中 · 风险 中 · 位置 Nexent 使用方仓库、
@@ -632,6 +644,7 @@
 | 13 | R33 | Nexent 真实消费者接入与需求 A5 验收 | R25–R32、R34–R35 |
 | 14 | R36 | 上游测试文件的 DSH import 改写与别名清零（见 `tasks/R36-test-imports.md`） | 批次 9 |
 | 15 | R37 | Nexent 聊天页嵌入独立 Trajectory UI，并接通读取、resume、fork（见 `tasks/R37-nexent-trajectory-ui.md`） | R33 |
+| 16 | R38 | Nexent 20 Turn 长轨迹冷恢复、fork 与详情面板全景验收（见 `tasks/R38-nexent-long-trajectory.md`） | R37 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
