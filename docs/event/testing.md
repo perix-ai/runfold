@@ -20,13 +20,14 @@
 | 单语言实现 | TypeScript 与 Python 各自的单元、集成、持久化、异常输入测试 | `packages/event/<language>/tests/` |
 | 跨语言契约 | 共享夹具的接受/拒绝结果、repair 结果、事件类型清单一致；TS 写/Python 读写，Python 写/TS 读写，双向 restore/resume/fork | `conformance/event/v0/`，`tests/event/cross-language/` |
 | UI | 与 DSH 视图行为对照（上游 views 用例的独立宿主移植），Python 生成的轨迹可渲染，大规模历史可渲染 | `packages/event/typescript/tests/ui/` |
-| 发布产物 | 打包安装到空白消费者项目，严格类型边界通过，运行时可用，不含任何 DSH 依赖或引用 | `packages/event/typescript/tests/package/`，`packages/event/python/tests/package_consumer.py` |
+| 发布产物 | TS 包安装到空白项目；Python 在隔离 builder 生成 wheel，再由第二个空白环境以 `--no-index` 只安装该 artifact；严格类型边界、公开运行时和无 DSH 引用均通过 | `packages/event/typescript/tests/package/`，`packages/event/python/tests/package_consumer.py` |
 
 ## 3. 必须覆盖的场景
 
 - 正常退出、截断/损坏日志修复、序号冲突、并发 Session；
 - 明文与 Zstandard 两种物理格式，packed chunk 行的写入与展开；
-- restore 后继续追加、重复恢复不增长历史、fork 只接受稳定前缀；
+- restore 后继续追加；末尾已有 `session/end-seed` 的重复打开幂等，而带新 live
+  后缀的下一次 restore 追加一个新边界；fork 只接受稳定前缀；
 - TS 写/Python 读写，Python 写/TS 读写；
 - UI 对 Python 生成轨迹与 20,000 级 Event 历史的渲染。
 

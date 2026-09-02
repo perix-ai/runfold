@@ -4,9 +4,9 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R32、R34 已完成，`npm run verify` 全绿，SDK
-> 与 UI 发布产物均不依赖任何 DSH 包。待执行的是 R33（Nexent 真实接入验收）
-> 和第 7 节总验收。
+> 总体状态（2026-09-02）：R01–R32、R34–R35 已完成，`npm run verify` 全绿，
+> SDK 与 UI 发布产物均不依赖任何 DSH 包。待执行的是 R33（Nexent 真实接入
+> 验收）和第 7 节总验收。
 
 ## 任务生命周期
 
@@ -484,6 +484,23 @@
 - [x] 根级 `verify` 同时运行 TypeScript、Python、跨语言和打包测试。
 - [x] README、测试矩阵和本清单与当前实现一致。
 
+- [x] **R35** · 难度 易 · 风险 低 · 位置
+  `packages/event/python/tests/package_consumer.py`
+  - **问题**：当前空白消费者把 Python 源码目录直接传给 `pip install`。pip 虽会
+    临时构建 wheel，但门禁没有把 wheel 作为独立交付物传入另一个环境，无法证明
+    R33 所要求的“使用安装后的包、不得依赖源码目录或 `PYTHONPATH`”。
+  - **处理**：在隔离 builder 环境先生成唯一 wheel，再在独立 consumer 环境以
+    `--no-index` 只安装该 wheel；运行现有公开 API smoke，并断言导入路径位于
+    consumer 的 `site-packages` 而非源码树。
+  - **依赖**：R34。
+  - **结果**：已完成（2026-09-02）：package consumer 先在 builder venv 生成
+    唯一的 `perix_event_sdk-0.1.0-py3-none-any.whl`，再创建全新的 consumer venv，
+    以 `pip install --no-index <wheel>` 安装；smoke 返回包版本、持久化与 fork
+    结果，并验证 `perix_event.__file__` 位于 consumer 环境且不在源码树中。
+  - **验证**：`npm run test:python:package` 通过，安装阶段只处理本地 wheel；
+    完整 `npm run verify` 通过 207/10/87 身份门禁、全部构建/类型检查、1004 个
+    行为测试及 TypeScript/Python 两个发布物消费者。
+
 - [x] **R09** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/tests/package/package-consumer.mjs`
   - **问题**：只断言 `dsh-session*` 四个名字不泄漏；`lib/types` 实际有 8 处
     `from '@deepseek-ai/cordis'` 与 `declare module '@deepseek-ai/cordis'`。
@@ -538,11 +555,12 @@
     Python 包，不增加 server/sidecar 或专属格式；覆盖记录、持久化重启、
     restore/resume、稳定前缀 fork，并把一份真实产出交给 TypeScript 读取和
     Trajectory UI 渲染。
-  - **依赖**：R25–R32、R34。
+  - **依赖**：R25–R32、R34–R35。
 
 - [ ] Event 轨迹设施达到生产可用。只有 DSH 依赖收口 R25–R29、生产加固
-  R30–R32、边界校准 R34 和 Nexent 真实接入 R33 全部完成，需求 A1–A6 均有
-  验收证据、公共产物无 DSH 运行时依赖，并通过完整验证后才能勾选此项。
+  R30–R32、边界校准 R34、wheel 门禁 R35 和 Nexent 真实接入 R33 全部完成，
+  需求 A1–A6 均有验收证据、公共产物无 DSH 运行时依赖，并通过完整验证后才能
+  勾选此项。
 
 ## 执行顺序
 
@@ -561,7 +579,8 @@
 | 9 | R25 → R26 → R27 → R28 → R29 | 彻底移除 DSH 名称与注册表依赖（交由 Codex，见 `tasks/R25-R29-dsh-free.md`） | 批次 8 |
 | 10 | R32 | 按最终代码和验证结果同步全部文档事实 | 批次 9、R31 |
 | 11 | R34 | 校准多轮 restore 的 `session/end-seed` 边界语义 | R31 |
-| 12 | R33 | Nexent 真实消费者接入与需求 A5 验收 | R25–R32、R34 |
+| 12 | R35 | 显式构建并从独立 wheel 安装 Python 空白消费者 | R34 |
+| 13 | R33 | Nexent 真实消费者接入与需求 A5 验收 | R25–R32、R34–R35 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 

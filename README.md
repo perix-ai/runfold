@@ -82,7 +82,7 @@ after each verified commit instead of being accumulated into one large batch.
 
 ## Status
 
-The repository implementation and all internal acceptance work through R34
+The repository implementation and all internal acceptance work through R35
 (except the external Nexent integration in R33) are complete: the current full
 gate verifies 207 retained upstream files, runs 1004 behavior
 tests, and installs both language packages into blank consumers. Production

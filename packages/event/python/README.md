@@ -56,7 +56,10 @@ npm run test:python
 npm run test:python:package
 ```
 
-The current Python suite has 35 behavior tests. The root cross-language suite
+The current Python suite has 36 behavior tests. The package-consumer command
+builds a wheel in an isolated builder, installs only that artifact with
+`--no-index` into a second blank environment, and rejects imports from the
+source tree. The root cross-language suite
 also exercises plain and Zstandard files in both directions through Python's
 public `restore/resume` methods and TypeScript's public `runtime.restore()`;
 Python-generated Events are rendered by the TypeScript Trajectory UI.
