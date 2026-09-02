@@ -230,18 +230,20 @@
 - [x] 实现 DSH 兼容的 Zstandard 多 frame 读写，并提供明确的可选依赖策略。
 - [x] 实现空白项目安装与公共 API smoke test。
 
-- [ ] **R11** · 难度 易 · 风险 低 · 位置 `packages/event/python/src/perix_event/persistence_jsonl.py`
+- [x] **R11** · 难度 易 · 风险 低 · 位置 `packages/event/python/src/perix_event/persistence_jsonl.py`
   - **问题**：`.event.lock` advisory 文件锁是 DSH 没有的功能，且在 session 目录
     里多写一个文件。
   - **处理**：按"不增加功能"原则删除，仅保留进程内 `threading.RLock`；若因
     Nexent 多进程需求保留，须在 `contract.md` 标注 Python-only（R01），并
     增加 TS 读取含 `.event.lock` 目录的跨语言测试。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-01）：删除 `_exclusive_file_lock`、`_lock_path` 及三处调用，只保留进程内 `RLock`；不再写 `.event.lock`。
 
-- [ ] **R12** · 难度 易 · 风险 低 · 位置 `packages/event/python/src/perix_event/session.py`
+- [x] **R12** · 难度 易 · 风险 低 · 位置 `packages/event/python/src/perix_event/session.py`
   - **问题**：`SessionStore.resume()` 只是 `restore()` 别名，DSH 没有该 API。
   - **处理**：保留则在 docstring 与 `contract.md` 明确"别名"（R02）；否则删除。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-01）：保留别名，docstring 与 `contract.md` 均注明"与 `restore` 相同、Python-only、不增加行为"。
 
 ## 5. 跨语言契约
 
