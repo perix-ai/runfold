@@ -3,7 +3,7 @@
 > 对应清单：[`../tasks.md`](../tasks.md) 第 3.2 节 R25–R29。
 > 执行者：Codex。状态：待执行。
 >
-> 本文自包含；执行前先读 [`../README.md`](../README.md)（抽离原则）、
+> 本文自包含；执行前先读 [`../architecture.md`](../architecture.md)（抽离原则）、
 > [`../tasks.md`](../tasks.md) 第 3 节（已完成的解耦）、
 > [`../../../packages/event/typescript/README.md`](../../../packages/event/typescript/README.md)
 > 和 [`../../../AGENTS.md`](../../../AGENTS.md)（提交与推送规则）。
@@ -67,7 +67,7 @@ B 类的精确用量（保留 UI 源码 + `ui/trajectory/src`，不含测试）�
 
 ## 约束
 
-- 仍然遵守 `README.md` 的优先级：先保行为，再去耦合，最后才美化。不重写任何算法。
+- 仍然遵守 `architecture.md` 3.1 的优先级：先保行为，再去耦合，最后才美化。不重写任何算法。
 - 裁入仓库的每个上游文件都必须来自固定 commit `dd6322d604e00eec1ba5e0c8541159906a21094a`，
   放在 `packages/event/typescript/packages/` 下保持上游相对路径，并纳入
   `scripts/verify-upstream-identity.mjs` 的比对范围。凡不在快照里的上游包，
@@ -180,7 +180,7 @@ Cordis：把它们从保留树中删除（源码在快照里可查），并在 T
 - `packages/event/typescript/README.md`：来源映射表补上新裁入的目录；删除
   "Original DSH module specifiers remain only inside retained upstream source"
   一段，改为描述映射表机制。
-- `docs/event/README.md`"当前已知差距"与 `tasks.md` R25–R29 标记完成，写明每步的
+- `docs/event/decisions.md` 的 D04/D05 标注结果，`tasks.md` R25–R29 标记完成，写明每步的
   文件数与验证结果。
 - 全量 `npm run verify` 通过后，把 `tasks.md` 第 7 节总验收项的前置条件更新为
   "包括本任务"。

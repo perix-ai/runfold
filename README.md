@@ -6,12 +6,8 @@
 agents. The first and currently only facility is **Event**: the append-only
 execution trajectory of an agent Session, its persistence, restore/resume/fork
 behavior, and the Trajectory UI that projects it. It is cut directly from
-DeepSeek Harness rather than designed from scratch.
-
-Further facilities (materialized state, checkpoints, artifact and effect
-ledgers, observability projections) are out of scope until Event is
-production-ready. Earlier from-scratch design drafts for them were removed on
-2026-09-01; see git history before that date if they are needed again.
+DeepSeek Harness rather than designed from scratch. This file is a map;
+scope, design, and rules live under `docs/event/`.
 
 ## Repository layout
 
@@ -45,41 +41,24 @@ perix-runtime-data/
         └── upstream/               # Unmodified pinned DSH source snapshot
 ```
 
-## Event reference implementation
+## Where to read
 
-The current extraction goal, DSH dependency-removal rules, multi-language
-contract, and completion criteria are centralized in the
-[`Event 轨迹设施说明`](docs/event/README.md). It is the source of
-truth for this work.
+| Question | Document |
+| --- | --- |
+| What is being built and what counts as done | [`docs/event/requirements.md`](docs/event/requirements.md) |
+| How it is structured and how upstream code is handled | [`docs/event/architecture.md`](docs/event/architecture.md) |
+| The interface and on-disk contract shared by both languages | [`docs/event/specification.md`](docs/event/specification.md) |
+| How it is verified | [`docs/event/testing.md`](docs/event/testing.md) |
+| Why key choices were made | [`docs/event/decisions.md`](docs/event/decisions.md) |
+| Progress and open work | [`docs/event/tasks.md`](docs/event/tasks.md) |
 
-The first executable slice is intentionally Event-only and is cut directly
-from DeepSeek Harness `0.1.2-alpha.3`:
-
-- `@perix/event-sdk` bundles the DSH Session, persistence seam, and JSONL
-  backend from retained source, hosted by a small Perix `EventHost` instead of
-  the Cordis plugin platform, without reimplementing their behavior;
-- `perix-event-sdk` is a native Python implementation of the same Session,
-  surface, repair, JSONL, restore/resume, and fork contract; it does not invoke
-  TypeScript or require a server;
-- `@perix/event-ui` runs DSH's unchanged conversation assembler, Trajectory
-  projection, and Trajectory React view behind a small standalone host;
-- `apps/event/typescript/trajectory-demo` is development-only and contains no
-  reusable library implementation.
+## Quick start
 
 ```bash
 npm install
 npm run verify
 npm run dev:event-ui
 ```
-
-`npm run verify` builds every package, runs the retained upstream regression
-suite plus TypeScript/Python/conformance/system suites, and installs the
-TypeScript and Python SDKs into blank consumer environments.
-
-The untouched upstream reference lives under `third_party/deepseek-harness/`.
-The retained extraction lives under `packages/event/typescript/`; the
-native Python peer lives under `packages/event/python/`. Their shared v0
-contract is recorded in [`docs/event/contract.md`](docs/event/contract.md).
 
 ## Non-goals
 
@@ -103,7 +82,4 @@ after each verified commit instead of being accumulated into one large batch.
 
 ## Status
 
-Pre-alpha. Both implementations and the bidirectional conformance path are
-executable, and the published TypeScript SDK depends on no DeepSeek Harness
-package. The remaining items before the Event facility can be called
-production-ready are listed in [`docs/event/tasks.md`](docs/event/tasks.md).
+See the status block at the top of [`docs/event/tasks.md`](docs/event/tasks.md).

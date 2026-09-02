@@ -1,11 +1,12 @@
 # Event 抽离实施清单
 
-本清单落实 [`README.md`](README.md) 中的目标和约束。完成标记必须以代码、
-测试或打包验证为依据；仅创建目录或 API 占位不算完成。
+> 文档类型：计划与进度。落实 [`requirements.md`](requirements.md) 的验收标准
+> 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
+> 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态：**进行中**。目录组织、Python 实现、跨语言契约和当前测试矩阵
-> 已完成；TypeScript 的 DSH/Cordis 解耦仍有未完成项，因此 Event 抽离尚不能
-> 标记为生产可用。
+> 总体状态（2026-09-01）：R01–R24 全部完成，`npm run verify` 全绿，SDK 发布
+> 产物不依赖任何 DSH 包。待执行的是 3.2 节 R25–R29（彻底移除代码中的 DSH
+> 名称与仓库开发时的注册表依赖）和第 7 节总验收。
 
 ## 条目格式
 
@@ -354,3 +355,20 @@
 | 6 | R22, R23, R09 | 收尾与泄漏门禁 | 批次 5 |
 | 7 | R10, R24 | 独立长线 | 无 |
 | 8 | R25 → R26 → R27 → R28 → R29 | 彻底移除 DSH 名称与注册表依赖（交由 Codex，见 `tasks/R25-R29-dsh-free.md`） | 批次 6 |
+
+## 附录：2026-09-01 评审差距的处理记录
+
+评审时列出的差距及其结果，保留作审计线索；编号对应上文条目。
+
+- `@perix/event-sdk/runtime` 曾整包导出 Cordis，已改为 Perix 自有的 `EventHost`（R16–R21）；
+- `@perix/event-sdk/messages` 曾整包导出 `dsh-llm`，已改为 `runtime/src/messages.ts`（R15）；
+- core 与 persistence 的全部 DSH 运行时依赖已由 `runtime/` 替换，SDK 产物只剩 `koffi`（win32）一个第三方运行时依赖（R14–R23）；
+- TypeScript 的 restore 入口已收敛为 `runtime.restore(id)`，与 Python 对应（R21）；
+- 生成物中的 `@deepseek-ai/cordis` 引用已消失；`rewrite-public-namespaces.mjs` 删除，打包测试断言收紧（R22、R09）；
+- 三个 `invariant` 子路径曾是 SDK 出口，已删除（R13）；
+- Python 曾有 DSH 没有的 `.event.lock` 文件锁且规格误写为共同契约，锁已删除，`resume()` 保留为文档化别名（R01、R11、R12）；
+- `KNOWN_SESSION_EVENT_TYPES` 两份手抄副本已由 conformance 单一来源与双侧测试锁定（R08）；
+- `views.client.spec.tsx` 中与 shell 无关的 25 个用例已移植到独立宿主，桩掉的能力已登记（R05、R10）；
+- 早期从零设计草案与 Event 实现矛盾，已删除（R03，决策 D02）；
+- 裁剪源码与 `third_party` 快照的一致性已由 `verify:upstream-identity` 校验（R07）；
+- UI 闭包仍从注册表打包（R24，决策 D04），由 R25–R29 收尾。

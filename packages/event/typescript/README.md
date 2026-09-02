@@ -4,9 +4,8 @@ This directory is the TypeScript implementation of Event. Trajectory is not a
 peer abstraction: it is an Event-derived projection and optional UI contained
 within this implementation.
 
-The extraction's goals, dependency-removal policy, multi-language contract, and
-completion criteria are defined in the
-[`Event extraction brief`](../../../docs/event/README.md).
+The extraction's dependency-removal policy and source-layout rules are defined in the
+[`Event architecture`](../../../docs/event/architecture.md).
 
 Copied DSH code keeps its upstream relative path wherever practical. New
 directories and files are allowed when they are required to make the extraction
@@ -125,7 +124,7 @@ listed in `scripts/verify-upstream-identity.mjs`, each of which is explained
 above. The native Python peer is in
 `packages/event/python/`, parallel to this implementation rather than to
 Trajectory; both execute the
-[`Event v0 contract`](../../../docs/event/contract.md) and fixtures under
+[`Event v0 contract`](../../../docs/event/specification.md) and fixtures under
 `conformance/event/v0/`.
 
 ## Test layout

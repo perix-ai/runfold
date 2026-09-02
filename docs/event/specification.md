@@ -1,4 +1,8 @@
-# Event v0 跨语言契约
+# Event v0 接口与数据规格
+
+> 文档类型：接口与数据规格（specification）。回答"两种实现共同遵守的逻辑
+> 接口、磁盘格式与一致性验收是什么"。需求见 [`requirements.md`](requirements.md)，
+> 架构见 [`architecture.md`](architecture.md)。
 
 本文件记录 TypeScript 与 Python 共同遵守的 Event v0 逻辑接口和持久化
 边界。行为基线来自 DeepSeek Harness `0.1.2-alpha.3`（commit

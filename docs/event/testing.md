@@ -1,0 +1,45 @@
+# Event 轨迹设施验证策略
+
+> 文档类型：验证策略。回答"用什么证明需求被满足、行为没有退化"。具体的
+> 测试文件矩阵与命令见
+> [`packages/event/typescript/TESTING.md`](../../packages/event/typescript/TESTING.md)。
+
+## 1. 原则
+
+测试是抽离本身的一部分，不是最后补充。任何为去除 DSH 依赖而改写的代码，
+都要先由保留下来的上游测试锁定行为，再增加面向新公共接口和跨语言契约的
+测试。
+
+## 2. 验证层次
+
+| 层次 | 证明什么 | 位置 |
+| --- | --- | --- |
+| 上游一致性 | 保留源码除登记的宿主接缝外与固定 commit 逐字节一致 | `scripts/verify-upstream-identity.mjs`，`npm run verify` 首步 |
+| 上游行为基线 | DSH 的 Event、持久化、Trajectory 回归测试在裁剪版上原样通过 | `packages/event/typescript/packages/**/tests`，经 `test-support/` 垫片运行 |
+| 单语言实现 | TypeScript 与 Python 各自的单元、集成、持久化、异常输入测试 | `packages/event/<language>/tests/` |
+| 跨语言契约 | 共享夹具的接受/拒绝结果、repair 结果、事件类型清单一致；TS 写/Python 读写，Python 写/TS 读写，双向 restore/resume/fork | `conformance/event/v0/`，`tests/event/cross-language/` |
+| UI | 与 DSH 视图行为对照（上游 views 用例的独立宿主移植），Python 生成的轨迹可渲染，大规模历史可渲染 | `packages/event/typescript/tests/ui/` |
+| 发布产物 | 打包安装到空白消费者项目，严格类型边界通过，运行时可用，不含任何 DSH 依赖或引用 | `packages/event/typescript/tests/package/`，`packages/event/python/tests/package_consumer.py` |
+
+## 3. 必须覆盖的场景
+
+- 正常退出、截断/损坏日志修复、序号冲突、并发 Session；
+- 明文与 Zstandard 两种物理格式，packed chunk 行的写入与展开；
+- restore 后继续追加、重复恢复不增长历史、fork 只接受稳定前缀；
+- TS 写/Python 读写，Python 写/TS 读写；
+- UI 对 Python 生成轨迹与 20,000 级 Event 历史的渲染。
+
+## 4. 已知缺口
+
+被排除的上游测试及其理由记录在
+[`packages/event/typescript/TESTING.md`](../../packages/event/typescript/TESTING.md)
+的 "Known gaps" 一节；每一项要么已由独立宿主下的等价测试覆盖，要么测试的是
+Event 组件不具备的 shell 机制。
+
+## 5. 入口
+
+```bash
+npm run verify
+```
+
+按层次单独运行的命令见 `package.json` 的 `scripts` 与 TESTING.md。

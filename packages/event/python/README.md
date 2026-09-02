@@ -57,4 +57,4 @@ npm run test:python:package
 ```
 
 The public API and exact TypeScript/Python behavior mapping are documented in
-[`docs/event/contract.md`](../../../docs/event/contract.md).
+[`docs/event/specification.md`](../../../docs/event/specification.md).
