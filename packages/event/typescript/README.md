@@ -40,11 +40,12 @@ The publishable boundaries added around this source are:
   both packages.
 
 All consumer-facing package, component, and test names use the Perix namespace:
-`@perix/event-sdk`, `@perix/event-ui`, and `EventTrajectory`. Original DSH
-module specifiers remain only inside retained upstream source and its build
-aliases, where changing them would make the source diverge from the audited
-upstream implementation. Those retained-source workspaces keep their upstream
-package identity, are marked private, and are never the consumer-facing SDK.
+`@perix/event-sdk`, `@perix/event-ui`, and `EventTrajectory`. Core Session and
+persistence implementation imports use explicit local relative paths; every
+such import-only rewrite is declared and checked against the audited upstream
+bytes by `scripts/verify-upstream-identity.mjs`. DSH module specifiers remain in
+unchanged retained upstream tests and provenance comments, not in the public
+SDK surface.
 
 ## Necessary local changes
 
@@ -66,14 +67,22 @@ package identity, are marked private, and are never the consumer-facing SDK.
   Schemastery config schema and `static inject`, validating `root` and
   `compression` in the constructor instead. Session append, fork, repair,
   surface, write-behind, and JSONL logic are untouched. The exact files are
-  listed in `scripts/verify-upstream-identity.mjs`; every other retained file
-  is byte-identical to upstream.
+  listed in `scripts/verify-upstream-identity.mjs`; other implementation
+  differences are limited to the declared dependency-specifier rewrites below.
+- **Local dependency specifiers.** Fourteen core Session and persistence source
+  files replace only their DSH import/export specifiers with relative paths to
+  the retained packages or `runtime/`. The identity verifier derives those
+  relative paths from an explicit per-file mapping and requires the resulting
+  file to be otherwise byte-identical to the pinned snapshot.
 - **Retained tests kept unmodified.** `vitest.config.ts` aliases
   `@deepseek-ai/cordis` and `@deepseek-ai/dsh-scope` to `test-support/`, a
   test-only shim that provides `ctx.plugin` / `fiber.dispose` on top of host
-  scopes. Three upstream tests that exercise mechanisms the host does not have
-  are excluded: `scoped.spec.ts` (scope-filtered dispatch), `typert.spec.ts`
-  (Typert lookup registry), and `invariant.spec.ts` (the invariants plugin).
+  scopes. Its remaining core DSH aliases serve unchanged upstream tests only.
+  Three host-only tests are not retained: `scoped.spec.ts` (scope-filtered
+  dispatch), `typert.spec.ts` (Typert lookup registry), and `invariant.spec.ts`
+  (the invariants plugin). The three corresponding `src/invariant.ts`
+  companions are also not retained. All six original files remain available
+  in `third_party/deepseek-harness/upstream/`.
 - The other retained directories under `packages/client/` and
   `packages/test-support/` are source-only: their files are imported by
   relative path from `ui/trajectory/src`, and their `package.json` and
@@ -93,13 +102,14 @@ package identity, are marked private, and are never the consumer-facing SDK.
   retained sources import: `brand.ts` (`@deepseek-ai/dsh-brand`), `values.ts`
   (`@deepseek-ai/dsh-util-values`), `timeout.ts` (`@deepseek-ai/dsh-timeout`),
   and `messages.ts` (the Event-facing subset of `@deepseek-ai/dsh-llm` plus the
-  `ImageAttachmentRef` shape from `@deepseek-ai/dsh-attachment`). Retained
-  sources keep their upstream specifiers; the SDK build, the test runner, and
-  the UI type-check resolve those specifiers to `runtime/` (see
-  `sdk/vite.config.ts`, `vitest.config.ts`, `tsconfig.tests.json`, and
-  `ui/trajectory/tsconfig.json`), so the published SDK bundles them and depends
-  on none of the replaced packages. `runtime/README.md` records each file's
-  provenance.
+  `ImageAttachmentRef` shape from `@deepseek-ai/dsh-attachment`). Core and
+  persistence sources import these modules by relative path; the SDK bundles
+  those imports directly. `vitest.config.ts` still resolves the original DSH
+  names used by unchanged upstream tests. The TypeScript test and Trajectory
+  configs temporarily retain only the Session, LLM, and attachment type aliases
+  needed by the UI closure; R27 removes them when those UI types become local.
+  The published SDK depends on none of the replaced packages.
+  `runtime/README.md` records each file's provenance.
 - `sdk/` adds only package exports; the implementation remains in the retained
   DSH package trees above and in `runtime/`. `@perix/event-sdk/runtime` is the
   host (`EventHost`), and the root entry adds `createEventRuntime()`, the
@@ -116,12 +126,11 @@ package identity, are marked private, and are never the consumer-facing SDK.
   boundary. Internal DSH shell and projection types remain implementation
   details rather than leaking the full Harness type graph to consumers.
 
-No retained DSH Event, persistence, projection, view, style, or behavioral test
-source is modified. `npm run verify:upstream-identity` (the first step of
-`npm run verify`) enforces this: every file under `packages/` must be
-byte-identical to the pinned snapshot except the seven manifests and configs
-listed in `scripts/verify-upstream-identity.mjs`, each of which is explained
-above. The native Python peer is in
+Retained DSH Event and persistence algorithms are unchanged; only documented
+host seams and declared module-specifier rewrites differ, while the six listed
+host-only files are omitted. `npm run verify:upstream-identity` (the first step
+of `npm run verify`) enforces those boundaries against every retained file.
+The native Python peer is in
 `packages/event/python/`, parallel to this implementation rather than to
 Trajectory; both execute the
 [`Event v0 contract`](../../../docs/event/specification.md) and fixtures under

@@ -3,7 +3,7 @@
  * @module @deepseek-ai/dsh-session-persistence/preparations
  */
 
-import type { Session, SessionId } from '@deepseek-ai/dsh-session'
+import type { Session, SessionId } from '../../../core/session/src/index.ts'
 
 interface PreparedSource {
   readonly session: Session

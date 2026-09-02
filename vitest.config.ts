@@ -18,22 +18,18 @@ export default defineConfig({
       { find: /^@perix\/event-sdk\/runtime$/, replacement: source('./packages/event/typescript/runtime/src/host.ts') },
       { find: /^@perix\/event-sdk\/messages$/, replacement: source('./packages/event/typescript/sdk/src/messages.ts') },
       { find: /^@perix\/event-sdk$/, replacement: source('./packages/event/typescript/sdk/src/index.ts') },
-      // Perix runtime modules replace the DSH utility packages for every retained source and test.
+      // These DSH aliases exist only for unchanged retained upstream tests.
       { find: /^@deepseek-ai\/cordis$/, replacement: source('./packages/event/typescript/test-support/cordis-shim.ts') },
       { find: /^@deepseek-ai\/dsh-scope$/, replacement: source('./packages/event/typescript/test-support/scope-shim.ts') },
       { find: /^@deepseek-ai\/dsh-brand$/, replacement: source('./packages/event/typescript/runtime/src/brand.ts') },
       { find: /^@deepseek-ai\/dsh-util-values$/, replacement: source('./packages/event/typescript/runtime/src/values.ts') },
-      { find: /^@deepseek-ai\/dsh-timeout$/, replacement: source('./packages/event/typescript/runtime/src/timeout.ts') },
       { find: /^@deepseek-ai\/dsh-llm(?:\/brand|\/types)?$/, replacement: source('./packages/event/typescript/runtime/src/messages.ts') },
       { find: /^@deepseek-ai\/dsh-session$/, replacement: source('./packages/event/typescript/packages/core/session/src/index.ts') },
-      { find: /^@deepseek-ai\/dsh-session\/invariant$/, replacement: source('./packages/event/typescript/packages/core/session/src/invariant.ts') },
       { find: /^@deepseek-ai\/dsh-session\/types$/, replacement: source('./packages/event/typescript/packages/core/session/src/types.ts') },
       { find: /^@deepseek-ai\/dsh-session\/chunk-rows$/, replacement: source('./packages/event/typescript/packages/core/session/src/chunk-rows.ts') },
       { find: /^@deepseek-ai\/dsh-session\/surface$/, replacement: source('./packages/event/typescript/packages/core/session/src/surface.ts') },
       { find: /^@deepseek-ai\/dsh-session-persistence$/, replacement: source('./packages/event/typescript/packages/session/session-persistence/src/index.ts') },
-      { find: /^@deepseek-ai\/dsh-session-persistence\/invariant$/, replacement: source('./packages/event/typescript/packages/session/session-persistence/src/invariant.ts') },
       { find: /^@deepseek-ai\/dsh-session-persistence-jsonl$/, replacement: source('./packages/event/typescript/packages/session/session-persistence-jsonl/src/index.ts') },
-      { find: /^@deepseek-ai\/dsh-session-persistence-jsonl\/invariant$/, replacement: source('./packages/event/typescript/packages/session/session-persistence-jsonl/src/invariant.ts') },
       { find: /^@deepseek-ai\/dsh-client-ui-conversation\/client$/, replacement: source('./packages/event/typescript/ui/trajectory/src/conversation-client.ts') },
       { find: /^@deepseek-ai\/dsh-client-locale\/src\/locales\/en\.ts$/, replacement: source('./packages/event/typescript/packages/client/locale/src/locales/en.ts') },
       { find: /^@deepseek-ai\/dsh-client-locale\/src\/locales\/zh\.ts$/, replacement: source('./packages/event/typescript/packages/client/locale/src/locales/zh.ts') },
@@ -53,11 +49,6 @@ export default defineConfig({
       '**/lib/**',
       // Monorepo code-generation contract, not Session runtime behavior.
       'packages/event/typescript/packages/core/session/tests/gen-persistence-catalog.spec.ts',
-      // Cordis host mechanisms not retained: scope-filtered dispatch, the Typert lookup
-      // registry, and the invariants diagnostic plugin (see docs/event/tasks.md R17, R20).
-      'packages/event/typescript/packages/core/session/tests/scoped.spec.ts',
-      'packages/event/typescript/packages/core/session/tests/typert.spec.ts',
-      'packages/event/typescript/packages/core/session/tests/invariant.spec.ts',
       // DSH ModuleLoader packaging contract; the standalone extraction uses Vite ESM.
       'packages/event/typescript/packages/client/ui-trajectory/tests/client-bundle.client.spec.ts',
       // Full DSH shell/slot integration; covered here by the standalone boundary test.

@@ -3,7 +3,7 @@
  * @module @deepseek-ai/dsh-session-persistence/write-behind
  */
 
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
+import type { SessionEvent } from '../../../core/session/src/index.ts'
 
 /** Dependencies and scheduling policy for one live session's write controller. */
 export interface SessionWriteBehindOptions {

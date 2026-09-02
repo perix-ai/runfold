@@ -13,10 +13,10 @@ import {
   SESSION_FORMAT_VERSION,
   SessionPreparation,
   snapshotSessionEvent,
-} from '@deepseek-ai/dsh-session'
-import type { Session, SessionEvent, SessionId, SessionHeader } from '@deepseek-ai/dsh-session'
-import { MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
-import { snapshotJsonValue } from '@deepseek-ai/dsh-util-values'
+} from '../../../core/session/src/index.ts'
+import type { Session, SessionEvent, SessionId, SessionHeader } from '../../../core/session/src/index.ts'
+import { MAX_TIMER_DELAY_MS } from '../../../../runtime/src/timeout.ts'
+import { snapshotJsonValue } from '../../../../runtime/src/values.ts'
 import type { BorrowedSessionSource, SessionInspection, SessionLocation } from './index.ts'
 import { SessionPersistenceNotFoundError } from './errors.ts'
 import type { SessionPersistenceRevision } from './revision.ts'

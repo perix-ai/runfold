@@ -19,9 +19,9 @@
  * @module @deepseek-ai/dsh-session/chunk-rows
  */
 
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { ToolCallId } from '@deepseek-ai/dsh-llm/brand'
-import type { StreamChunk } from '@deepseek-ai/dsh-llm'
+import { brandString } from '../../../../runtime/src/brand.ts'
+import type { ToolCallId } from '../../../../runtime/src/messages.ts'
+import type { StreamChunk } from '../../../../runtime/src/messages.ts'
 import type { SessionEvent } from './types.ts'
 
 /** The chunk kinds that may pack; block boundaries, usage, and finish chunks always stay one event per line. */

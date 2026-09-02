@@ -21,8 +21,8 @@ import {
   type SessionInspection,
   type SessionPersistenceRevision as PersistenceRevision, type SessionRawArtifact,
   type StoredPrefix,
-} from '@deepseek-ai/dsh-session-persistence'
-import type { Session, SessionEvent, SessionId, SessionHeader, SessionPreparation } from '@deepseek-ai/dsh-session'
+} from '../../session-persistence/src/index.ts'
+import type { Session, SessionEvent, SessionId, SessionHeader, SessionPreparation } from '../../../core/session/src/index.ts'
 import {
   encodeSegment, eventLines, logPath, logSuffix, parseHeaderMeta, projectDir, scanLog, sessionDir,
   SessionLogScanner, toHeaderLine,

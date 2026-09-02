@@ -1,4 +1,4 @@
-import { brandString, type Branded } from '@deepseek-ai/dsh-brand'
+import { brandString, type Branded } from '../../../../runtime/src/brand.ts'
 import type {
   AssistantMessage,
   ToolCallId,
@@ -10,8 +10,8 @@ import type {
   ToolResultMessage,
   ToolSchema,
   UserMessage,
-} from '@deepseek-ai/dsh-llm'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+} from '../../../../runtime/src/messages.ts'
+import type { JsonValue } from '../../../../runtime/src/values.ts'
 
 /** Identifies one session in the store (and its persistence artifacts). */
 export type SessionId = Branded<'SessionId'>

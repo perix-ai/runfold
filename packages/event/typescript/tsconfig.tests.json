@@ -50,26 +50,17 @@
       "@deepseek-ai/dsh-session/*": [
         "packages/event/typescript/packages/core/session/src/*"
       ],
-      "@deepseek-ai/dsh-session-persistence": [
-        "packages/event/typescript/packages/session/session-persistence/src/index.ts"
+      "@deepseek-ai/dsh-llm": [
+        "packages/event/typescript/runtime/src/messages.ts"
       ],
-      "@deepseek-ai/dsh-session-persistence/*": [
-        "packages/event/typescript/packages/session/session-persistence/src/*"
+      "@deepseek-ai/dsh-llm/brand": [
+        "packages/event/typescript/runtime/src/messages.ts"
       ],
-      "@deepseek-ai/dsh-session-persistence-jsonl": [
-        "packages/event/typescript/packages/session/session-persistence-jsonl/src/index.ts"
+      "@deepseek-ai/dsh-llm/types": [
+        "packages/event/typescript/runtime/src/messages.ts"
       ],
-      "@deepseek-ai/dsh-session-persistence-jsonl/*": [
-        "packages/event/typescript/packages/session/session-persistence-jsonl/src/*"
-      ],
-      "@deepseek-ai/dsh-brand": [
-        "packages/event/typescript/runtime/src/brand.ts"
-      ],
-      "@deepseek-ai/dsh-util-values": [
-        "packages/event/typescript/runtime/src/values.ts"
-      ],
-      "@deepseek-ai/dsh-timeout": [
-        "packages/event/typescript/runtime/src/timeout.ts"
+      "@deepseek-ai/dsh-attachment": [
+        "packages/event/typescript/runtime/src/messages.ts"
       ],
       "@deepseek-ai/dsh-client-locale/src/locales/*": [
         "packages/event/typescript/packages/client/locale/src/locales/*"

@@ -4,10 +4,10 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-01）：R01–R24 全部完成，`npm run verify` 全绿，SDK 发布
-> 产物不依赖任何 DSH 包。待执行的是 R25–R29（彻底移除代码中的 DSH 名称与
-> 仓库开发时的注册表依赖）、R30–R32（生产验收前的行为、测试与文档收口）、
-> R33（Nexent 真实接入验收）和第 7 节总验收。
+> 总体状态（2026-09-02）：R01–R26、R30–R31 已完成，`npm run verify` 全绿，
+> SDK 发布产物不依赖任何 DSH 包。待执行的是 R27–R29（彻底移除 UI 代码中的
+> DSH 名称与仓库开发时的注册表依赖）、R32（生产验收文档收口）、R33
+> （Nexent 真实接入验收）和第 7 节总验收。
 
 ## 任务生命周期
 
@@ -259,12 +259,20 @@
     映射表；替换目标按导入文件计算相对路径，映射必须命中上游文本、目标必须是
     TypeScript 根目录内的现存文件，随后仍逐字节比较。当前映射表保持为空。
   - **验证**：`node --check scripts/verify-upstream-identity.mjs` 与
-    `npm run verify:upstream-identity` 通过：132 个保留文件、9 个既有差异、0 个映射。
+    `npm run verify:upstream-identity` 通过：R25 提交时为 132 个保留文件、9 个
+    既有差异、0 个映射；后续任务按此机制登记映射。
 
-- [ ] **R26** · 难度 易 · 风险 低 · 位置 `packages/core/session/src`、`packages/session/*/src` 共 14 个文件
+- [x] **R26** · 难度 易 · 风险 低 · 位置 `packages/core/session/src`、`packages/session/*/src` 共 14 个文件
   - **问题**：源码仍写 `@deepseek-ai/dsh-session`、`dsh-llm`、`dsh-brand`、`dsh-util-values`、`dsh-timeout` 等名字，靠 6 处构建/测试别名解析。
   - **处理**：只改 import 行为相对路径（`@perix/event-sdk/runtime` 自引用保留）；删除对应别名；删除三个 `invariant.ts` 与三个被排除的 Cordis 测试。
   - **依赖**：R25。
+  - **结果**：已完成（2026-09-02）：14 个核心与持久化文件只改 26 条已声明的
+    模块 specifier；SDK 构建侧删除全部 DSH 别名，UI 尚需的 Session、LLM、
+    attachment 类型映射明确留给 R27。三个 invariant companion 与三个宿主专用
+    测试从保留树删除，原件仍在固定 `third_party` 快照。
+  - **验证**：`npm run verify` 全绿；身份审计为 126 个保留文件、9 个既有差异、
+    26 个声明映射；Event 626/626、Trajectory 94/94、Runtime 11/11、SDK 15/15、
+    UI 33/33、Python 35/35、系统 1/1、跨语言 5/5，以及 TS/Python 空白消费者通过。
 
 - [ ] **R27** · 难度 中 · 风险 中 · 位置 `runtime/src/ui-types.ts`、`runtime/src/event-types.ts`、UI 闭包约 30 个文件
   - **问题**：UI 闭包从 20 多个注册表包只取类型（`SessionSnapshot`、`ConversationNodeDefinition`、`InjectFace` 等）以及六处 `import type {}` 的事件数据形状增强。

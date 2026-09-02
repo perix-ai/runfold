@@ -25,13 +25,21 @@ and `test:python:package`.
 
 ## Known gaps
 
-Six upstream test files are excluded in the root `vitest.config.ts`:
+Three upstream test files are excluded in the root `vitest.config.ts`:
 
 | Excluded test | Reason | Coverage status |
 | --- | --- | --- |
 | `packages/core/session/tests/gen-persistence-catalog.spec.ts` | Verifies DSH monorepo code generation, not Session behavior | Not applicable to the extraction |
 | `packages/client/ui-trajectory/tests/client-bundle.client.spec.ts` | Asserts the DSH browser `ModuleLoader` packaging contract; the extraction ships Vite ESM | Replaced by `tests/package` |
+| `packages/client/ui-trajectory/tests/views.client.spec.tsx` | Mounts the complete DSH shell (slot ring, Conversation tabs, locale plugin) | **Ported.** `tests/ui/trajectory-view.spec.tsx` runs its 25 shell-independent cases (ledger and inspector interactions, timeline projection, view state) against the standalone host with the upstream assertions unchanged. The six remaining cases test plugin registration, tab labels, and the Node plugin half, which the Event component does not have |
+
+Three host-only test files are not retained in the extraction:
+
+| Test in pinned snapshot | Reason | Coverage status |
+| --- | --- | --- |
 | `packages/core/session/tests/scoped.spec.ts` | Tests dsh-scope's scope-filtered dispatch, a Harness host mechanism the Perix host does not have | Every listener hears every session by design |
 | `packages/core/session/tests/typert.spec.ts` | Tests the Typert lookup registration removed with Cordis | Not applicable |
 | `packages/core/session/tests/invariant.spec.ts` | Tests the Cordis invariants companion plugin removed in R13 | Not applicable |
-| `packages/client/ui-trajectory/tests/views.client.spec.tsx` | Mounts the complete DSH shell (slot ring, Conversation tabs, locale plugin) | **Ported.** `tests/ui/trajectory-view.spec.tsx` runs its 25 shell-independent cases (ledger and inspector interactions, timeline projection, view state) against the standalone host with the upstream assertions unchanged. The six remaining cases test plugin registration, tab labels, and the Node plugin half, which the Event component does not have |
+
+Their original bytes, and the three omitted package-owned `src/invariant.ts`
+companions, remain under `third_party/deepseek-harness/upstream/` for audit.

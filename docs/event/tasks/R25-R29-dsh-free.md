@@ -1,7 +1,7 @@
 # 任务：彻底移除 TypeScript 侧对 DeepSeek Harness 的一切依赖
 
 > 对应清单：[`../tasks.md`](../tasks.md) 第 3.2 节 R25–R29。
-> 执行者：Codex。状态：进行中（R25 已完成，R26–R29 待执行）。
+> 执行者：Codex。状态：进行中（R25–R26 已完成，R27–R29 待执行）。
 >
 > 本文自包含；执行前先读 [`../architecture.md`](../architecture.md)（抽离原则）、
 > [`../tasks.md`](../tasks.md) 第 3 节（已完成的解耦）、
@@ -96,6 +96,11 @@ B 类的精确用量（保留 UI 源码 + `ui/trajectory/src`，不含测试）�
 （映射表为空时行为与现在相同），单独提交。
 
 ### 第 2 步（R26）：核心与持久化源码的 import 改写
+
+**完成（2026-09-02）。** 14 个实现文件登记 26 条 specifier 映射；三个
+`invariant.ts` 与三个宿主专用测试从保留树删除。完整 `npm run verify` 通过，
+身份审计结果为 126 个保留文件、9 个文档化差异、26 个声明映射。UI 闭包仍需的
+Session、LLM、attachment 类型映射保留到 R27，不属于 SDK 构建依赖。
 
 涉及 14 个文件：
 

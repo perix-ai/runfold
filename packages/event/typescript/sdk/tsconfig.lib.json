@@ -8,42 +8,6 @@
     "paths": {
       "@perix/event-sdk/runtime": [
         "../runtime/src/host.ts"
-      ],
-      "@deepseek-ai/dsh-brand": [
-        "../runtime/src/brand.ts"
-      ],
-      "@deepseek-ai/dsh-util-values": [
-        "../runtime/src/values.ts"
-      ],
-      "@deepseek-ai/dsh-timeout": [
-        "../runtime/src/timeout.ts"
-      ],
-      "@deepseek-ai/dsh-llm": [
-        "../runtime/src/messages.ts"
-      ],
-      "@deepseek-ai/dsh-llm/brand": [
-        "../runtime/src/messages.ts"
-      ],
-      "@deepseek-ai/dsh-llm/types": [
-        "../runtime/src/messages.ts"
-      ],
-      "@deepseek-ai/dsh-session": [
-        "../packages/core/session/src/index.ts"
-      ],
-      "@deepseek-ai/dsh-session/*": [
-        "../packages/core/session/src/*"
-      ],
-      "@deepseek-ai/dsh-session-persistence": [
-        "../packages/session/session-persistence/src/index.ts"
-      ],
-      "@deepseek-ai/dsh-session-persistence/*": [
-        "../packages/session/session-persistence/src/*"
-      ],
-      "@deepseek-ai/dsh-session-persistence-jsonl": [
-        "../packages/session/session-persistence-jsonl/src/index.ts"
-      ],
-      "@deepseek-ai/dsh-session-persistence-jsonl/*": [
-        "../packages/session/session-persistence-jsonl/src/*"
       ]
     },
     "rootDir": "..",

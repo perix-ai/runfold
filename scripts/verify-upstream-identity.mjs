@@ -23,13 +23,68 @@ const skipDirectories = new Set(['node_modules', 'lib', 'dist'])
  * files relative to `typescriptRoot`. The replacement specifier is calculated
  * from the importing file, so moving either side fails the identity check.
  *
- * Keep this empty until a source rewrite lands. Each entry must have the form:
+ * Each entry must have the form:
  *
  *   ['core/example/src/index.ts', [
  *     { from: '@upstream/example', target: 'runtime/src/example.ts' },
  *   ]],
  */
-const SPECIFIER_MAPPINGS = new Map([])
+const SPECIFIER_MAPPINGS = new Map([
+  ['core/session/src/index.ts', [
+    { from: '@deepseek-ai/dsh-brand', target: 'runtime/src/brand.ts' },
+    { from: '@deepseek-ai/dsh-util-values', target: 'runtime/src/values.ts' },
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+  ]],
+  ['core/session/src/types.ts', [
+    { from: '@deepseek-ai/dsh-brand', target: 'runtime/src/brand.ts' },
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-util-values', target: 'runtime/src/values.ts' },
+  ]],
+  ['core/session/src/surface.ts', [
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+  ]],
+  ['core/session/src/repair.ts', [
+    { from: '@deepseek-ai/dsh-brand', target: 'runtime/src/brand.ts' },
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-util-values', target: 'runtime/src/values.ts' },
+  ]],
+  ['core/session/src/request-header.ts', [
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+  ]],
+  ['core/session/src/chunk-rows.ts', [
+    { from: '@deepseek-ai/dsh-brand', target: 'runtime/src/brand.ts' },
+    { from: '@deepseek-ai/dsh-llm/brand', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+  ]],
+  ['session/session-persistence/src/index.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['session/session-persistence/src/coordinator.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-timeout', target: 'runtime/src/timeout.ts' },
+    { from: '@deepseek-ai/dsh-util-values', target: 'runtime/src/values.ts' },
+  ]],
+  ['session/session-persistence/src/preparations.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['session/session-persistence/src/write-behind.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['session/session-persistence/src/revision.ts', [
+    { from: '@deepseek-ai/dsh-brand', target: 'runtime/src/brand.ts' },
+  ]],
+  ['session/session-persistence/src/errors.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['session/session-persistence-jsonl/src/index.ts', [
+    { from: '@deepseek-ai/dsh-session-persistence', target: 'packages/session/session-persistence/src/index.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['session/session-persistence-jsonl/src/format.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-session-persistence', target: 'packages/session/session-persistence/src/index.ts' },
+  ]],
+])
 
 /**
  * Retained files that intentionally differ from upstream. Every entry needs a

@@ -5,9 +5,9 @@
  * @module @deepseek-ai/dsh-session/repair
  */
 
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { MessageId, ToolCallId, ToolResultMessage } from '@deepseek-ai/dsh-llm'
-import { deepFreeze } from '@deepseek-ai/dsh-util-values'
+import { brandString } from '../../../../runtime/src/brand.ts'
+import type { MessageId, ToolCallId, ToolResultMessage } from '../../../../runtime/src/messages.ts'
+import { deepFreeze } from '../../../../runtime/src/values.ts'
 import type { SessionEvent } from './types.ts'
 
 /** Recovery code for an assistant tool request that never reached a recorded call start. */

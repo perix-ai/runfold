@@ -6,12 +6,12 @@
  */
 
 import type { EventHost } from '@perix/event-sdk/runtime'
-import { SessionPreparation } from '@deepseek-ai/dsh-session'
-import type { Session, SessionEvent, SessionId, SessionHeader } from '@deepseek-ai/dsh-session'
+import { SessionPreparation } from '../../../core/session/src/index.ts'
+import type { Session, SessionEvent, SessionId, SessionHeader } from '../../../core/session/src/index.ts'
 import type { SessionPersistenceRevision } from './revision.ts'
 
 // Re-export the metadata vocabulary so Consumers import it from the Service Definition.
-export type { SessionHeader } from '@deepseek-ai/dsh-session'
+export type { SessionHeader } from '../../../core/session/src/index.ts'
 export { SessionPersistenceRevision } from './revision.ts'
 export { SessionPersistenceNotFoundError } from './errors.ts'
 
