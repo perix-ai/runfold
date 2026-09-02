@@ -5,10 +5,9 @@ from __future__ import annotations
 import os
 import tempfile
 import threading
-from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterable
 
 from . import _zstd
 from ._json import is_safe_integer, snapshot_json_value
@@ -72,37 +71,6 @@ def _revision(stat: os.stat_result) -> tuple[int, int, int, int, int]:
     return (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
 
 
-@contextmanager
-def _exclusive_file_lock(path: Path) -> Iterator[None]:
-    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    descriptor = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
-    try:
-        if os.name == "posix":
-            import fcntl
-
-            fcntl.flock(descriptor, fcntl.LOCK_EX)
-        elif os.name == "nt":  # pragma: no cover - exercised on Windows CI
-            import msvcrt
-
-            if os.fstat(descriptor).st_size == 0:
-                os.write(descriptor, b"\0")
-                os.fsync(descriptor)
-            os.lseek(descriptor, 0, os.SEEK_SET)
-            msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
-        yield
-    finally:
-        if os.name == "posix":
-            import fcntl
-
-            fcntl.flock(descriptor, fcntl.LOCK_UN)
-        elif os.name == "nt":  # pragma: no cover - exercised on Windows CI
-            import msvcrt
-
-            os.lseek(descriptor, 0, os.SEEK_SET)
-            msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
-        os.close(descriptor)
-
-
 def _sync_directory(path: Path) -> None:
     if os.name != "posix":
         return
@@ -143,9 +111,6 @@ class JsonlSessionPersistence:
     def _lock(self, session_id: str) -> threading.RLock:
         with self._locks_guard:
             return self._locks.setdefault(session_id, threading.RLock())
-
-    def _lock_path(self, header: SessionHeader) -> Path:
-        return session_dir(self.root, header.get("cwd"), header["id"]) / ".event.lock"
 
     def locate(self, header: SessionHeader) -> SessionLocation:
         return SessionLocation(
@@ -457,22 +422,19 @@ class JsonlSessionPersistence:
     def _commit_repair(
         self, prefix: _StoredPrefix, closers: Iterable[SessionEvent]
     ) -> None:
-        header = prefix.meta
-        lock_path = self._lock_path(header)
-        with _exclusive_file_lock(lock_path):
-            if _revision(prefix.path.stat()) != prefix.revision:
-                raise _RevisionChanged
-            if prefix.torn_marker is not None:
-                with prefix.path.open("r+b") as handle:
-                    handle.truncate(prefix.torn_marker.truncate_to)
-                    handle.flush()
-                    os.fsync(handle.fileno())
-            repaired = [
-                *(prefix.torn_marker.recovered_events if prefix.torn_marker else ()),
-                *closers,
-            ]
-            if repaired:
-                self._append_payload_unlocked(prefix.path, repaired)
+        if _revision(prefix.path.stat()) != prefix.revision:
+            raise _RevisionChanged
+        if prefix.torn_marker is not None:
+            with prefix.path.open("r+b") as handle:
+                handle.truncate(prefix.torn_marker.truncate_to)
+                handle.flush()
+                os.fsync(handle.fileno())
+        repaired = [
+            *(prefix.torn_marker.recovered_events if prefix.torn_marker else ()),
+            *closers,
+        ]
+        if repaired:
+            self._append_payload_unlocked(prefix.path, repaired)
 
     def _materialize(
         self, header: SessionHeader, events: Iterable[SessionEvent]
@@ -492,29 +454,28 @@ class JsonlSessionPersistence:
         )
         self._reject_legacy_flat_artifact(directory.parent, header["id"])
         directory.mkdir(parents=True, exist_ok=True, mode=0o700)
-        with _exclusive_file_lock(self._lock_path(header)):
-            if opposite.exists():
-                raise EventValidationError(self._encoding_mismatch(opposite))
-            if final_path.exists():
-                raise EventValidationError(
-                    f'refusing to materialize "{header["id"]}": a log already exists '
-                    "on disk (load/resume it instead)"
-                )
-            content = self._encode_materialization(header, list(events))
-            descriptor, temporary_name = tempfile.mkstemp(
-                prefix=f"{final_path.name}.", suffix=".tmp", dir=directory
+        if opposite.exists():
+            raise EventValidationError(self._encoding_mismatch(opposite))
+        if final_path.exists():
+            raise EventValidationError(
+                f'refusing to materialize "{header["id"]}": a log already exists '
+                "on disk (load/resume it instead)"
             )
-            temporary = Path(temporary_name)
-            try:
-                os.fchmod(descriptor, 0o600)
-                with os.fdopen(descriptor, "wb", closefd=True) as handle:
-                    handle.write(content)
-                    handle.flush()
-                    os.fsync(handle.fileno())
-                os.link(temporary, final_path)
-                _sync_directory(directory)
-            finally:
-                temporary.unlink(missing_ok=True)
+        content = self._encode_materialization(header, list(events))
+        descriptor, temporary_name = tempfile.mkstemp(
+            prefix=f"{final_path.name}.", suffix=".tmp", dir=directory
+        )
+        temporary = Path(temporary_name)
+        try:
+            os.fchmod(descriptor, 0o600)
+            with os.fdopen(descriptor, "wb", closefd=True) as handle:
+                handle.write(content)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.link(temporary, final_path)
+            _sync_directory(directory)
+        finally:
+            temporary.unlink(missing_ok=True)
 
     def _append_batch(
         self, header: SessionHeader, events: Iterable[SessionEvent]
@@ -525,24 +486,23 @@ class JsonlSessionPersistence:
         path = log_path(
             self.root, header.get("cwd"), header["id"], self.compression
         )
-        with _exclusive_file_lock(self._lock_path(header)):
-            prefix = self._read_prefix(path)
-            if prefix.torn_marker is not None:
-                raise SessionPersistenceCorruptionError(
-                    f'cannot append to torn session log "{path}"; load it to repair first'
+        prefix = self._read_prefix(path)
+        if prefix.torn_marker is not None:
+            raise SessionPersistenceCorruptionError(
+                f'cannot append to torn session log "{path}"; load it to repair first'
+            )
+        if to_header_line(prefix.meta) != to_header_line(header):
+            raise SessionPersistenceCorruptionError(
+                f'stored header for "{header["id"]}" does not match its live Session header'
+            )
+        expected = len(prefix.events)
+        for index, event in enumerate(batch):
+            if event.get("seq") != expected + index:
+                raise EventValidationError(
+                    f'append seq mismatch for "{header["id"]}": expected '
+                    f'{expected + index} at index {index}, got {event.get("seq")}'
                 )
-            if to_header_line(prefix.meta) != to_header_line(header):
-                raise SessionPersistenceCorruptionError(
-                    f'stored header for "{header["id"]}" does not match its live Session header'
-                )
-            expected = len(prefix.events)
-            for index, event in enumerate(batch):
-                if event.get("seq") != expected + index:
-                    raise EventValidationError(
-                        f'append seq mismatch for "{header["id"]}": expected '
-                        f'{expected + index} at index {index}, got {event.get("seq")}'
-                    )
-            self._append_payload_unlocked(path, batch)
+        self._append_payload_unlocked(path, batch)
 
     def _append_payload_unlocked(
         self, path: Path, events: Iterable[SessionEvent]
