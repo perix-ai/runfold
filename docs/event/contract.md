@@ -39,6 +39,18 @@ TypeScript 目前仍借助 Cordis 承担 Session 发布和生命周期，这是�
 耦合，不是 Event 契约的一部分。Python 使用 `SessionStore` 与 persistence
 直接组合，不运行 server、sidecar 或 TypeScript 子进程。
 
+上表描述的是**逻辑等价**，不是 API 等价。下列接口只有一侧提供，另一侧
+没有对应物，调用方不能假设它们存在：
+
+| 接口 | 提供方 | 说明 |
+| --- | --- | --- |
+| write-behind 批处理（`writeBatchMaxDelayMs`） | 仅 TypeScript | Python 的 `flush` 同步写盘，没有延迟批次；两侧对外的持久化屏障语义相同 |
+| `SessionPreparation` / `sessionPersistence.prepare` | 仅 TypeScript | 未发布 Session 的所有权句柄；Python 的 `restore` 一步完成读取与发布 |
+| `listSnapshots` | 仅 TypeScript | 返回 header 与 revision token；Python 只有 `list` 返回 header |
+| `inspect(id, signal)` 的 `AbortSignal` | 仅 TypeScript | Python 的 `inspect` 不可取消 |
+| borrowed live source | 仅 TypeScript | 读取时若同 id 的 Session 已在线，返回其快照；Python 直接读磁盘 |
+| `store.resume(id)` | 仅 Python | 与 `store.restore(id)` 完全相同的别名，保留只为与本文档的 resume 术语对应 |
+
 ## restore、resume 与 fork
 
 - `inspect` 可以返回内存中的确定性 repair 视图，但不修改 torn physical tail。
@@ -72,8 +84,10 @@ TypeScript 目前仍借助 Cordis 承担 Session 发布和生命周期，这是�
   Zstandard frame：header 独占第一个 frame，每个追加批次形成后续 frame。
 - 同一 root 不能混用明文和 Zstandard；旧版 project 目录下的平铺
   `<id>.jsonl[.zstd]` 明确拒绝，不能静默忽略。
-- 物化采用临时文件、fsync 和原子发布；追加失败回滚到原长度。POSIX/Windows
-  使用各自的 advisory file lock，避免同一 Session 的进程内外写入交错。
+- 物化采用临时文件、fsync 和原子发布；追加失败回滚到原长度。
+- 两种实现都不使用跨进程文件锁，与 DSH 一致：同一 Session 同一时刻只能有
+  一个写入进程，由调用方保证。进程内串行化由 TypeScript 的持久化协调器和
+  Python 的每 Session `RLock` 各自负责。
 
 Python 3.14 使用标准库 `compression.zstd`；Python 3.10–3.13 通过
 `perix-event-sdk[zstd]` 使用 `zstandard`。两条路径写出同一种 checksummed
