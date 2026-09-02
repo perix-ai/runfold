@@ -138,6 +138,8 @@ store.close()
 
       const reader = eventContext(root, compression)
       const pythonLog = await reader.persistence!.load(SessionId('python-writer'))
+      const originalPythonHeader = structuredClone(pythonLog.meta)
+      const originalPythonEvents = structuredClone(pythonLog.events)
       expect(pythonLog.events[1]?.data).toMatchObject({
         id: 'python-user-1',
         content: [{ type: 'text', text: 'python to typescript' }],
@@ -148,13 +150,17 @@ store.close()
       }))
       expect(screen.getByText('python to typescript')).toBeTruthy()
 
-      const resumedPython = reader.sessions.create(SessionId('python-writer'), {
-        seed: pythonLog.events,
-        meta: {
-          createdAt: pythonLog.meta.createdAt,
-          ...(pythonLog.meta.cwd === undefined ? {} : { cwd: pythonLog.meta.cwd }),
-        },
+      const resumedPython = await reader.restore(SessionId('python-writer'))
+      expect(reader.sessions.get(SessionId('python-writer'))).toBe(resumedPython)
+      expect(resumedPython.header).toEqual(originalPythonHeader)
+      expect(resumedPython.events.slice(0, originalPythonEvents.length)).toEqual(originalPythonEvents)
+      expect(resumedPython.events).toHaveLength(originalPythonEvents.length + 1)
+      expect(resumedPython.events.at(-1)).toMatchObject({
+        type: 'session/end-seed',
+        seq: originalPythonEvents.length,
+        data: {},
       })
+      expect(resumedPython.events.filter(event => event.type === 'session/end-seed')).toHaveLength(1)
       await reader.sessions.flush(resumedPython)
       resumedPython.append('turn/start', { turn: 2 })
       resumedPython.append('user/message', createUserMessage({
@@ -169,6 +175,17 @@ store.close()
         SessionId('typescript-child'),
       )
       await reader.sessions.flush(typescriptChild)
+      expect(resumedPython.events.map(event => event.seq))
+        .toEqual(resumedPython.events.map((_, index) => index))
+      expect(typescriptChild.header).toMatchObject({
+        parentSession: SessionId('python-writer'),
+        seedLength: resumedPython.events.length,
+        cwd: '/workspace',
+      })
+      expect(typescriptChild.events.slice(0, resumedPython.events.length)).toEqual(resumedPython.events)
+      expect(typescriptChild.events.at(-1)?.type).toBe('session/end-seed')
+      expect(typescriptChild.events.map(event => event.seq))
+        .toEqual(typescriptChild.events.map((_, index) => index))
 
       const typescript = reader.sessions.create(SessionId('typescript-writer'), {
         meta: { cwd: '/workspace' },
@@ -190,9 +207,12 @@ from perix_event import JsonlSessionPersistence, SessionStore
 
 root, compression = sys.argv[1], sys.argv[2]
 persistence = JsonlSessionPersistence(root, compression=compression)
-inspection = persistence.load('typescript-writer')
-typescript_child = persistence.load('typescript-child')
+python_parent_inspection = persistence.load('python-writer')
+typescript_child_inspection = persistence.load('typescript-child')
+typescript_writer_inspection = persistence.load('typescript-writer')
 store = SessionStore(persistence)
+python_parent = store.restore('python-writer')
+typescript_child = store.resume('typescript-child')
 session = store.resume('typescript-writer')
 session.append('turn/start', {'turn': 2})
 session.append('user/message', {
@@ -204,28 +224,66 @@ session.append('user/message', {
 session.append('turn/end', {'turn': 2, 'reason': {'kind': 'completed'}})
 child = store.fork(session, child_session_id='python-child')
 store.close()
+python_child = persistence.load('python-child')
 print(json.dumps({
-    'loaded': len(inspection.events),
-    'childEvents': len(persistence.load('python-child').events),
-    'parent': persistence.load('python-child').meta['parentSession'],
-    'typescriptChildParent': typescript_child.meta['parentSession'],
+    'loaded': len(typescript_writer_inspection.events),
+    'childEvents': len(python_child.events),
+    'parent': python_child.meta['parentSession'],
+    'pythonParentHeaderPreserved': python_parent.header == python_parent_inspection.meta,
+    'pythonParentPrefixPreserved': list(python_parent.events[:len(python_parent_inspection.events)]) == list(python_parent_inspection.events),
+    'pythonParentAddedEndSeed': len(python_parent.events) == len(python_parent_inspection.events) + 1 and python_parent.events[-1]['type'] == 'session/end-seed',
+    'pythonParentSeqsContiguous': [event['seq'] for event in python_parent.events] == list(range(len(python_parent.events))),
+    'pythonParentHasResume': 'typescript resumed python' in json.dumps(python_parent.events),
+    'pythonParentFirstLiveSeq': python_parent.first_live_seq,
+    'typescriptChildParent': typescript_child.header['parentSession'],
+    'typescriptChildSeedLength': typescript_child.header['seedLength'],
+    'typescriptChildPrefixMatches': list(typescript_child.events[:typescript_child.header['seedLength']]) == list(python_parent_inspection.events),
+    'typescriptChildResumeStable': len(typescript_child.events) == len(typescript_child_inspection.events),
+    'typescriptChildSeqsContiguous': [event['seq'] for event in typescript_child.events] == list(range(len(typescript_child.events))),
     'typescriptChildHasResume': 'typescript resumed python' in json.dumps(typescript_child.events),
+    'typescriptChildFirstLiveSeq': typescript_child.first_live_seq,
 }))
 `, root, compression)) as {
         loaded: number
         childEvents: number
         parent: string
+        pythonParentHeaderPreserved: boolean
+        pythonParentPrefixPreserved: boolean
+        pythonParentAddedEndSeed: boolean
+        pythonParentSeqsContiguous: boolean
+        pythonParentHasResume: boolean
+        pythonParentFirstLiveSeq: number
         typescriptChildParent: string
+        typescriptChildSeedLength: number
+        typescriptChildPrefixMatches: boolean
+        typescriptChildResumeStable: boolean
+        typescriptChildSeqsContiguous: boolean
         typescriptChildHasResume: boolean
+        typescriptChildFirstLiveSeq: number
       }
-      expect(result).toMatchObject({ loaded: 3, parent: 'typescript-writer' })
-      expect(result.childEvents).toBeGreaterThan(result.loaded)
-      expect(result.typescriptChildParent).toBe('python-writer')
-      expect(result.typescriptChildHasResume).toBe(true)
+      expect(result).toEqual({
+        loaded: 3,
+        childEvents: 8,
+        parent: 'typescript-writer',
+        pythonParentHeaderPreserved: true,
+        pythonParentPrefixPreserved: true,
+        pythonParentAddedEndSeed: true,
+        pythonParentSeqsContiguous: true,
+        pythonParentHasResume: true,
+        pythonParentFirstLiveSeq: 7,
+        typescriptChildParent: 'python-writer',
+        typescriptChildSeedLength: 7,
+        typescriptChildPrefixMatches: true,
+        typescriptChildResumeStable: true,
+        typescriptChildSeqsContiguous: true,
+        typescriptChildHasResume: true,
+        typescriptChildFirstLiveSeq: 8,
+      })
 
       const finalReader = eventContext(root, compression)
-      const child = await finalReader.persistence!.load(SessionId('python-child'))
-      expect(child.meta.parentSession).toBe(SessionId('typescript-writer'))
+      const child = await finalReader.restore(SessionId('python-child'))
+      expect(child.header.parentSession).toBe(SessionId('typescript-writer'))
+      expect(child.events.map(event => event.seq)).toEqual(child.events.map((_, index) => index))
       expect(JSON.stringify(child.events)).toContain('python resumed typescript')
     })
   }

@@ -278,7 +278,7 @@
 
 ### 3.3 EventHost 生命周期校准
 
-进行中（R30 已完成，R31–R32 待执行），详见
+进行中（R30–R31 已完成，R32 待执行），详见
 [`tasks/R30-R32-production-hardening.md`](tasks/R30-R32-production-hardening.md)。
 
 - [x] **R30** · 难度 中 · 风险 高 · 位置
@@ -346,7 +346,7 @@
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：新增 `conformance/event/v0/cases/known-event-types.json`（51 个类型），TS `public-api.spec.ts` 与 Python `test_conformance.py` 各加一条集合相等断言。
 
-- [ ] **R31** · 难度 易 · 风险 中 · 位置
+- [x] **R31** · 难度 易 · 风险 中 · 位置
   `tests/event/cross-language/python-conformance.spec.ts`
   - **问题**：Python 写、TypeScript 续写的永久测试先调用
     `persistence.load()`，再用 `sessions.create({ seed })` 发布，并未经过对外
@@ -358,6 +358,13 @@
     flush、fork，并由 Python 重新读取验证；保留现有反向链路，证明双方通过
     公开 API 等价互操作。
   - **依赖**：R21、R30。
+  - **结果**：已完成（2026-09-02）：明文与 Zstandard 链路均由 TypeScript
+    `runtime.restore()` 恢复 Python 落盘轨迹，逐项验证原 header、完整前缀和
+    单次 `session/end-seed`，再续写、flush、fork；Python 使用公开
+    `restore/resume` 验证父子轨迹、连续 seq、稳定前缀和 lineage。反向链路保留，
+    最终读取也改用 TypeScript 公开 `runtime.restore()`。
+  - **验证**：`test:conformance` 5/5；完整 `npm run verify` 通过，包括 132 个
+    上游文件一致性、全部构建、820 个测试以及 TypeScript/Python 空白消费者安装。
 
 ## 6. 测试与交付
 
