@@ -25,6 +25,8 @@ Retained and cut into `packages/event/typescript/packages/`:
 | `packages/client/ui-trajectory` | `@deepseek-ai/dsh-client-ui-trajectory` |
 | `packages/client/ui-conversation` | `@deepseek-ai/dsh-client-ui-conversation` (subset retained) |
 | `packages/client/ui-renderer` | `@deepseek-ai/dsh-client-ui-renderer` (subset retained) |
+| `packages/client/store` | `@deepseek-ai/dsh-client-store` (runtime closure retained) |
+| `packages/client/ui-primitives` | `@deepseek-ai/dsh-client-ui-primitives` (runtime closure and focused tests retained) |
 | `packages/client/ui-theme` | `@deepseek-ai/dsh-client-ui-theme` (styles retained) |
 | `packages/client/locale` | `@deepseek-ai/dsh-client-locale` (dictionaries retained) |
 | `packages/test-support/client-runtime` | `@deepseek-ai/dsh-client-test-runtime` (translate helper retained) |
@@ -46,18 +48,17 @@ section 3) replaces with local code:
 | `packages/util/timeout` | `@deepseek-ai/dsh-timeout` |
 | `packages/util/values` | `@deepseek-ai/dsh-util-values` |
 
-Referenced by the retained Trajectory UI closure. At build time these are
-resolved from the npm registry at the pinned version and bundled into
-`@perix/event-ui`; consumers never install them:
+Consulted while localizing the Trajectory UI's host-facing types and Event-map
+augmentations. The required contracts are now defined by local source or
+mapped to the retained directories above; none of these packages is installed
+from the npm registry or bundled into `@perix/event-ui`:
 
 | Upstream directory | Package |
 | --- | --- |
 | `packages/api/session-controller` | `@deepseek-ai/dsh-api-session-controller` |
 | `packages/api/workspace-controller` | `@deepseek-ai/dsh-api-workspace-controller` |
 | `packages/attachment/attachment` | `@deepseek-ai/dsh-attachment` |
-| `packages/client/store` | `@deepseek-ai/dsh-client-store` |
 | `packages/client/ui-chat` | `@deepseek-ai/dsh-client-ui-chat` |
-| `packages/client/ui-primitives` | `@deepseek-ai/dsh-client-ui-primitives` |
 | `packages/client/ui-session` | `@deepseek-ai/dsh-client-ui-session` |
 | `packages/client/ui-slots` | `@deepseek-ai/dsh-client-ui-slots` |
 | `packages/compaction/compaction` | `@deepseek-ai/dsh-compaction` |

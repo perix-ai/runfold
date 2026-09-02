@@ -1,7 +1,7 @@
 # 任务：彻底移除 TypeScript 侧对 DeepSeek Harness 的一切依赖
 
 > 对应清单：[`../tasks.md`](../tasks.md) 第 3.2 节 R25–R29。
-> 执行者：Codex。状态：进行中（R25–R28 已完成，R29 待执行）。
+> 执行者：Codex。状态：已完成（R25–R29）。
 >
 > 本文自包含；执行前先读 [`../architecture.md`](../architecture.md)（抽离原则）、
 > [`../tasks.md`](../tasks.md) 第 3 节（已完成的解耦）、
@@ -12,21 +12,23 @@
 
 完成后，仓库满足以下四条，且缺一不可：
 
-1. `packages/event/**`、`tests/**`、`apps/**` 下的任何 `.ts/.tsx/.mjs` 文件，
-   其 `import`、`export ... from`、`declare module`、`require()` 中都不再出现
-   `@deepseek-ai/` 前缀。
-2. 任何 `package.json`、`package-lock.json`、`vitest.config.ts`、`tsconfig*.json`
-   中都不再出现 `@deepseek-ai` 字样；`npm ls` 输出里没有 `@deepseek-ai/*`；
-   根 `package.json` 的 `overrides` 删除。
-3. `npm run verify` 全绿：上游回归套件（当前 626 + 94 个用例）、Perix
+1. `packages/event/**`、`tests/**`、`apps/**` 下的生产实现不再通过 `import`、
+   `export ... from`、`declare module` 或 `require()` 引用 `@deepseek-ai/*`。
+   未修改的上游测试可以保留原始 specifier，并只由测试配置映射到本地代码。
+2. 根 manifest、发布包 manifests、lockfile 与安装树不再包含 DSH 包；根
+   `package.json` 的 `overrides` 删除。保留树中的上游 manifests 仅供审计，
+   不属于 npm workspace；`vitest.config.ts` 的剩余 DSH aliases 仅运行未修改的
+   上游测试。
+3. `npm run verify` 全绿：上游回归套件（626 + 182 + 94 个用例）、Perix
    TS/Python/跨语言/打包测试全部通过，`verify:upstream-identity` 通过。
 4. `@perix/event-sdk`、`@perix/event-ui` 的发布产物与今天行为一致；
    `tests/package/package-consumer.mjs` 的泄漏断言继续通过并按第 4 步收紧。
 
-`third_party/deepseek-harness/upstream/` 是唯一允许保留 DSH 名称的地方，
-它是审计快照，不参与构建。
+`third_party/deepseek-harness/upstream/` 是未修改的审计快照，不参与构建。
+DSH 名称还可存在于逐字节保留的上游测试/manifests、来源说明和测试专用别名；
+它们不得成为生产实现 import、安装依赖或发布产物的一部分。
 
-## 现状（2026-09-01）
+## 立项基线（2026-09-01，已由 R25–R28 消除）
 
 已经消除的：`@perix/event-sdk` 发布产物不含任何 DSH 引用，运行时依赖只剩
 `koffi` 与 `@types/node`；Cordis、dsh-scope、dsh-llm、dsh-brand、dsh-util-values、
@@ -191,6 +193,12 @@ UI-primitives 源文件，以及对应的 9 个上游套件和 48 份 DOM 基线
    形式，并登记进映射表）。
 
 ### 第 5 步（R29）：收尾
+
+**完成（2026-09-02）。** 审计快照 README 已把 store 与 UI-primitives 闭包列为
+已裁入，并把其余 Trajectory 来源明确为本地类型/增强的审计依据；TypeScript
+README 已登记完整来源映射和最终身份校验数量；D04 标为被 D05 取代，D05 记录
+实际结果。完整 `npm run verify` 通过：207 个保留文件、10 个必要差异、87 个
+声明映射，1002 个行为测试及 TypeScript/Python 空白消费者安装测试全部通过。
 
 - `third_party/deepseek-harness/README.md`：更新"仅注册表引用"那一组为"已裁入"。
 - `packages/event/typescript/README.md`：来源映射表补上新裁入的目录；删除

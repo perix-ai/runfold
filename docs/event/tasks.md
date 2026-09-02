@@ -4,9 +4,8 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R28、R30–R31 已完成，`npm run verify` 全绿，
-> SDK 与 UI 发布产物均不依赖任何 DSH 包。待执行的是 R29（同步来源、决策与
-> 验收文档）、R32（生产验收文档收口）、R33
+> 总体状态（2026-09-02）：R01–R31 已完成，`npm run verify` 全绿，SDK 与 UI
+> 发布产物均不依赖任何 DSH 包。待执行的是 R32（生产验收文档收口）、R33
 > （Nexent 真实接入验收）和第 7 节总验收。
 
 ## 任务生命周期
@@ -249,7 +248,7 @@
   - **依赖**：无。
   - **结果**：已完成评估（2026-09-01）：`@perix/event-ui` 产物 5.1 MB：主 chunk 1.35 MB，`style.css` 1.5 MB（其中 20 个 `@font-face` 以 data: URI 内嵌字体，占绝大部分），23 个 shiki 语法 chunk 约 2.3 MB 按需动态加载。`package.json` 只依赖 `@perix/event-sdk` 与 React peer，消费者不安装任何 DSH 包。结论：保持"原样裁剪"，不裁 shiki；若日后有体积要求，可选的后续项是把字体改为外部文件、收窄 shiki 语法集，两者都不影响 Event 行为。
 
-### 3.2 彻底移除 DSH 名称与注册表依赖（进行中，详见 [`tasks/R25-R29-dsh-free.md`](tasks/R25-R29-dsh-free.md)）
+### 3.2 彻底移除 DSH 名称与注册表依赖（已完成，详见 [`tasks/R25-R29-dsh-free.md`](tasks/R25-R29-dsh-free.md)）
 
 - [x] **R25** · 难度 易 · 风险 低 · 位置 `scripts/verify-upstream-identity.mjs`
   - **问题**：改写保留源码的 import 后，逐字节比对会把每个文件都列成"允许差异"，一致性保障失效。
@@ -306,10 +305,17 @@
     TS/Python 空白消费者通过。`npm ls --all`、manifest/lockfile 与发布物扫描均无
     `@deepseek-ai`。
 
-- [ ] **R29** · 难度 易 · 风险 低 · 位置 `third_party/deepseek-harness/README.md`、TS README、本清单、`docs/event/decisions.md`
+- [x] **R29** · 难度 易 · 风险 低 · 位置 `third_party/deepseek-harness/README.md`、TS README、本清单、`docs/event/decisions.md`
   - **问题**：完成后文档中"仅注册表引用"、"名字仍在保留源码中"等描述过期。
   - **处理**：按任务书第 5 步逐项更新，并把第 7 节总验收的前置条件补上本任务。
   - **依赖**：R28。
+  - **结果**：已完成（2026-09-02）：审计快照来源清单补入已裁剪的 store 与
+    UI-primitives 闭包；TypeScript README 登记最终来源映射与身份校验数量；D04
+    标为被 D05 取代，D05 记录实际依赖边界；任务书目标改为准确区分生产实现与
+    逐字节保留的上游测试、manifests 和来源文本。
+  - **验证**：`npm run verify` 全绿；身份审计为 207 个保留文件、10 个必要差异、
+    87 个声明映射；1002 个行为测试、全部构建、类型检查及 TypeScript/Python
+    空白消费者安装测试通过。
 
 ### 3.3 EventHost 生命周期校准
 
@@ -453,8 +459,9 @@
     Trajectory UI 渲染。
   - **依赖**：R25–R32。
 
-- [ ] Event 轨迹设施达到生产可用。只有 R25–R33 全部完成、需求 A1–A6 均有
-  验收证据、公共产物无 DSH 运行时依赖，并通过完整验证后才能勾选此项。
+- [ ] Event 轨迹设施达到生产可用。只有 DSH 依赖收口 R25–R29、生产加固
+  R30–R32 和 Nexent 真实接入 R33 全部完成，需求 A1–A6 均有验收证据、公共
+  产物无 DSH 运行时依赖，并通过完整验证后才能勾选此项。
 
 ## 执行顺序
 
@@ -489,4 +496,5 @@
 - `views.client.spec.tsx` 中与 shell 无关的 25 个用例已移植到独立宿主，桩掉的能力已登记（R05、R10）；
 - 早期从零设计草案与 Event 实现矛盾，已删除（R03，决策 D02）；
 - 裁剪源码与 `third_party` 快照的一致性已由 `verify:upstream-identity` 校验（R07）；
-- UI 闭包仍从注册表打包（R24，决策 D04），由 R25–R29 收尾。
+- R24 时 UI 闭包仍从注册表打包；R25–R29 已把实际运行时闭包裁入固定来源树，
+  删除全部 DSH registry 依赖并以发布物扫描锁定边界（决策 D04、D05）。

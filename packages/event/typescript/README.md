@@ -33,6 +33,11 @@ The implementation is cut from DeepSeek Harness `0.1.2-alpha.3`, commit
 | `packages/client/locale` | same path | Unchanged English and Chinese dictionaries retained |
 | `packages/test-support/client-runtime` | same path | Unchanged translation helper retained |
 
+The closed extraction currently contains 207 retained files. The identity
+verifier accepts 10 documented necessary differences and applies 87 declared
+module-specifier mappings before byte comparison; every other retained byte
+must match the pinned snapshot.
+
 The publishable boundaries added around this source are:
 
 - `sdk/`: `@perix/event-sdk`, a zero-business-logic export package for Session,
