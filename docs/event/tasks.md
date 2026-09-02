@@ -249,12 +249,17 @@
   - **依赖**：无。
   - **结果**：已完成评估（2026-09-01）：`@perix/event-ui` 产物 5.1 MB：主 chunk 1.35 MB，`style.css` 1.5 MB（其中 20 个 `@font-face` 以 data: URI 内嵌字体，占绝大部分），23 个 shiki 语法 chunk 约 2.3 MB 按需动态加载。`package.json` 只依赖 `@perix/event-sdk` 与 React peer，消费者不安装任何 DSH 包。结论：保持"原样裁剪"，不裁 shiki；若日后有体积要求，可选的后续项是把字体改为外部文件、收窄 shiki 语法集，两者都不影响 Event 行为。
 
-### 3.2 彻底移除 DSH 名称与注册表依赖（待执行，详见 [`tasks/R25-R29-dsh-free.md`](tasks/R25-R29-dsh-free.md)）
+### 3.2 彻底移除 DSH 名称与注册表依赖（进行中，详见 [`tasks/R25-R29-dsh-free.md`](tasks/R25-R29-dsh-free.md)）
 
-- [ ] **R25** · 难度 易 · 风险 低 · 位置 `scripts/verify-upstream-identity.mjs`
+- [x] **R25** · 难度 易 · 风险 低 · 位置 `scripts/verify-upstream-identity.mjs`
   - **问题**：改写保留源码的 import 后，逐字节比对会把每个文件都列成"允许差异"，一致性保障失效。
   - **处理**：脚本改为"对上游内容应用显式 specifier 映射表后再逐字节比对"；映射表为空时行为与现在相同，先单独提交。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-02）：一致性脚本新增按保留文件声明的 specifier
+    映射表；替换目标按导入文件计算相对路径，映射必须命中上游文本、目标必须是
+    TypeScript 根目录内的现存文件，随后仍逐字节比较。当前映射表保持为空。
+  - **验证**：`node --check scripts/verify-upstream-identity.mjs` 与
+    `npm run verify:upstream-identity` 通过：132 个保留文件、9 个既有差异、0 个映射。
 
 - [ ] **R26** · 难度 易 · 风险 低 · 位置 `packages/core/session/src`、`packages/session/*/src` 共 14 个文件
   - **问题**：源码仍写 `@deepseek-ai/dsh-session`、`dsh-llm`、`dsh-brand`、`dsh-util-values`、`dsh-timeout` 等名字，靠 6 处构建/测试别名解析。
