@@ -189,8 +189,9 @@ Trajectory; both execute the
 - `test-support/`: test-only Cordis and dsh-scope shims used to run the
   retained upstream suites; never built or published.
 - `../../../tests/event/cross-language`: bidirectional TypeScript/Python
-  compatibility and shared-conformance tests.
+  compatibility, shared-conformance tests, and a real Nexent Python trajectory
+  restored and rendered by the TypeScript SDK/UI.
 
-Run all layers with `npm run verify`. The current matrix contains 1004 behavior
+Run all layers with `npm run verify`. The current matrix contains 1005 behavior
 tests plus TypeScript and Python blank-consumer installation checks. See
 `TESTING.md` for the exact matrix.

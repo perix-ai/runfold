@@ -11,7 +11,7 @@ The Event implementations are verified at ten independent layers.
 | Perix SDK | `tests/sdk` | Public exports, lifecycle, immutability, replay, fork, JSONL round-trip/restart, raw/suffix reads, and isolation work through `@perix/*` imports |
 | Perix UI | `tests/ui` | `EventTrajectory` projects, renders, localizes, pages, replaces input, and handles 20,000 events; the ported upstream view cases cover ledger, inspector, timeline, and duration state on the standalone host |
 | Complete system | `tests/integration` | One log crosses validation, fork, JSONL durability, process-style restart, and React rendering |
-| Cross-language conformance | `tests/event/cross-language`, `conformance/event/v0` | Both languages agree on valid/invalid inputs and repair; each reads, resumes, appends, and forks the other's plain/Zstd files; repeated restores preserve DSH seed boundaries; Python events render in Trajectory |
+| Cross-language conformance | `tests/event/cross-language`, `conformance/event/v0` | Both languages agree on valid/invalid inputs and repair; each reads, resumes, appends, and forks the other's plain/Zstd files; repeated restores preserve DSH seed boundaries; a real Nexent parent/fork trajectory passes TypeScript public restore, projection, and Trajectory rendering |
 | Python implementation | `packages/event/python/tests` | Native Session, surface, repair, codecs, persistence, recovery, and 20,000-Event history work without TypeScript |
 | Published artifacts | `tests/package`, `packages/event/python/tests/package_consumer.py` | Packed SDK/UI install into a blank npm project; an isolated builder creates the Python wheel and a second no-index environment installs only that artifact; both work through public APIs |
 
@@ -27,7 +27,7 @@ Focused commands are also available: `test:upstream`,
 `test:python:package`.
 
 The current complete run checks 207 retained files, 10 documented differences,
-87 declared specifier mappings, and 1004 behavior tests before the two blank
+87 declared specifier mappings, and 1005 behavior tests before the two blank
 consumer installation checks.
 
 ## Known gaps

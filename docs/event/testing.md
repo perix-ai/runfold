@@ -18,7 +18,7 @@
 | 上游行为基线 | DSH 的 Event、持久化、Trajectory 回归测试在裁剪版上原样通过 | `packages/event/typescript/packages/**/tests`，经 `test-support/` 垫片运行 |
 | 宿主生命周期 | `EventHost` 对保留代码使用的 Cordis 生命周期子集等价，覆盖事件、effect、scope、释放和服务绑定 | `packages/event/typescript/tests/runtime/` |
 | 单语言实现 | TypeScript 与 Python 各自的单元、集成、持久化、异常输入测试 | `packages/event/<language>/tests/` |
-| 跨语言契约 | 共享夹具的接受/拒绝结果、repair 结果、事件类型清单一致；TS 写/Python 读写，Python 写/TS 读写，双向 restore/resume/fork | `conformance/event/v0/`，`tests/event/cross-language/` |
+| 跨语言契约 | 共享夹具的接受/拒绝结果、repair 结果、事件类型清单一致；TS 写/Python 读写，Python 写/TS 读写，双向 restore/resume/fork；真实 Nexent 父子轨迹通过 TS 公共 restore 与 UI | `conformance/event/v0/`，`tests/event/cross-language/` |
 | UI | 与 DSH 视图行为对照（上游 views 用例的独立宿主移植），Python 生成的轨迹可渲染，大规模历史可渲染 | `packages/event/typescript/tests/ui/` |
 | 发布产物 | TS 包安装到空白项目；Python 在隔离 builder 生成 wheel，再由第二个空白环境以 `--no-index` 只安装该 artifact；严格类型边界、公开运行时和无 DSH 引用均通过 | `packages/event/typescript/tests/package/`，`packages/event/python/tests/package_consumer.py` |
 
@@ -41,8 +41,8 @@ Event 组件不具备的 shell 机制。
 ## 5. 入口
 
 当前完整门禁校验 207 个保留文件、10 个必要差异和 87 个声明映射，并运行
-1004 个行为测试（626 Event、182 UI runtime、94 Trajectory、11 EventHost、
-15 SDK、33 UI、36 Python、1 系统、6 跨语言），随后安装 TypeScript 与 Python
+1005 个行为测试（626 Event、182 UI runtime、94 Trajectory、11 EventHost、
+15 SDK、33 UI、36 Python、1 系统、7 跨语言），随后安装 TypeScript 与 Python
 空白消费者。
 
 ```bash

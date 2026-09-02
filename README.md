@@ -82,10 +82,11 @@ after each verified commit instead of being accumulated into one large batch.
 
 ## Status
 
-The repository implementation and all internal acceptance work through R35
-(except the external Nexent integration in R33) are complete: the current full
-gate verifies 207 retained upstream files, runs 1004 behavior
-tests, and installs both language packages into blank consumers. Production
-acceptance remains open until R33 proves the Python package in Nexent's real
-process and passes one resulting trajectory through the TypeScript UI. See
+The repository implementation and all internal acceptance work through R35 are
+complete: the current full gate verifies 207 retained upstream files, runs 1005
+behavior tests, and installs both language packages into blank consumers. R33
+now also proves the Python package in Nexent's real process and passes the
+resulting parent/fork trajectory through the TypeScript public restore API and
+retained UI. Production acceptance remains open only until the Nexent
+integration commit is published to an authorized writable remote. See
 [`docs/event/tasks.md`](docs/event/tasks.md) for the evidence and remaining work.
