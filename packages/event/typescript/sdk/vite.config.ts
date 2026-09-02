@@ -11,11 +11,13 @@ const bundledPackages = [
   '@deepseek-ai/dsh-util-values',
   '@deepseek-ai/dsh-timeout',
   '@deepseek-ai/dsh-llm',
+  '@perix/event-sdk/runtime',
 ]
 
 export default defineConfig({
   resolve: {
     alias: [
+      { find: /^@perix\/event-sdk\/runtime$/, replacement: source('../runtime/src/host.ts') },
       { find: /^@deepseek-ai\/dsh-brand$/, replacement: source('../runtime/src/brand.ts') },
       { find: /^@deepseek-ai\/dsh-util-values$/, replacement: source('../runtime/src/values.ts') },
       { find: /^@deepseek-ai\/dsh-timeout$/, replacement: source('../runtime/src/timeout.ts') },

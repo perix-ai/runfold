@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const typesRoot = resolve(root, 'lib/types')
 const targets = new Map([
+  ['@perix/event-sdk/runtime', 'runtime/src/host.d.ts'],
   ['@deepseek-ai/dsh-brand', 'runtime/src/brand.d.ts'],
   ['@deepseek-ai/dsh-util-values', 'runtime/src/values.d.ts'],
   ['@deepseek-ai/dsh-timeout', 'runtime/src/timeout.d.ts'],

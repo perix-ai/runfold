@@ -5,16 +5,16 @@ import { join, resolve } from 'node:path'
 import React from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import SessionStore, { interruptedTurnClosers, Session, SessionId } from '@perix/event-sdk'
+import { createEventRuntime, interruptedTurnClosers, Session, SessionId } from '@perix/event-sdk'
+import type { EventRuntime } from '@perix/event-sdk'
 import JsonlSessionPersistence, { type JsonlCompression } from '@perix/event-sdk/persistence-jsonl'
 import { createUserMessage } from '@perix/event-sdk/messages'
-import { Context } from '@perix/event-sdk/runtime'
 import { EventTrajectory } from '@perix/event-ui'
 
 const repositoryRoot = resolve(import.meta.dirname, '../../..')
 const pythonSource = join(repositoryRoot, 'packages/event/python/src')
 const roots: string[] = []
-const contexts: Context[] = []
+const runtimes: EventRuntime[] = []
 
 async function storageRoot(label: string): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), `perix-event-${label}-`))
@@ -22,16 +22,16 @@ async function storageRoot(label: string): Promise<string> {
   return root
 }
 
-async function eventContext(root: string, compression: JsonlCompression): Promise<Context> {
-  const context = new Context()
-  contexts.push(context)
-  await context.plugin(SessionStore)
-  await context.plugin(JsonlSessionPersistence, {
-    root,
-    compression,
-    writeBatchMaxDelayMs: 1,
+function eventContext(root: string, compression: JsonlCompression): EventRuntime {
+  const runtime = createEventRuntime({
+    persistence: host => new JsonlSessionPersistence(host, {
+      root,
+      compression,
+      writeBatchMaxDelayMs: 1,
+    }),
   })
-  return context
+  runtimes.push(runtime)
+  return runtime
 }
 
 function runPython(source: string, ...args: string[]): string {
@@ -47,8 +47,8 @@ function runPython(source: string, ...args: string[]): string {
 
 afterEach(async () => {
   cleanup()
-  for (const context of contexts.splice(0)) {
-    await context.fiber.dispose()
+  for (const runtime of runtimes.splice(0)) {
+    await runtime.dispose()
   }
   for (const root of roots.splice(0)) await rm(root, { recursive: true, force: true })
 })
@@ -100,8 +100,8 @@ describe('TypeScript and Python Event conformance', () => {
     await mkdir(targetDir, { recursive: true })
     await copyFile(fixture, join(targetDir, 'session.jsonl'))
 
-    const context = await eventContext(root, 'none')
-    const loaded = await context.sessionPersistence.load(SessionId('conformance-v0'))
+    const context = eventContext(root, 'none')
+    const loaded = await context.persistence!.load(SessionId('conformance-v0'))
     const session = Session.fromRestore(
       SessionId('conformance-v0'),
       structuredClone(loaded.events),
@@ -136,8 +136,8 @@ session.append('turn/end', {'turn': 1, 'reason': {'kind': 'completed'}})
 store.close()
 `, root, compression)
 
-      const reader = await eventContext(root, compression)
-      const pythonLog = await reader.sessionPersistence.load(SessionId('python-writer'))
+      const reader = eventContext(root, compression)
+      const pythonLog = await reader.persistence!.load(SessionId('python-writer'))
       expect(pythonLog.events[1]?.data).toMatchObject({
         id: 'python-user-1',
         content: [{ type: 'text', text: 'python to typescript' }],
@@ -180,8 +180,8 @@ store.close()
       }), { surfaceOp: 'append' })
       typescript.append('turn/end', { turn: 1, reason: { kind: 'completed' } })
       await reader.sessions.flush(typescript)
-      await reader.fiber.dispose()
-      contexts.splice(contexts.indexOf(reader), 1)
+      await reader.dispose()
+      runtimes.splice(runtimes.indexOf(reader), 1)
 
       const result = JSON.parse(runPython(`
 import json
@@ -223,8 +223,8 @@ print(json.dumps({
       expect(result.typescriptChildParent).toBe('python-writer')
       expect(result.typescriptChildHasResume).toBe(true)
 
-      const finalReader = await eventContext(root, compression)
-      const child = await finalReader.sessionPersistence.load(SessionId('python-child'))
+      const finalReader = eventContext(root, compression)
+      const child = await finalReader.persistence!.load(SessionId('python-child'))
       expect(child.meta.parentSession).toBe(SessionId('typescript-writer'))
       expect(JSON.stringify(child.events)).toContain('python resumed typescript')
     })

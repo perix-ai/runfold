@@ -13,7 +13,9 @@ DSH Event source—not registry copies—into the published package:
 - `@perix/event-sdk/session/surface`
 - `@perix/event-sdk/persistence`
 - `@perix/event-sdk/persistence-jsonl`
-- `@perix/event-sdk/runtime` for the runtime `Context` and service primitives
+- `@perix/event-sdk/runtime` for `EventHost` (ownership scopes, lifecycle
+  events, composition slots); the root entry also exports
+  `createEventRuntime()` (Perix-owned; see `../runtime/README.md`)
 - `@perix/event-sdk/messages` for Event-compatible message constructors and
   value types (Perix-owned; see `../runtime/README.md`)
 
@@ -21,10 +23,27 @@ The upstream `*/invariant` companion modules are Cordis diagnostic plugins,
 not Event behavior, and are intentionally not exported.
 
 Consumers can therefore construct and host the Event system using only
-`@perix/*` import specifiers. Names from the upstream implementation remain
-internal provenance and transitive implementation details. Generated SDK
-artifacts also translate the retained Session, persistence, and
-type-symbol identities to their matching `@perix/event-sdk/*` paths.
+`@perix/*` import specifiers:
+
+```ts
+import { createEventRuntime, SessionId } from '@perix/event-sdk'
+import JsonlSessionPersistence from '@perix/event-sdk/persistence-jsonl'
+import { createUserMessage } from '@perix/event-sdk/messages'
+
+const runtime = createEventRuntime({
+  persistence: host => new JsonlSessionPersistence(host, { root: './sessions', compression: 'none' }),
+})
+const session = runtime.sessions.create(SessionId('example'), { meta: { cwd: process.cwd() } })
+session.append('user/message', createUserMessage({
+  content: [{ type: 'text', text: 'hello' }],
+  source: { kind: 'user' },
+}), { surfaceOp: 'append' })
+await runtime.sessions.flush(session)
+const restored = await runtime.restore(SessionId('example'))
+await runtime.dispose()
+``` Names from the upstream implementation remain
+internal provenance only: the published JavaScript mentions no DSH package,
+the declarations reference none, and the package depends on none.
 
 The package's own tests live in `../tests/sdk`; the complete cross-package and
 packed-consumer matrix is documented in the parent `TESTING.md`.

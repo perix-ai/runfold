@@ -6,8 +6,7 @@
  * @module @deepseek-ai/dsh-session-persistence-jsonl
  */
 
-import { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import type { EventHost } from '@perix/event-sdk/runtime'
 import { readdirSync } from 'node:fs'
 import { open, mkdir, readFile, readdir, realpath, link, rm, stat, truncate } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
@@ -51,12 +50,6 @@ function assertZstdHeaderFrame(plaintext: Buffer): void {
     throw new Error('corrupt Zstandard session log: first frame is not exactly one header line')
   }
 }
-
-/** Loader schema for the JSONL artifact's physical encoding. */
-export const JsonlCompressionSchema: z<JsonlCompression> = z.union([
-  z.const('zstd'),
-  z.const('none'),
-]).default(DEFAULT_COMPRESSION)
 
 /** Plugin config: where the JSONL backend keeps its session logs, and the packed-row write switch. */
 export interface Config {
@@ -123,17 +116,6 @@ function isENOENT(error: unknown): boolean {
 export class JsonlSessionPersistence extends SessionPersistence implements PersistenceBackend<JsonlTornMarker> {
   override readonly supportsRawArtifacts = true
 
-  static inject = ['sessions']
-
-  static Config: z<Config> = z.object({
-    root: z.string().required(),
-    packChunks: z.boolean().default(DEFAULT_PACK_CHUNKS),
-    compression: JsonlCompressionSchema,
-    preparedSessionCacheSize: z.number().step(1).min(1).default(DEFAULT_PREPARED_SESSION_CACHE_SIZE),
-    writeBatchMaxDelayMs: z.number().step(1).min(1).max(MAX_WRITE_BATCH_DELAY_MS)
-      .default(DEFAULT_WRITE_BATCH_MAX_DELAY_MS),
-  })
-
   /**
    * Backend label for coordinator diagnostics and effects. It shadows
    * `Service.name` without changing the service key captured by the base
@@ -147,8 +129,15 @@ export class JsonlSessionPersistence extends SessionPersistence implements Persi
   private coordinator: PersistenceCoordinator<JsonlTornMarker>
   private rootEncodingCheck: Promise<void> | undefined
 
-  constructor(ctx: Context, public config: Config) {
+  constructor(ctx: EventHost, public config: Config) {
     super(ctx)
+    // Formerly enforced by the plugin loader's config schema.
+    if (typeof config.root !== 'string' || config.root.length === 0) {
+      throw new TypeError('session persistence root must be a non-empty string')
+    }
+    if (config.compression !== undefined && config.compression !== 'zstd' && config.compression !== 'none') {
+      throw new TypeError('session persistence compression must be "zstd" or "none"')
+    }
     // Resolve once so later process.cwd() changes cannot split one backend across roots.
     this.root = resolve(config.root)
     // Programmatic wrappers may construct the backend without Schemastery normalization.

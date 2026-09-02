@@ -25,10 +25,13 @@ and `test:python:package`.
 
 ## Known gaps
 
-Three upstream test files are excluded in the root `vitest.config.ts`:
+Six upstream test files are excluded in the root `vitest.config.ts`:
 
 | Excluded test | Reason | Coverage status |
 | --- | --- | --- |
 | `packages/core/session/tests/gen-persistence-catalog.spec.ts` | Verifies DSH monorepo code generation, not Session behavior | Not applicable to the extraction |
 | `packages/client/ui-trajectory/tests/client-bundle.client.spec.ts` | Asserts the DSH browser `ModuleLoader` packaging contract; the extraction ships Vite ESM | Replaced by `tests/package` |
+| `packages/core/session/tests/scoped.spec.ts` | Tests dsh-scope's scope-filtered dispatch, a Harness host mechanism the Perix host does not have | Every listener hears every session by design |
+| `packages/core/session/tests/typert.spec.ts` | Tests the Typert lookup registration removed with Cordis | Not applicable |
+| `packages/core/session/tests/invariant.spec.ts` | Tests the Cordis invariants companion plugin removed in R13 | Not applicable |
 | `packages/client/ui-trajectory/tests/views.client.spec.tsx` | 1338-line view test that mounts the complete DSH shell (slots, workspaces, session controller) | **Open gap.** Only the smaller `tests/ui` suite covers the standalone view; porting an equivalent is tracked as R10 in `docs/event/tasks.md` |

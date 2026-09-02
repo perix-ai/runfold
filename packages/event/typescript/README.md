@@ -22,9 +22,9 @@ The implementation is cut from DeepSeek Harness `0.1.2-alpha.3`, commit
 
 | DeepSeek Harness source | Local implementation | Treatment |
 | --- | --- | --- |
-| `packages/core/session` | `packages/core/session` | Complete `src/` and `tests/` retained unchanged; package/build boundary adapted |
-| `packages/session/session-persistence` | `packages/session/session-persistence` | Complete `src/` and `tests/` retained unchanged; package/build boundary adapted |
-| `packages/session/session-persistence-jsonl` | `packages/session/session-persistence-jsonl` | Complete `src/` and `tests/` retained unchanged; package/build boundary adapted |
+| `packages/core/session` | `packages/core/session` | Complete `src/` and `tests/` retained; `src/index.ts` host seam edited (see below) |
+| `packages/session/session-persistence` | `packages/session/session-persistence` | Complete `src/` and `tests/` retained; `src/index.ts` and `src/coordinator.ts` host seam edited |
+| `packages/session/session-persistence-jsonl` | `packages/session/session-persistence-jsonl` | Complete `src/` and `tests/` retained; `src/index.ts` host seam edited |
 | `packages/client/ui-trajectory` | `packages/client/ui-trajectory` | Complete package source and tests retained unchanged |
 | `packages/client/ui-conversation` | same path | Only the unchanged assembler, location index, and four transitive contract files retained |
 | `packages/client/ui-renderer` | same path | Only unchanged snapshot binding retained |
@@ -49,12 +49,32 @@ package identity, are marked private, and are never the consumer-facing SDK.
 
 ## Necessary local changes
 
-- Only the three Event packages (`core/session`, `session/session-persistence`,
-  `session/session-persistence-jsonl`) are npm workspaces. Their manifests
-  replace DSH monorepo-only `workspace:^` references with the exact published
-  versions and expose direct TypeScript build output; their TypeScript configs
-  remove references to packages that are not part of this extraction, and local
-  base configs replace the upstream monorepo base.
+- No retained directory is an npm workspace: the SDK bundles the three Event
+  packages from source. Their `package.json` files are upstream bytes; their
+  `tsconfig.json` files only drop the monorepo project references, because
+  Vite reads the nearest `tsconfig.json` and the referenced directories do not
+  exist here.
+- **Host seam (Cordis removal).** Five retained source files are edited, and
+  only at the lines where they touched the DSH plugin platform:
+  `core/session/src/index.ts` drops `Service`, the Typert lookup registration,
+  the `dsh-scope` carrier (the carrier is now the session itself), and the
+  Cordis module augmentations, and takes an `EventHost` instead of a
+  `Context`; `core/session/src/types.ts` drops the Typert remote-error
+  augmentation; `session/session-persistence/src/index.ts` does the same for the
+  persistence base class (adding a `name` label the JSONL backend already
+  overrode); `session/session-persistence/src/coordinator.ts` changes one type
+  import; `session/session-persistence-jsonl/src/index.ts` drops the
+  Schemastery config schema and `static inject`, validating `root` and
+  `compression` in the constructor instead. Session append, fork, repair,
+  surface, write-behind, and JSONL logic are untouched. The exact files are
+  listed in `scripts/verify-upstream-identity.mjs`; every other retained file
+  is byte-identical to upstream.
+- **Retained tests kept unmodified.** `vitest.config.ts` aliases
+  `@deepseek-ai/cordis` and `@deepseek-ai/dsh-scope` to `test-support/`, a
+  test-only shim that provides `ctx.plugin` / `fiber.dispose` on top of host
+  scopes. Three upstream tests that exercise mechanisms the host does not have
+  are excluded: `scoped.spec.ts` (scope-filtered dispatch), `typert.spec.ts`
+  (Typert lookup registry), and `invariant.spec.ts` (the invariants plugin).
 - The other retained directories under `packages/client/` and
   `packages/test-support/` are source-only: their files are imported by
   relative path from `ui/trajectory/src`, and their `package.json` and
@@ -82,14 +102,17 @@ package identity, are marked private, and are never the consumer-facing SDK.
   on none of the replaced packages. `runtime/README.md` records each file's
   provenance.
 - `sdk/` adds only package exports; the implementation remains in the retained
-  DSH package trees above and in `runtime/`. Its build bundles those three local implementation
+  DSH package trees above and in `runtime/`. `@perix/event-sdk/runtime` is the
+  host (`EventHost`), and the root entry adds `createEventRuntime()`, the
+  composition root that replaces `ctx.plugin(SessionStore)` and the
+  persistence plugin. Its build bundles those three local implementation
   trees and mechanically rewrites only their internal declaration import paths,
   so an installed package never falls back to registry copies of those Event
   packages.
-- The SDK build mechanically maps retained runtime package identifiers
-  (`@deepseek-ai/dsh-session*`) to their corresponding `@perix/event-sdk/*`
-  public identities in generated JavaScript and declarations. This includes
-  Typert type-symbol strings; retained source is unchanged.
+- The published declarations keep the upstream `@module @deepseek-ai/...`
+  JSDoc lines as provenance. They import, re-export, or augment no DSH module,
+  and the published JavaScript does not mention the namespace at all;
+  `tests/package` enforces both.
 - `ui/trajectory/index.d.ts` intentionally exposes only the browser component
   boundary. Internal DSH shell and projection types remain implementation
   details rather than leaking the full Harness type graph to consumers.
@@ -119,6 +142,8 @@ Trajectory; both execute the
   SDK.
 - `../python/tests`: native Python core, persistence, conformance, large
   history, and blank-environment package tests.
+- `test-support/`: test-only Cordis and dsh-scope shims used to run the
+  retained upstream suites; never built or published.
 - `../../../tests/event/cross-language`: bidirectional TypeScript/Python
   compatibility and shared-conformance tests.
 

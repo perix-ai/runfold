@@ -50,14 +50,10 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc --noEmit && vite build && tsc -p tsconfig.lib.json && node scripts/rewrite-internal-type-imports.mjs && node scripts/rewrite-public-namespaces.mjs",
+    "build": "tsc --noEmit && vite build && tsc -p tsconfig.lib.json && node scripts/rewrite-internal-type-imports.mjs",
     "test": "vitest run --root ../../../.. --config vitest.config.ts packages/event/typescript/tests/sdk"
   },
   "dependencies": {
-    "@deepseek-ai/cordis": "4.0.2",
-    "@deepseek-ai/dsh-scope": "0.1.2-alpha.3",
-    "@deepseek-ai/dsh-typert-protocol": "0.1.2-alpha.3",
-    "@deepseek-ai/schemastery": "3.18.2",
     "@types/node": "^24.3.0",
     "koffi": "^3.1.0"
   },

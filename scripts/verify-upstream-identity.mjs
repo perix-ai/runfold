@@ -21,11 +21,14 @@ const skipDirectories = new Set(['node_modules', 'lib', 'dist'])
  * changes"). Adding an entry here without that record is a review failure.
  */
 const ALLOWED_DIFFERENCES = new Set([
-  // npm workspaces: workspace:^ references replaced by published versions
-  'core/session/package.json',
-  'session/session-persistence/package.json',
-  'session/session-persistence-jsonl/package.json',
-  // TypeScript configs: monorepo project references removed
+  // Perix host seams: Cordis Service/Context, scope carrier, Typert lookup, and
+  // Schemastery config replaced by EventHost (docs/event/tasks.md R17-R19)
+  'core/session/src/index.ts',
+  'core/session/src/types.ts',
+  'session/session-persistence/src/index.ts',
+  'session/session-persistence/src/coordinator.ts',
+  'session/session-persistence-jsonl/src/index.ts',
+  // TypeScript configs: monorepo project references removed (Vite reads them)
   'core/session/tsconfig.json',
   'session/session-persistence/tsconfig.json',
   'session/session-persistence-jsonl/tsconfig.json',

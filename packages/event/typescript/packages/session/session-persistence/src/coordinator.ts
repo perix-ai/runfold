@@ -5,7 +5,7 @@
  * @module @deepseek-ai/dsh-session-persistence/coordinator
  */
 
-import { Context } from '@deepseek-ai/cordis'
+import type { EventHost } from '@perix/event-sdk/runtime'
 import {
   adoptSessionEvent,
   interruptedTurnClosers,
@@ -607,7 +607,7 @@ export class PersistenceCoordinator<TornMarker = unknown> {
   private readonly writeBatchMaxDelayMs: number
 
   constructor(
-    private ctx: Context,
+    private ctx: EventHost,
     private backend: PersistenceBackend<TornMarker>,
     options: PersistenceCoordinatorOptions = {
       preparedSessionCacheSize: DEFAULT_PREPARED_SESSION_CACHE_SIZE,

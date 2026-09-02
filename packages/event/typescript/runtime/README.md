@@ -10,11 +10,22 @@ each file states what it was copied or reduced from and why.
 | `src/values.ts` | `@deepseek-ai/dsh-util-values` | JSON snapshot, equality, and deep-freeze helpers — verbatim body |
 | `src/timeout.ts` | `@deepseek-ai/dsh-timeout` | `MAX_TIMER_DELAY_MS` — the one constant persistence uses |
 | `src/messages.ts` | `@deepseek-ai/dsh-llm` (`.`, `/brand`, `/types`), `ImageAttachmentRef` from `@deepseek-ai/dsh-attachment` | Ids, content blocks, message shapes and constructors, stream chunks, `LlmCallConfig`, `callConfigEquals` — copied types and functions; no LLM runtime |
+| `src/host.ts` | `@deepseek-ai/cordis` `Context`/`Service`, `@deepseek-ai/dsh-scope` carriers | `EventHost`: an event bus for the four `session/*` events (plus the `internal/dispatch` instrumentation hook), ownership scopes with reverse-order disposal, and `provide`/`get` composition slots. No plugin registry, no scope-filtered dispatch, no Typert |
+| `src/create.ts` | DSH plugin composition (`ctx.plugin(SessionStore)` + a persistence plugin) | `createEventRuntime()`: one host, one Session store, an optional persistence backend, `restore(id)`, and `dispose()` |
 
 The retained sources under `../packages/` keep their upstream `@deepseek-ai/*`
-import specifiers. Build and test configuration resolves those specifiers to
+import specifiers for utilities and messages, and import the host as
+`@perix/event-sdk/runtime`. Build and test configuration resolves both to
 these modules, so the published `@perix/event-sdk` bundles this directory and
 depends on none of the replaced packages.
 
+`EventHost` reproduces the one Cordis behavior the retained lifecycle relies
+on: a service read through a scope (`scope.sessions`) is a proxy view whose
+`ctx` is that scope, so a Session created through a child scope is owned by
+the child and torn down with it. Views forward every other read and write to
+the single underlying instance.
+
 Behavior is locked by the retained upstream test suites, which run against
-these modules through the same resolution, and by `../tests/sdk/messages.spec.ts`.
+these modules through the same resolution (`../test-support/cordis-shim.ts`
+adapts their `ctx.plugin` / `fiber.dispose` vocabulary onto host scopes), and
+by `../tests/sdk/`.

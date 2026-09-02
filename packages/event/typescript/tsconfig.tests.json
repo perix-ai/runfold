@@ -39,7 +39,7 @@
         "packages/event/typescript/sdk/src/persistence-jsonl.ts"
       ],
       "@perix/event-sdk/runtime": [
-        "packages/event/typescript/sdk/src/runtime.ts"
+        "packages/event/typescript/runtime/src/host.ts"
       ],
       "@perix/event-sdk/messages": [
         "packages/event/typescript/sdk/src/messages.ts"
@@ -74,6 +74,8 @@
     }
   },
   "include": [
+    "test-support/**/*.ts",
+    "runtime/src/**/*.ts",
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "../../../tests/event/cross-language/**/*.ts",

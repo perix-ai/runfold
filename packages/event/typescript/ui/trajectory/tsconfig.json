@@ -28,6 +28,9 @@
       ],
       "@deepseek-ai/dsh-timeout": [
         "runtime/src/timeout.ts"
+      ],
+      "@perix/event-sdk/runtime": [
+        "runtime/src/host.ts"
       ]
     }
   },

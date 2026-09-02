@@ -82,16 +82,17 @@ try {
     include: ['consumer.tsx'],
   }, null, 2) + '\n')
   await writeFile(join(consumer, 'consumer.tsx'), `
-import SessionStore, { SessionId } from '@perix/event-sdk'
+import { createEventRuntime, SessionId } from '@perix/event-sdk'
 import JsonlSessionPersistence from '@perix/event-sdk/persistence-jsonl'
 import type { SessionEvent } from '@perix/event-sdk/session/types'
 import { createUserMessage } from '@perix/event-sdk/messages'
-import { Context } from '@perix/event-sdk/runtime'
+import type { EventHost } from '@perix/event-sdk/runtime'
 import { EventTrajectory, type EventTrajectoryProps } from '@perix/event-ui'
 import '@perix/event-ui/style.css'
 
-const context = new Context()
-await context.plugin(SessionStore)
+const context = createEventRuntime({
+  persistence: (host: EventHost) => new JsonlSessionPersistence(host, { root: '/tmp/perix-consumer', compression: 'none' }),
+})
 const session = context.sessions.create(SessionId('typed-consumer'))
 session.append('user/message', createUserMessage({
   content: [{ type: 'text', text: 'typed' }],
@@ -100,17 +101,14 @@ session.append('user/message', createUserMessage({
 const events: readonly SessionEvent[] = session.events
 const props: EventTrajectoryProps = { events, locale: 'en' }
 const view = <EventTrajectory {...props} />
-void JsonlSessionPersistence
 void view
-await context.fiber.dispose()
+await context.dispose()
 `)
   await writeFile(join(consumer, 'runtime.mjs'), `
-import SessionStore, { SessionId } from '@perix/event-sdk'
+import { createEventRuntime, SessionId } from '@perix/event-sdk'
 import { createUserMessage } from '@perix/event-sdk/messages'
-import { Context } from '@perix/event-sdk/runtime'
 
-const context = new Context()
-await context.plugin(SessionStore)
+const context = createEventRuntime()
 const session = context.sessions.create(SessionId('runtime-consumer'))
 session.append('user/message', createUserMessage({
   content: [{ type: 'text', text: 'runtime' }],
@@ -119,7 +117,7 @@ session.append('user/message', createUserMessage({
 if (session.events.length !== 1 || session.deriveMessages().length !== 1) {
   throw new Error('installed Event SDK failed its runtime lifecycle')
 }
-await context.fiber.dispose()
+await context.dispose()
 `)
 
   run('npm', [
@@ -138,23 +136,30 @@ await context.fiber.dispose()
 
   await assertExportFiles(join(consumer, 'node_modules/@perix/event-sdk'))
   await assertExportFiles(join(consumer, 'node_modules/@perix/event-ui'))
-  const sdkGeneratedText = []
+  // No DSH package may be required at runtime or referenced by the public
+  // types. JavaScript must not mention the namespace at all; declarations may
+  // keep upstream `@module` provenance comments but never import, re-export,
+  // or augment a DSH module.
+  const installedSdk = JSON.parse(await readFile(
+    join(consumer, 'node_modules/@perix/event-sdk/package.json'),
+    'utf8',
+  ))
+  for (const field of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
+    for (const name of Object.keys(installedSdk[field] ?? {})) {
+      assert.equal(name.startsWith('@deepseek-ai/'), false, `SDK ${field} still lists ${name}`)
+    }
+  }
+  const codeReference = /(?:from\s*|import\s*\(?\s*|require\(\s*|declare\s+module\s+)['"]@deepseek-ai\//
   for (const file of await generatedTextFiles(
     join(consumer, 'node_modules/@perix/event-sdk/lib'),
   )) {
     const content = await readFile(file, 'utf8')
-    sdkGeneratedText.push(content)
-    assert.equal(
-      /@deepseek-ai\/dsh-session(?:-persistence(?:-jsonl)?)?(?:\/types)?/.test(content),
-      false,
-      `upstream Event namespace leaked from ${file}`,
-    )
+    if (file.endsWith('.js')) {
+      assert.equal(content.includes('@deepseek-ai'), false, `DSH namespace leaked into ${file}`)
+    } else {
+      assert.equal(codeReference.test(content), false, `DSH module referenced from ${file}`)
+    }
   }
-  const sdkArtifact = sdkGeneratedText.join('\n')
-  assert.equal(sdkArtifact.includes('@perix/event-sdk/session#Session'), true)
-  assert.equal(sdkArtifact.includes('@perix/event-sdk/session/types#SessionId'), true)
-  assert.equal(sdkArtifact.includes('@perix/event-sdk/persistence'), true)
-  assert.equal(sdkArtifact.includes('@perix/event-sdk/persistence-jsonl'), true)
   const uiDeclaration = await readFile(
     join(consumer, 'node_modules/@perix/event-ui/index.d.ts'),
     'utf8',

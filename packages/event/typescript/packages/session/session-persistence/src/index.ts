@@ -5,7 +5,7 @@
  * @module @deepseek-ai/dsh-session-persistence
  */
 
-import { Context, Service } from '@deepseek-ai/cordis'
+import type { EventHost } from '@perix/event-sdk/runtime'
 import { SessionPreparation } from '@deepseek-ai/dsh-session'
 import type { Session, SessionEvent, SessionId, SessionHeader } from '@deepseek-ai/dsh-session'
 import type { SessionPersistenceRevision } from './revision.ts'
@@ -78,8 +78,8 @@ export type {
   StoredSuffix,
 } from './coordinator.ts'
 
-declare module '@deepseek-ai/cordis' {
-  interface Context {
+declare module '@perix/event-sdk/runtime' {
+  interface EventHostServices {
     sessionPersistence: SessionPersistence
   }
 }
@@ -102,9 +102,12 @@ export interface SessionLocation {
  * durability, and {@link load} balances a complete interrupted tail without
  * rewriting committed events.
  */
-export abstract class SessionPersistence extends Service {
-  constructor(ctx: Context) {
-    super(ctx, 'sessionPersistence')
+export abstract class SessionPersistence {
+  /** Backend label for diagnostics; concrete backends override it. */
+  readonly name: string = 'sessionPersistence'
+
+  constructor(protected ctx: EventHost) {
+    ctx.provide('sessionPersistence', this)
   }
 
   /**

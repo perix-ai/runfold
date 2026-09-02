@@ -55,9 +55,9 @@ truth for this work.
 The first executable slice is intentionally Event-only and is cut directly
 from DeepSeek Harness `0.1.2-alpha.3`:
 
-- `@perix/event-sdk` exposes the unchanged DSH Session, persistence seam, and
-  JSONL backend through namespaced subpath exports without reimplementing their
-  behavior;
+- `@perix/event-sdk` bundles the DSH Session, persistence seam, and JSONL
+  backend from retained source, hosted by a small Perix `EventHost` instead of
+  the Cordis plugin platform, without reimplementing their behavior;
 - `perix-event-sdk` is a native Python implementation of the same Session,
   surface, repair, JSONL, restore/resume, and fork contract; it does not invoke
   TypeScript or require a server;
@@ -103,7 +103,7 @@ after each verified commit instead of being accumulated into one large batch.
 
 ## Status
 
-Pre-alpha. The Python v0 implementation and bidirectional conformance path are
-executable; the TypeScript extraction still requires the DSH/Cordis dependency
-cleanup listed in [`docs/event/tasks.md`](docs/event/tasks.md) before the whole
-Event facility can be called production-ready.
+Pre-alpha. Both implementations and the bidirectional conformance path are
+executable, and the published TypeScript SDK depends on no DeepSeek Harness
+package. The remaining items before the Event facility can be called
+production-ready are listed in [`docs/event/tasks.md`](docs/event/tasks.md).

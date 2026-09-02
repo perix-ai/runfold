@@ -1,20 +1,20 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import SessionStore, {
+import {
+  createEventRuntime,
   Session,
   SessionForkError,
   SessionId,
 } from '@perix/event-sdk'
+import type { EventRuntime } from '@perix/event-sdk'
 import type { SessionEvent } from '@perix/event-sdk/session/types'
-import { Context } from '@perix/event-sdk/runtime'
 import { createAssistantMessage, createUserMessage } from '@perix/event-sdk/messages'
 
-const contexts: Context[] = []
+const runtimes: EventRuntime[] = []
 
-async function eventContext(): Promise<Context> {
-  const context = new Context()
-  contexts.push(context)
-  await context.plugin(SessionStore)
-  return context
+function eventContext(): EventRuntime {
+  const runtime = createEventRuntime()
+  runtimes.push(runtime)
+  return runtime
 }
 
 function appendTurn(session: Session, turn = 1): void {
@@ -41,12 +41,12 @@ function appendTurn(session: Session, turn = 1): void {
 }
 
 afterEach(async () => {
-  for (const context of contexts.splice(0)) await context.fiber.dispose()
+  for (const runtime of runtimes.splice(0)) await runtime.dispose()
 })
 
 describe('Perix Event session lifecycle', () => {
   it('records contiguous immutable events and derives model history', async () => {
-    const context = await eventContext()
+    const context = eventContext()
     const session = context.sessions.create(SessionId('lifecycle'), { meta: { cwd: '/workspace' } })
     appendTurn(session)
 
@@ -76,7 +76,7 @@ describe('Perix Event session lifecycle', () => {
   })
 
   it('forks only stable boundaries and records lineage', async () => {
-    const context = await eventContext()
+    const context = eventContext()
     const parent = context.sessions.create(SessionId('parent'), { meta: { cwd: '/workspace' } })
     appendTurn(parent)
 

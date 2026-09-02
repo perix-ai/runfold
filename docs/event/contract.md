@@ -25,19 +25,20 @@ schema 描述可移植结构，完整的顺序、surface、repair 和未知 Even
 
 | 行为 | TypeScript | Python | 共同语义 |
 | --- | --- | --- | --- |
-| 创建 | `ctx.sessions.create(...)` | `store.create(...)` | 创建 header；Event 尚为空时保持惰性物化 |
+| 创建 | `runtime.sessions.create(...)` | `store.create(...)` | 创建 header；Event 尚为空时保持惰性物化 |
 | 追加 | `session.append(type, data, opts)` | `session.append(type, data, surface_op=..., source_event_seqs=...)` | 校验并复制 JSON，分配连续 `seq` 和当前毫秒时间 |
 | 读取 | `sessionPersistence.load/inspect` | `persistence.load/inspect` | 返回独立、已校验的逻辑快照；`load` 提交必要 repair |
-| 恢复/续写 | `sessionPersistence.prepare` 后由 `SessionStore` 发布 | `store.restore/resume` | 采用原 header 和完整持久化前缀，只追加缺失的 `session/end-seed` |
-| 持久化屏障 | `ctx.sessions.flush(session)` | `store.flush(session)` | 调用返回时此前 Event 已持久化 |
-| fork | `ctx.sessions.fork(...)` | `store.fork(...)` | 仅接受存在且不位于 open turn 内的 inclusive 前缀 |
+| 恢复/续写 | `runtime.restore(id)` | `store.restore/resume` | 采用原 header 和完整持久化前缀，只追加缺失的 `session/end-seed` |
+| 持久化屏障 | `runtime.sessions.flush(session)` | `store.flush(session)` | 调用返回时此前 Event 已持久化 |
+| fork | `runtime.sessions.fork(...)` | `store.fork(...)` | 仅接受存在且不位于 open turn 内的 inclusive 前缀 |
 | 后缀读取 | `readFrom(id, seq)` | `read_from(id, seq)` | 从逻辑 seq 返回已展开 Event，不泄漏 packed row |
 | 原始轨迹 | `readRaw(id)` | `read_raw(id)` | 返回解压后的逻辑 JSONL 文本和 header |
 | 消息投影 | `deriveMessages()` | `derive_messages()` | 按当前 surface 顺序得到相同消息 |
 
-TypeScript 目前仍借助 Cordis 承担 Session 发布和生命周期，这是待删除的宿主
-耦合，不是 Event 契约的一部分。Python 使用 `SessionStore` 与 persistence
-直接组合，不运行 server、sidecar 或 TypeScript 子进程。
+TypeScript 通过 `createEventRuntime({ persistence })` 组合一个 `EventHost`、
+`SessionStore` 和可选的持久化后端；`runtime.restore(id)` 是 `prepare` 后
+发布 Session 的一步式入口。Python 使用 `SessionStore` 与 persistence 直接
+组合。两侧都不依赖 Cordis，也不运行 server、sidecar 或子进程。
 
 上表描述的是**逻辑等价**，不是 API 等价。下列接口只有一侧提供，另一侧
 没有对应物，调用方不能假设它们存在：
@@ -45,7 +46,7 @@ TypeScript 目前仍借助 Cordis 承担 Session 发布和生命周期，这是�
 | 接口 | 提供方 | 说明 |
 | --- | --- | --- |
 | write-behind 批处理（`writeBatchMaxDelayMs`） | 仅 TypeScript | Python 的 `flush` 同步写盘，没有延迟批次；两侧对外的持久化屏障语义相同 |
-| `SessionPreparation` / `sessionPersistence.prepare` | 仅 TypeScript | 未发布 Session 的所有权句柄；Python 的 `restore` 一步完成读取与发布 |
+| `SessionPreparation` / `persistence.prepare` | 仅 TypeScript | 未发布 Session 的所有权句柄；`runtime.restore` 封装了它，与 Python 的 `restore` 对应 |
 | `listSnapshots` | 仅 TypeScript | 返回 header 与 revision token；Python 只有 `list` 返回 header |
 | `inspect(id, signal)` 的 `AbortSignal` | 仅 TypeScript | Python 的 `inspect` 不可取消 |
 | borrowed live source | 仅 TypeScript | 读取时若同 id 的 Session 已在线，返回其快照；Python 直接读磁盘 |

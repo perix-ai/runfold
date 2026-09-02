@@ -1,10 +1,10 @@
 import { readFile } from 'node:fs/promises'
 import { describe, expect, it } from 'vitest'
-import SessionStore, { KNOWN_SESSION_EVENT_TYPES, Session, SessionId } from '@perix/event-sdk'
+import SessionStore, { createEventRuntime, KNOWN_SESSION_EVENT_TYPES, Session, SessionId } from '@perix/event-sdk'
 import SessionStoreFromSession from '@perix/event-sdk/session'
 import JsonlSessionPersistence from '@perix/event-sdk/persistence-jsonl'
 import SessionPersistence from '@perix/event-sdk/persistence'
-import { Context } from '@perix/event-sdk/runtime'
+import { EventHost } from '@perix/event-sdk/runtime'
 import { createAssistantMessage, createUserMessage } from '@perix/event-sdk/messages'
 import * as chunkRows from '@perix/event-sdk/session/chunk-rows'
 import * as surface from '@perix/event-sdk/session/surface'
@@ -38,8 +38,15 @@ describe('@perix/event-sdk public contract', () => {
     expect(Object.keys(surface).length).toBeGreaterThan(0)
   })
 
-  it('provides all construction primitives without requiring consumer DSH imports', () => {
-    expect(typeof Context).toBe('function')
+  it('provides all construction primitives without requiring consumer DSH imports', async () => {
+    expect(typeof EventHost).toBe('function')
+    const runtime = createEventRuntime()
+    expect(runtime.sessions).toBeInstanceOf(SessionStore)
+    expect(runtime.host.get('sessions')).toBeDefined()
+    expect(runtime.persistence).toBeUndefined()
+    await expect(runtime.restore(SessionId('nothing'))).rejects.toThrow(/without configured persistence/)
+    await runtime.dispose()
+    expect(runtime.host.get('sessions')).toBeUndefined()
     expect(typeof SessionPersistence).toBe('function')
     expect(typeof JsonlSessionPersistence).toBe('function')
     expect(createUserMessage({

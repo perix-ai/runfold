@@ -15,10 +15,12 @@ export default defineConfig({
       { find: /^@perix\/event-sdk\/session$/, replacement: source('./packages/event/typescript/sdk/src/session.ts') },
       { find: /^@perix\/event-sdk\/persistence$/, replacement: source('./packages/event/typescript/sdk/src/persistence.ts') },
       { find: /^@perix\/event-sdk\/persistence-jsonl$/, replacement: source('./packages/event/typescript/sdk/src/persistence-jsonl.ts') },
-      { find: /^@perix\/event-sdk\/runtime$/, replacement: source('./packages/event/typescript/sdk/src/runtime.ts') },
+      { find: /^@perix\/event-sdk\/runtime$/, replacement: source('./packages/event/typescript/runtime/src/host.ts') },
       { find: /^@perix\/event-sdk\/messages$/, replacement: source('./packages/event/typescript/sdk/src/messages.ts') },
       { find: /^@perix\/event-sdk$/, replacement: source('./packages/event/typescript/sdk/src/index.ts') },
       // Perix runtime modules replace the DSH utility packages for every retained source and test.
+      { find: /^@deepseek-ai\/cordis$/, replacement: source('./packages/event/typescript/test-support/cordis-shim.ts') },
+      { find: /^@deepseek-ai\/dsh-scope$/, replacement: source('./packages/event/typescript/test-support/scope-shim.ts') },
       { find: /^@deepseek-ai\/dsh-brand$/, replacement: source('./packages/event/typescript/runtime/src/brand.ts') },
       { find: /^@deepseek-ai\/dsh-util-values$/, replacement: source('./packages/event/typescript/runtime/src/values.ts') },
       { find: /^@deepseek-ai\/dsh-timeout$/, replacement: source('./packages/event/typescript/runtime/src/timeout.ts') },
@@ -50,6 +52,11 @@ export default defineConfig({
       '**/lib/**',
       // Monorepo code-generation contract, not Session runtime behavior.
       'packages/event/typescript/packages/core/session/tests/gen-persistence-catalog.spec.ts',
+      // Cordis host mechanisms not retained: scope-filtered dispatch, the Typert lookup
+      // registry, and the invariants diagnostic plugin (see docs/event/tasks.md R17, R20).
+      'packages/event/typescript/packages/core/session/tests/scoped.spec.ts',
+      'packages/event/typescript/packages/core/session/tests/typert.spec.ts',
+      'packages/event/typescript/packages/core/session/tests/invariant.spec.ts',
       // DSH ModuleLoader packaging contract; the standalone extraction uses Vite ESM.
       'packages/event/typescript/packages/client/ui-trajectory/tests/client-bundle.client.spec.ts',
       // Full DSH shell/slot integration; covered here by the standalone boundary test.

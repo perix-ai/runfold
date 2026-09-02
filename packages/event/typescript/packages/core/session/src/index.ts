@@ -6,15 +6,12 @@
  * @module @deepseek-ai/dsh-session
  */
 
-import { Context, Service } from '@deepseek-ai/cordis'
+import type { EventHost } from '@perix/event-sdk/runtime'
 import { isAbsolute } from 'node:path'
 import { brandString } from '@deepseek-ai/dsh-brand'
 import { deepFreeze, snapshotJsonValue } from '@deepseek-ai/dsh-util-values'
-import { scopeOf, scopeTarget } from '@deepseek-ai/dsh-scope'
-import type { Scoped } from '@deepseek-ai/dsh-scope'
 import type { Message } from '@deepseek-ai/dsh-llm'
 import { SESSION_FORMAT_VERSION } from './types.ts'
-import type { TypertLookup } from '@deepseek-ai/dsh-typert-protocol'
 import type { CreateSessionOptions, EpochHeader, PrepareSessionOptions, RequestContext, SessionEvent, SessionEventMap, SessionEventType, SessionHeader, SessionId, SurfaceIntent, SurfaceEventType } from './types.ts'
 import { deriveEventMessage, SurfaceManager } from './surface.ts'
 import type { SessionSurface } from './surface.ts'
@@ -32,12 +29,15 @@ export { deriveEventMessage, foldSurface, isAppendSurfaceEvent, isReplacementSur
 export { canonicalHeader, foldRequestHeader, headerEquals } from './request-header.ts'
 export { KNOWN_SESSION_EVENT_TYPES } from './known-event-types.ts'
 
-declare module '@deepseek-ai/cordis' {
-  interface Context {
+// Perix host: the Cordis `Context`/`Events` augmentations become host slots and
+// events. Scope-filtered dispatch is not retained; every listener hears every
+// session, and the carrier passed as the listener `this` is the session itself.
+declare module '@perix/event-sdk/runtime' {
+  interface EventHostServices {
     sessions: SessionStore
   }
 
-  interface Events {
+  interface EventHostEvents {
     /**
      * Creation announcement during session publication. A synchronous throw vetoes and rolls
      * back with a paired disposal; detach requested during dispatch is deferred.
@@ -49,7 +49,7 @@ declare module '@deepseek-ai/cordis' {
      * @dshScopeScan unsupported
      * @mode emit
      */
-    'session/created'(this: Scoped<Session>, session: Session): void
+    'session/created'(session: Session): void
     /**
      * Emitted once when an announced session leaves the store, including
      * publication rollback, but never for an entry whose creation announcement
@@ -59,7 +59,7 @@ declare module '@deepseek-ai/cordis' {
      * @dshScopeScan unsupported
      * @mode emit
      */
-    'session/disposed'(this: Scoped<Session>, session: Session): void
+    'session/disposed'(session: Session): void
     /**
      * Post-commit, fire-and-forget append feed. The listener snapshot resolves
      * before the log push, but callbacks run after it; observer failures are
@@ -71,7 +71,7 @@ declare module '@deepseek-ai/cordis' {
      * @dshScopeScan unsupported
      * @mode emit
      */
-    'session/event'(this: Scoped<Session>, session: Session, event: SessionEvent): void
+    'session/event'(session: Session, event: SessionEvent): void
     /**
      * Awaited parallel durability checkpoint: every listener runs and the
      * caller awaits all of them, with no waterfall veto. Scope-filtered dispatch
@@ -80,13 +80,7 @@ declare module '@deepseek-ai/cordis' {
      * @dshScopeScan unsupported
      * @mode parallel
      */
-    'session/flush'(this: Scoped<Session>, session: Session): Promise<void> | void
-  }
-}
-
-declare module '@deepseek-ai/dsh-typert-protocol' {
-  interface TypertLookupMap {
-    session: TypertLookup<Session, SessionId>
+    'session/flush'(session: Session): Promise<void> | void
   }
 }
 
@@ -372,13 +366,13 @@ function assertSupportedRequestHeader(type: string, data: unknown, location: str
 type SessionCallback = (...args: unknown[]) => unknown
 
 /** Resolve one listener snapshot, including Cordis's internal dispatch checks. */
-function collectSessionCallbacks(ctx: Context, args: unknown[]): SessionCallback[] {
+function collectSessionCallbacks(ctx: EventHost, args: unknown[]): SessionCallback[] {
   return [...ctx.events.dispatch('emit', args)] as SessionCallback[]
 }
 
 /** Invoke one resolved observe-only listener snapshot with per-listener containment. */
 function invokeContainedSessionObservers(
-  ctx: Context,
+  ctx: EventHost,
   name: 'session/event' | 'session/disposed',
   id: SessionId,
   args: unknown[],
@@ -400,8 +394,8 @@ function invokeContainedSessionObservers(
 interface SessionEntry {
   readonly id: SessionId
   readonly session: Session
-  readonly carrier: Scoped<Session>
-  readonly emitCtx: Context
+  readonly carrier: Session
+  readonly emitCtx: EventHost
   announced: boolean
   announcing: boolean
   appending: boolean
@@ -787,21 +781,12 @@ export class SessionForkError extends Error {
  * Persistence is intentionally not implemented here — persistence plugins
  * subscribe to `session/event` and flush on `session/flush` / dispose.
  */
-export class SessionStore extends Service {
+export class SessionStore {
   private store = new Map<SessionId, SessionEntry>()
   private counter = 0
 
-  constructor(ctx: Context) {
-    super(ctx, 'sessions')
-    ctx.inject(['typert'], (typeCtx) => {
-      typeCtx.typert.lookups.register('session', {
-        parameter: 'session',
-        wire: 'sessionId',
-        hostTypeSymbol: '@deepseek-ai/dsh-session#Session',
-        wireTypeSymbol: '@deepseek-ai/dsh-session/types#SessionId',
-        resolve: sessionId => this.get(sessionId),
-      })
-    })
+  constructor(protected ctx: EventHost) {
+    ctx.provide('sessions', this)
   }
 
   /**
@@ -910,7 +895,7 @@ export class SessionStore extends Service {
    */
   enter(session: Session): () => void {
     const id = session.id
-    const carrier = scopeTarget(session, scopeOf(this.ctx))
+    const carrier = session
     // This is the authoritative collision boundary after arbitrary unpublished
     // preparation. Only one exact same-id transaction can publish.
     if (this.store.has(id)) throw new Error(`session "${id}" already exists`)

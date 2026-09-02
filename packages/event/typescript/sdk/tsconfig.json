@@ -6,6 +6,9 @@
     "allowImportingTsExtensions": true,
     "target": "ES2024",
     "paths": {
+      "@perix/event-sdk/runtime": [
+        "../runtime/src/host.ts"
+      ],
       "@deepseek-ai/dsh-brand": [
         "../runtime/src/brand.ts"
       ],

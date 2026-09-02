@@ -184,15 +184,14 @@ schema 和 conformance 契约，因此其轨迹也能由现有 Trajectory UI 读
 
 ## 当前已知差距
 
-当前 TypeScript 裁剪版已经可以构建和通过现有测试，但仍是过渡状态，不能把
-“测试通过”解释为“已经完成 DSH 解耦”：
+TypeScript 裁剪版的 DSH/Cordis 解耦已于 2026-09-01 完成（tasks.md R13–R23）。
+下面保留当时的差距清单及其处理结果，作为审计记录：
 
-- `@perix/event-sdk/runtime` 目前仍整包导出 `@deepseek-ai/cordis`；
+- `@perix/event-sdk/runtime` 已改为 Perix 自有的 `EventHost`（R16–R21）；
 - `@perix/event-sdk/messages` 已改为 Perix 自有的 `runtime/src/messages.ts`（R15）；
-- core 与 persistence 的 brand/values/timeout/llm 依赖已由 `runtime/` 替换（R14、R15）；
-  剩余 Cordis、dsh-scope、schemastery、typert 由 R16–R21 处理；UI 闭包按 R24 评估；
-- TypeScript 的 restore/resume 生命周期入口仍受 Cordis 组合方式影响，尚未
-  收敛为与 Python 一样的独立 Event API；
+- core 与 persistence 的全部 DSH 运行时依赖已由 `runtime/` 替换（R14–R21）；
+  SDK 产物只剩 `koffi`（win32）一个第三方运行时依赖；UI 闭包按 R24 评估；
+- TypeScript 的 restore 入口已收敛为 `runtime.restore(id)`，与 Python 对应（R21）；
 - Python v0 原生实现和当前跨语言 conformance 已完成，但不能代替上述
   TypeScript 依赖清理，也不代表整个抽离已达到最终生产完成标准。
 
@@ -200,9 +199,8 @@ schema 和 conformance 契约，因此其轨迹也能由现有 Trajectory UI 读
 
 2026-09-01 评审补充的差距（编号对应 `tasks.md`）：
 
-- 生成物 `lib/types` 仍有 `from '@deepseek-ai/cordis'` 与
-  `declare module '@deepseek-ai/cordis'`；`rewrite-public-namespaces.mjs`
-  只做字符串替换，打包测试也只检查 `dsh-session*`，所以泄漏测不出来（R09、R22）；
+- 生成物中的 `@deepseek-ai/cordis` 引用已随 R17–R19 消失；`rewrite-public-namespaces.mjs`
+  与打包测试的泄漏断言仍待 R22、R09 收尾；
 - 三个 `invariant` 子路径曾是 SDK 出口，它们是 Cordis companion plugin，已删除（R13）；
 - Python 曾有 DSH 没有的 `.event.lock` 文件锁，`contract.md` 还误把它写成共同
   契约；锁已删除，`resume()` 保留为文档化的 `restore()` 别名（R01、R11、R12）；
