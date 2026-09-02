@@ -2,38 +2,16 @@
 
 **The agent data plane for durable agent execution.**
 
-`perix-runtime-data` defines the durable runtime-data layer for Perix agents.
+`perix-runtime-data` holds the durable runtime-data facilities for Perix
+agents. The first and currently only facility is **Event**: the append-only
+execution trajectory of an agent Session, its persistence, restore/resume/fork
+behavior, and the Trajectory UI that projects it. It is cut directly from
+DeepSeek Harness rather than designed from scratch.
 
-It owns the semantics and lifecycle of:
-
-- **Stream** — an ordered root or lineage-aware child history
-- **Event** — canonical append-only execution facts
-- **State** — materialized logical runtime state
-- **Checkpoint** — durable recovery boundaries
-- **Artifact** — versioned metadata and references for generated files/data
-- **Effect** — externally committed side effects and idempotency records
-- **Projection** — derived views such as OpenTelemetry and analytics exports
-
-## Design principle
-
-One canonical logical history; multiple materializations and projections.
-
-```text
-Canonical Event Stream
-      |
-      +--> State --> Checkpoint --> Forked Stream
-      |
-      +--> Artifact index / Effect ledger
-      |
-      `--> OTel / Analytics projections
-```
-
-Runtime-data semantics are independent from any specific harness, model provider,
-sandbox, database, or observability backend.
-
-V0 uses one root stream per session, optimistic concurrency through
-`expected_seq`, and exact `(stream_id, seq)` revisions. See
-[`RFC 0001`](rfcs/0001-runtime-data-model.md) for the current model.
+Further facilities (materialized state, checkpoints, artifact and effect
+ledgers, observability projections) are out of scope until Event is
+production-ready. Earlier from-scratch design drafts for them were removed on
+2026-09-01; see git history before that date if they are needed again.
 
 ## Repository layout
 
@@ -58,27 +36,13 @@ perix-runtime-data/
 │   └── event/cross-language/       # Bidirectional implementation tests
 ├── docs/
 │   └── event/                      # Scope, contract, and task checklist
-├── spec/
-│   ├── ids/
-│   ├── stream/
-│   ├── event/
-│   ├── state/
-│   ├── checkpoint/
-│   ├── artifact/
-│   ├── effect/
-│   └── projection/
 ├── schemas/
-│   └── event/v0/
-├── adapters/
-│   ├── harness/
-│   ├── storage/
-│   └── observability/
+│   └── event/v0/                   # Language-neutral wire schemas
 ├── conformance/
 │   └── event/v0/                   # Shared cases and wire fixtures
-├── third_party/
-│   └── deepseek-harness/
-│       └── upstream/               # Unmodified pinned DSH source snapshot
-└── rfcs/
+└── third_party/
+    └── deepseek-harness/
+        └── upstream/               # Unmodified pinned DSH source snapshot
 ```
 
 ## Event reference implementation

@@ -113,6 +113,15 @@ Cordis 不是 Event 的领域概念，也不应成为公共 SDK。若现有 DSH 
 Cordis 注入 Session、持久化或 UI 服务，目标是把同样的可观察生命周期改成
 直接组合或最小本地接口，而不是把 Cordis 整包换名后继续暴露。
 
+决策（2026-09-01）：**不通过 vendor 或 bundle Cordis 来"隐藏"依赖。**
+Cordis 是插件平台，轨迹设施依赖插件平台是反向依赖；哪怕打进内部 chunk
+不对外导出，也意味着 Event 的生命周期语义由宿主框架定义。允许为此修改
+保留源码，但改动限定在宿主接缝：`Service` 基类、`ctx.effect/on/emit/
+parallel/logger`、scope carrier、typert 注册和 `declare module` 扩展。
+替代物是一个本地最小 `EventHost`（事件总线、反序 disposer、logger），
+Session/append/fork/repair/surface/JSONL 逻辑逐字节不动，并由保留的上游
+测试锁定行为。具体步骤见 [`tasks.md`](tasks.md) 第 3.1 节。
+
 同理，Event 需要消息的持久化形状，但不需要完整的 DSH LLM runtime。应只
 保留 Event 真正接受和产生的消息类型、构造规则及 JSON 形状，并将其定义为
 跨语言可实现的 Perix 契约。
@@ -187,6 +196,20 @@ schema 和 conformance 契约，因此其轨迹也能由现有 Trajectory UI 读
   TypeScript 依赖清理，也不代表整个抽离已达到最终生产完成标准。
 
 这些差距应按上述分类逐项处理，不能通过改包名或增加 server 掩盖。
+
+2026-09-01 评审补充的差距（编号对应 `tasks.md`）：
+
+- 生成物 `lib/types` 仍有 `from '@deepseek-ai/cordis'` 与
+  `declare module '@deepseek-ai/cordis'`；`rewrite-public-namespaces.mjs`
+  只做字符串替换，打包测试也只检查 `dsh-session*`，所以泄漏测不出来（R09、R22）；
+- 三个 `invariant` 子路径是 Cordis companion plugin，不应出现在 SDK 出口（R13）；
+- Python 的 `.event.lock` 文件锁与 `resume()` 别名是 DSH 没有的功能，且
+  `contract.md` 误把锁写成了共同契约（R01、R11、R12）；
+- `KNOWN_SESSION_EVENT_TYPES` 两份手抄副本无一致性测试（R08）；
+- `views.client.spec.tsx` 被排除，独立宿主桩掉的 Trajectory 能力未登记（R05、R10）；
+- 根目录早期的 `spec/`、`rfcs/`、`schemas/v0`、`conformance/cases` 从零设计草案与
+  Event 实现矛盾，已于 2026-09-01 删除（R03）；
+- 没有脚本校验裁剪源码与 `third_party` 快照一致（R07）。
 
 ## 完成标准
 
