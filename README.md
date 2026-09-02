@@ -51,7 +51,8 @@ perix-runtime-data/
 │       │   ├── ui/trajectory/      # Publishable @perix/event-ui boundary
 │       │   └── tests/              # TypeScript Event tests
 │       └── python/
-│           ├── sdk/                # Native installable perix-event-sdk
+│           ├── src/perix_event/    # Native implementation and public API
+│           ├── pyproject.toml      # perix-event-sdk distribution
 │           └── tests/              # Python core/persistence/package tests
 ├── tests/
 │   └── event/cross-language/       # Bidirectional implementation tests

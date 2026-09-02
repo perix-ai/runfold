@@ -1,20 +1,49 @@
-# Python Event implementation
+# Python Event package
 
 This directory is the native Python implementation of the Event trajectory
-facility described in [`docs/event`](../../../docs/event/README.md).
+facility and the installable `perix-event-sdk` distribution. The public SDK and
+its implementation intentionally ship as one in-process package; there is no
+TypeScript bridge or server client.
 
 ```text
-event/
-├── sdk/
-│   ├── pyproject.toml
-│   └── src/perix_event/   # Complete implementation and public SDK
-└── tests/                 # Unified Python unit/integration/package tests
+python/
+├── pyproject.toml
+├── src/perix_event/   # Public API and complete implementation
+└── tests/             # Unit, integration, and package-consumer tests
 ```
 
 Unlike the TypeScript extraction, Python has no retained DSH package workspaces
-to wrap. The installable SDK therefore owns the complete Session, surface,
-repair, message, chunk codec, and JSONL persistence logic under `src/perix_event`.
-It does not invoke TypeScript and introduces no server process.
+to wrap. `src/perix_event/__init__.py` defines the supported public API, while
+the sibling modules contain Session, surface, repair, message, chunk codec, and
+JSONL persistence behavior.
+
+## Install and use
+
+```bash
+pip install perix-event-sdk
+```
+
+```python
+from perix_event import JsonlSessionPersistence, SessionStore, create_user_message
+
+persistence = JsonlSessionPersistence("./sessions", compression="none")
+store = SessionStore(persistence)
+session = store.create("example", meta={"cwd": "/workspace"})
+session.append("turn/start", {"turn": 1})
+session.append(
+    "user/message",
+    create_user_message(
+        content=[{"type": "text", "text": "hello"}],
+        source={"kind": "user"},
+    ),
+    surface_op="append",
+)
+session.append("turn/end", {"turn": 1, "reason": {"kind": "completed"}})
+store.close()
+```
+
+Python 3.14 uses standard-library Zstandard support. On Python 3.10–3.13,
+install `perix-event-sdk[zstd]`; plaintext JSONL needs no optional dependency.
 
 The implementation preserves DSH format v0 field names and behavior while using
 Perix package names. Shared cross-language fixtures live under

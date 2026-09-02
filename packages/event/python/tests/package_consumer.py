@@ -8,7 +8,7 @@ import venv
 from pathlib import Path
 
 
-SDK = Path(__file__).resolve().parents[1] / "sdk"
+PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:
@@ -24,7 +24,7 @@ def main() -> None:
                 "pip",
                 "install",
                 "--disable-pip-version-check",
-                str(SDK),
+                str(PACKAGE_ROOT),
             ],
             check=True,
         )

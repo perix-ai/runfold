@@ -12,7 +12,7 @@ import { Context } from '@perix/event-sdk/runtime'
 import { EventTrajectory } from '@perix/event-ui'
 
 const repositoryRoot = resolve(import.meta.dirname, '../../..')
-const pythonSource = join(repositoryRoot, 'packages/event/python/sdk/src')
+const pythonSource = join(repositoryRoot, 'packages/event/python/src')
 const roots: string[] = []
 const contexts: Context[] = []
 

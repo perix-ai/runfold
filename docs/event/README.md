@@ -86,9 +86,11 @@ Event 是 agent 执行轨迹中的持久事实，Session 是有顺序的 Event �
 | [`conformance/`](../../conformance/) | 跨语言共享行为用例、有效/无效样本与预期结果 | 随契约演进 |
 
 `third_party` 是来源证据，不参与生产构建和运行。裁剪实现保留上游相对路径
-是默认做法，但为了形成独立库而新增 `sdk/`、统一测试目录、构建入口或最小
-宿主是允许的；新增内容必须清楚标记为本地代码。文件级来源映射和必要差异
-继续记录在 [TypeScript Event implementation](../../packages/event/typescript/README.md)。
+是默认做法，但 TypeScript 为了形成独立发布边界而新增 `sdk/`、统一测试目录、
+构建入口或最小宿主是允许的；新增内容必须清楚标记为本地代码。Python 使用
+标准 `pyproject.toml` + `src/perix_event/` 布局，不增加没有独立职责的 `sdk/`
+目录。文件级来源映射和必要差异继续记录在
+[TypeScript Event implementation](../../packages/event/typescript/README.md)。
 
 当前 `upstream/` 是为这次抽离保留的范围化快照，不是 DSH 整仓镜像；纳入
 快照的每个上游文件都必须与固定 commit 逐字节一致。若后续发现 Event 依赖

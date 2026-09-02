@@ -35,6 +35,8 @@
 ## 4. Python 原生实现
 
 - [x] 建立可安装的 `perix-event-sdk` 包及清晰的公开 API。
+- [x] 使用标准 `pyproject.toml` + `src/perix_event/` 布局，公开 API 与完整实现
+  同包发布，不保留无独立职责的 `sdk/` 目录。
 - [x] 实现 Session header、Event envelope、连续序号和 JSON 值校验。
 - [x] 实现 surface append/replace、来源序号验证和消息投影。
 - [x] 实现 request header/context fold、chunk row 与 seq-range 编解码。
