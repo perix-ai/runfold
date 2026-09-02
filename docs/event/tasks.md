@@ -36,7 +36,7 @@
 - [x] 记录 TypeScript 与 Python 的公共 API、持久化格式和行为映射。
 - [x] 为每项必要偏离保留来源、理由和回归测试。
 
-- [x] **R01** · 难度 易 · 风险 低 · 位置 `docs/event/contract.md`
+- [x] **R01** · 难度 易 · 风险 低 · 位置 `docs/event/specification.md`
   - **问题**：第 76 行把 advisory file lock 写成了 TS/Python 共同契约。DSH 的
     JSONL 后端没有任何文件锁（`session-persistence-jsonl/src` 中无
     flock/lock 逻辑），锁只存在于 Python。
@@ -45,7 +45,7 @@
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：删除锁段落，改为"两种实现都不使用跨进程文件锁，与 DSH 一致"。
 
-- [x] **R02** · 难度 易 · 风险 低 · 位置 `docs/event/contract.md` 行为接口映射表
+- [x] **R02** · 难度 易 · 风险 低 · 位置 `docs/event/specification.md` 行为接口映射表
   - **问题**：表格只写了"共同语义"，读者会把"逻辑等价"误读为"API 等价"。
     TS 独有：write-behind 批处理、`SessionPreparation`/`prepare`、
     `listSnapshots`、带 `AbortSignal` 的 `inspect`、borrowed live source。
@@ -213,7 +213,7 @@
     TS 没有与 Python `store.restore(id)` 对应的一步式恢复入口。
   - **处理**：导出本地 `createEventRuntime()`，返回 `sessions`
     （`create/restore/fork/flush`）、`persistence`、`dispose`；`restore(id)`
-    即 `contract.md` 中"`prepare` 后由 `SessionStore` 发布"的封装。
+    即 `specification.md` 中"`prepare` 后由 `SessionStore` 发布"的封装。
   - **依赖**：R16–R20。
   - **结果**：已完成（2026-09-01）：`@perix/event-sdk/runtime` 只导出 `EventHost`；根入口新增 `createEventRuntime({ persistence })` 返回 `sessions/persistence/restore/dispose`；`restore` = `prepare` + `enter` + `announce`。Perix 测试与打包消费者已迁移。
 
@@ -260,7 +260,7 @@
   - **处理**：从快照裁入这两个包的闭包；第三方依赖（shiki、mdast、micromark、katex、anser、clsx、immer、zustand）直接声明；删除全部 `@deepseek-ai/*` devDependencies 与 `overrides`；打包测试断言产物连注释都不含 `@deepseek-ai`。
   - **依赖**：R27。
 
-- [ ] **R29** · 难度 易 · 风险 低 · 位置 `third_party/deepseek-harness/README.md`、TS README、本清单、`docs/event/README.md`
+- [ ] **R29** · 难度 易 · 风险 低 · 位置 `third_party/deepseek-harness/README.md`、TS README、本清单、`docs/event/decisions.md`
   - **问题**：完成后文档中"仅注册表引用"、"名字仍在保留源码中"等描述过期。
   - **处理**：按任务书第 5 步逐项更新，并把第 7 节总验收的前置条件补上本任务。
   - **依赖**：R28。
@@ -283,16 +283,16 @@
   - **问题**：`.event.lock` advisory 文件锁是 DSH 没有的功能，且在 session 目录
     里多写一个文件。
   - **处理**：按"不增加功能"原则删除，仅保留进程内 `threading.RLock`；若因
-    Nexent 多进程需求保留，须在 `contract.md` 标注 Python-only（R01），并
+    Nexent 多进程需求保留，须在 `specification.md` 标注 Python-only（R01），并
     增加 TS 读取含 `.event.lock` 目录的跨语言测试。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：删除 `_exclusive_file_lock`、`_lock_path` 及三处调用，只保留进程内 `RLock`；不再写 `.event.lock`。
 
 - [x] **R12** · 难度 易 · 风险 低 · 位置 `packages/event/python/src/perix_event/session.py`
   - **问题**：`SessionStore.resume()` 只是 `restore()` 别名，DSH 没有该 API。
-  - **处理**：保留则在 docstring 与 `contract.md` 明确"别名"（R02）；否则删除。
+  - **处理**：保留则在 docstring 与 `specification.md` 明确"别名"（R02）；否则删除。
   - **依赖**：无。
-  - **结果**：已完成（2026-09-01）：保留别名，docstring 与 `contract.md` 均注明"与 `restore` 相同、Python-only、不增加行为"。
+  - **结果**：已完成（2026-09-01）：保留别名，docstring 与 `specification.md` 均注明"与 `restore` 相同、Python-only、不增加行为"。
 
 ## 5. 跨语言契约
 

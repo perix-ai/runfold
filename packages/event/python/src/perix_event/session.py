@@ -480,7 +480,7 @@ class SessionStore:
 
         DSH has no separate resume API: a restored Session already continues
         its append lifecycle. The alias exists only so callers can use the
-        ``resume`` vocabulary of ``docs/event/contract.md``; it adds no
+        ``resume`` vocabulary of ``docs/event/specification.md``; it adds no
         behavior and is Python-only.
         """
 
