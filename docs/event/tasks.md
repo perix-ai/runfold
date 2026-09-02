@@ -229,6 +229,33 @@
   - **依赖**：无。
   - **结果**：已完成评估（2026-09-01）：`@perix/event-ui` 产物 5.1 MB：主 chunk 1.35 MB，`style.css` 1.5 MB（其中 20 个 `@font-face` 以 data: URI 内嵌字体，占绝大部分），23 个 shiki 语法 chunk 约 2.3 MB 按需动态加载。`package.json` 只依赖 `@perix/event-sdk` 与 React peer，消费者不安装任何 DSH 包。结论：保持"原样裁剪"，不裁 shiki；若日后有体积要求，可选的后续项是把字体改为外部文件、收窄 shiki 语法集，两者都不影响 Event 行为。
 
+### 3.2 彻底移除 DSH 名称与注册表依赖（待执行，详见 [`codex-task-dsh-free.md`](codex-task-dsh-free.md)）
+
+- [ ] **R25** · 难度 易 · 风险 低 · 位置 `scripts/verify-upstream-identity.mjs`
+  - **问题**：改写保留源码的 import 后，逐字节比对会把每个文件都列成"允许差异"，一致性保障失效。
+  - **处理**：脚本改为"对上游内容应用显式 specifier 映射表后再逐字节比对"；映射表为空时行为与现在相同，先单独提交。
+  - **依赖**：无。
+
+- [ ] **R26** · 难度 易 · 风险 低 · 位置 `packages/core/session/src`、`packages/session/*/src` 共 14 个文件
+  - **问题**：源码仍写 `@deepseek-ai/dsh-session`、`dsh-llm`、`dsh-brand`、`dsh-util-values`、`dsh-timeout` 等名字，靠 6 处构建/测试别名解析。
+  - **处理**：只改 import 行为相对路径（`@perix/event-sdk/runtime` 自引用保留）；删除对应别名；删除三个 `invariant.ts` 与三个被排除的 Cordis 测试。
+  - **依赖**：R25。
+
+- [ ] **R27** · 难度 中 · 风险 中 · 位置 `runtime/src/ui-types.ts`、`runtime/src/event-types.ts`、UI 闭包约 30 个文件
+  - **问题**：UI 闭包从 20 多个注册表包只取类型（`SessionSnapshot`、`ConversationNodeDefinition`、`InjectFace` 等）以及六处 `import type {}` 的事件数据形状增强。
+  - **处理**：可裁的纯类型文件从快照裁入并纳入比对；其余按上游逐字段复制到本地类型模块；`register*Definition(ctx: Context)` 改为两成员的本地接口；增强目标改为 `@perix/event-sdk/session/types`。
+  - **依赖**：R26。
+
+- [ ] **R28** · 难度 难 · 风险 中 · 位置 `packages/client/store`、`packages/client/ui-primitives` 子集、`ui/trajectory/package.json`、根 `package.json`
+  - **问题**：运行时真正用到的只有 `dsh-client-store`（3 个文件）与 `dsh-client-ui-primitives` 的图标、Tooltip、JsonTree、MarkdownText、`extractMarkdownPlainText` 闭包，却因此拖着 25 个注册表包与根 `overrides`。
+  - **处理**：从快照裁入这两个包的闭包；第三方依赖（shiki、mdast、micromark、katex、anser、clsx、immer、zustand）直接声明；删除全部 `@deepseek-ai/*` devDependencies 与 `overrides`；打包测试断言产物连注释都不含 `@deepseek-ai`。
+  - **依赖**：R27。
+
+- [ ] **R29** · 难度 易 · 风险 低 · 位置 `third_party/deepseek-harness/README.md`、TS README、本清单、`docs/event/README.md`
+  - **问题**：完成后文档中"仅注册表引用"、"名字仍在保留源码中"等描述过期。
+  - **处理**：按任务书第 5 步逐项更新，并把第 7 节总验收的前置条件补上本任务。
+  - **依赖**：R28。
+
 ## 4. Python 原生实现
 
 - [x] 建立可安装的 `perix-event-sdk` 包及清晰的公开 API。
@@ -318,3 +345,4 @@
 | 5 | R16 → R19 → R17 → R18 → R20 → R21 | 宿主接口与保留源码改动 | 批次 4 |
 | 6 | R22, R23, R09 | 收尾与泄漏门禁 | 批次 5 |
 | 7 | R10, R24 | 独立长线 | 无 |
+| 8 | R25 → R26 → R27 → R28 → R29 | 彻底移除 DSH 名称与注册表依赖（交由 Codex，见 `codex-task-dsh-free.md`） | 批次 6 |
