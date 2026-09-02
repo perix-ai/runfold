@@ -205,7 +205,7 @@ TypeScript 裁剪版的 DSH/Cordis 解耦已于 2026-09-01 完成（tasks.md R13
 - Python 曾有 DSH 没有的 `.event.lock` 文件锁，`contract.md` 还误把它写成共同
   契约；锁已删除，`resume()` 保留为文档化的 `restore()` 别名（R01、R11、R12）；
 - `KNOWN_SESSION_EVENT_TYPES` 两份手抄副本已由 conformance 单一来源与双侧测试锁定（R08）；
-- `views.client.spec.tsx` 被排除，独立宿主桩掉的 Trajectory 能力未登记（R05、R10）；
+- `views.client.spec.tsx` 中与 shell 无关的 25 个用例已移植到独立宿主，桩掉的能力已登记（R05、R10）；
 - 根目录早期的 `spec/`、`rfcs/`、`schemas/v0`、`conformance/cases` 从零设计草案与
   Event 实现矛盾，已于 2026-09-01 删除（R03）；
 - 裁剪源码与 `third_party` 快照的一致性已由 `verify:upstream-identity` 校验（R07）。

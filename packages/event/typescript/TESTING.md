@@ -7,7 +7,7 @@ The Event implementations are verified at eight independent layers.
 | Upstream Event regression | `packages/core/session/tests`, `packages/session/**/tests` | Retained Session and persistence behavior still matches the pinned source |
 | Upstream Trajectory regression | `packages/client/ui-trajectory/tests` | Retained projection, layout, table, timeline, and view behavior remains intact |
 | Perix SDK | `tests/sdk` | Public exports, lifecycle, immutability, replay, fork, JSONL round-trip/restart, raw/suffix reads, and isolation work through `@perix/*` imports |
-| Perix UI | `tests/ui` | `EventTrajectory` projects, renders, localizes, pages, replaces input, and handles 20,000 events |
+| Perix UI | `tests/ui` | `EventTrajectory` projects, renders, localizes, pages, replaces input, and handles 20,000 events; the ported upstream view cases cover ledger, inspector, timeline, and duration state on the standalone host |
 | Complete system | `tests/integration` | One log crosses validation, fork, JSONL durability, process-style restart, and React rendering |
 | Cross-language conformance | `tests/event/cross-language`, `conformance/event/v0` | Both languages agree on valid/invalid inputs and repair; each reads, resumes, appends, and forks the other's plain/Zstd files; Python events render in Trajectory |
 | Python implementation | `packages/event/python/tests` | Native Session, surface, repair, codecs, persistence, recovery, and 20,000-Event history work without TypeScript |
@@ -34,4 +34,4 @@ Six upstream test files are excluded in the root `vitest.config.ts`:
 | `packages/core/session/tests/scoped.spec.ts` | Tests dsh-scope's scope-filtered dispatch, a Harness host mechanism the Perix host does not have | Every listener hears every session by design |
 | `packages/core/session/tests/typert.spec.ts` | Tests the Typert lookup registration removed with Cordis | Not applicable |
 | `packages/core/session/tests/invariant.spec.ts` | Tests the Cordis invariants companion plugin removed in R13 | Not applicable |
-| `packages/client/ui-trajectory/tests/views.client.spec.tsx` | 1338-line view test that mounts the complete DSH shell (slots, workspaces, session controller) | **Open gap.** Only the smaller `tests/ui` suite covers the standalone view; porting an equivalent is tracked as R10 in `docs/event/tasks.md` |
+| `packages/client/ui-trajectory/tests/views.client.spec.tsx` | Mounts the complete DSH shell (slot ring, Conversation tabs, locale plugin) | **Ported.** `tests/ui/trajectory-view.spec.tsx` runs its 25 shell-independent cases (ledger and inspector interactions, timeline projection, view state) against the standalone host with the upstream assertions unchanged. The six remaining cases test plugin registration, tab labels, and the Node plugin half, which the Event component does not have |

@@ -46,6 +46,7 @@ export default defineConfig({
     noExternal: ['@deepseek-ai/dsh-client-ui-primitives'],
   },
   test: {
+    setupFiles: ['./packages/event/typescript/test-support/jsdom-storage.ts'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

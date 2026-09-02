@@ -49,7 +49,8 @@ is unchanged.
 
 The public declaration contains no `@deepseek-ai/*` imports or `Dsh*` names.
 Tests for projection, rendering, localization, pagination, replacement, and a
-20,000-event history live in `../../tests/ui`.
+20,000-event history live in `../../tests/ui`, alongside the port of the
+upstream view test cases that do not need the DSH shell.
 
 Source provenance and the exact extraction boundary are documented in
 `packages/event/typescript/README.md`. The untouched upstream reference

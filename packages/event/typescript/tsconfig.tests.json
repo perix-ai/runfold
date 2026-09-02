@@ -70,6 +70,9 @@
       ],
       "@deepseek-ai/dsh-timeout": [
         "packages/event/typescript/runtime/src/timeout.ts"
+      ],
+      "@deepseek-ai/dsh-client-locale/src/locales/*": [
+        "packages/event/typescript/packages/client/locale/src/locales/*"
       ]
     }
   },
