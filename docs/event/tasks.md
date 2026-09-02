@@ -595,12 +595,12 @@
 | 6 | R22, R23, R09 | 收尾与泄漏门禁 | 批次 5 |
 | 7 | R10, R24 | 独立长线 | 无 |
 | 8 | R30 → R31 | 校准 EventHost 生命周期，并补齐双向公开 restore 门禁 | 批次 5 |
-| 9 | R36 | 上游测试文件的 DSH import 改写与别名清零（见 `tasks/R36-test-imports.md`） | 批次 8 |
 | 9 | R25 → R26 → R27 → R28 → R29 | 彻底移除 DSH 名称与注册表依赖（交由 Codex，见 `tasks/R25-R29-dsh-free.md`） | 批次 8 |
 | 10 | R32 | 按最终代码和验证结果同步全部文档事实 | 批次 9、R31 |
 | 11 | R34 | 校准多轮 restore 的 `session/end-seed` 边界语义 | R31 |
 | 12 | R35 | 显式构建并从独立 wheel 安装 Python 空白消费者 | R34 |
 | 13 | R33 | Nexent 真实消费者接入与需求 A5 验收 | R25–R32、R34–R35 |
+| 14 | R36 | 上游测试文件的 DSH import 改写与别名清零（见 `tasks/R36-test-imports.md`） | 批次 9 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
