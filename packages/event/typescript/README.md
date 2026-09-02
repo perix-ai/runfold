@@ -70,8 +70,19 @@ package identity, are marked private, and are never the consumer-facing SDK.
 - `ui/trajectory` contains all reusable standalone host wiring and
   supplies the services that the unchanged DSH Trajectory view normally
   receives from the complete DSH shell.
+- `runtime/` is Perix-authored code that replaces the DSH utility packages the
+  retained sources import: `brand.ts` (`@deepseek-ai/dsh-brand`), `values.ts`
+  (`@deepseek-ai/dsh-util-values`), `timeout.ts` (`@deepseek-ai/dsh-timeout`),
+  and `messages.ts` (the Event-facing subset of `@deepseek-ai/dsh-llm` plus the
+  `ImageAttachmentRef` shape from `@deepseek-ai/dsh-attachment`). Retained
+  sources keep their upstream specifiers; the SDK build, the test runner, and
+  the UI type-check resolve those specifiers to `runtime/` (see
+  `sdk/vite.config.ts`, `vitest.config.ts`, `tsconfig.tests.json`, and
+  `ui/trajectory/tsconfig.json`), so the published SDK bundles them and depends
+  on none of the replaced packages. `runtime/README.md` records each file's
+  provenance.
 - `sdk/` adds only package exports; the implementation remains in the retained
-  DSH package trees above. Its build bundles those three local implementation
+  DSH package trees above and in `runtime/`. Its build bundles those three local implementation
   trees and mechanically rewrites only their internal declaration import paths,
   so an installed package never falls back to registry copies of those Event
   packages.

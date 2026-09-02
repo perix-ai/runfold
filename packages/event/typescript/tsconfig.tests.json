@@ -8,24 +8,69 @@
     "target": "ES2024",
     "jsx": "react-jsx",
     "noEmit": true,
-    "types": ["node", "vitest/globals", "vite/client"],
+    "types": [
+      "node",
+      "vitest/globals",
+      "vite/client"
+    ],
     "paths": {
-      "@perix/event-ui": ["packages/event/typescript/ui/trajectory/src/index.ts"],
-      "@perix/event-sdk": ["packages/event/typescript/sdk/src/index.ts"],
-      "@perix/event-sdk/session": ["packages/event/typescript/sdk/src/session.ts"],
-      "@perix/event-sdk/session/types": ["packages/event/typescript/sdk/src/session-types.ts"],
-      "@perix/event-sdk/session/chunk-rows": ["packages/event/typescript/sdk/src/session-chunk-rows.ts"],
-      "@perix/event-sdk/session/surface": ["packages/event/typescript/sdk/src/session-surface.ts"],
-      "@perix/event-sdk/persistence": ["packages/event/typescript/sdk/src/persistence.ts"],
-      "@perix/event-sdk/persistence-jsonl": ["packages/event/typescript/sdk/src/persistence-jsonl.ts"],
-      "@perix/event-sdk/runtime": ["packages/event/typescript/sdk/src/runtime.ts"],
-      "@perix/event-sdk/messages": ["packages/event/typescript/sdk/src/messages.ts"],
-      "@deepseek-ai/dsh-session": ["packages/event/typescript/packages/core/session/src/index.ts"],
-      "@deepseek-ai/dsh-session/*": ["packages/event/typescript/packages/core/session/src/*"],
-      "@deepseek-ai/dsh-session-persistence": ["packages/event/typescript/packages/session/session-persistence/src/index.ts"],
-      "@deepseek-ai/dsh-session-persistence/*": ["packages/event/typescript/packages/session/session-persistence/src/*"],
-      "@deepseek-ai/dsh-session-persistence-jsonl": ["packages/event/typescript/packages/session/session-persistence-jsonl/src/index.ts"],
-      "@deepseek-ai/dsh-session-persistence-jsonl/*": ["packages/event/typescript/packages/session/session-persistence-jsonl/src/*"]
+      "@perix/event-ui": [
+        "packages/event/typescript/ui/trajectory/src/index.ts"
+      ],
+      "@perix/event-sdk": [
+        "packages/event/typescript/sdk/src/index.ts"
+      ],
+      "@perix/event-sdk/session": [
+        "packages/event/typescript/sdk/src/session.ts"
+      ],
+      "@perix/event-sdk/session/types": [
+        "packages/event/typescript/sdk/src/session-types.ts"
+      ],
+      "@perix/event-sdk/session/chunk-rows": [
+        "packages/event/typescript/sdk/src/session-chunk-rows.ts"
+      ],
+      "@perix/event-sdk/session/surface": [
+        "packages/event/typescript/sdk/src/session-surface.ts"
+      ],
+      "@perix/event-sdk/persistence": [
+        "packages/event/typescript/sdk/src/persistence.ts"
+      ],
+      "@perix/event-sdk/persistence-jsonl": [
+        "packages/event/typescript/sdk/src/persistence-jsonl.ts"
+      ],
+      "@perix/event-sdk/runtime": [
+        "packages/event/typescript/sdk/src/runtime.ts"
+      ],
+      "@perix/event-sdk/messages": [
+        "packages/event/typescript/sdk/src/messages.ts"
+      ],
+      "@deepseek-ai/dsh-session": [
+        "packages/event/typescript/packages/core/session/src/index.ts"
+      ],
+      "@deepseek-ai/dsh-session/*": [
+        "packages/event/typescript/packages/core/session/src/*"
+      ],
+      "@deepseek-ai/dsh-session-persistence": [
+        "packages/event/typescript/packages/session/session-persistence/src/index.ts"
+      ],
+      "@deepseek-ai/dsh-session-persistence/*": [
+        "packages/event/typescript/packages/session/session-persistence/src/*"
+      ],
+      "@deepseek-ai/dsh-session-persistence-jsonl": [
+        "packages/event/typescript/packages/session/session-persistence-jsonl/src/index.ts"
+      ],
+      "@deepseek-ai/dsh-session-persistence-jsonl/*": [
+        "packages/event/typescript/packages/session/session-persistence-jsonl/src/*"
+      ],
+      "@deepseek-ai/dsh-brand": [
+        "packages/event/typescript/runtime/src/brand.ts"
+      ],
+      "@deepseek-ai/dsh-util-values": [
+        "packages/event/typescript/runtime/src/values.ts"
+      ],
+      "@deepseek-ai/dsh-timeout": [
+        "packages/event/typescript/runtime/src/timeout.ts"
+      ]
     }
   },
   "include": [

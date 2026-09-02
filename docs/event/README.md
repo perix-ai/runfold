@@ -188,8 +188,9 @@ schema 和 conformance 契约，因此其轨迹也能由现有 Trajectory UI 读
 “测试通过”解释为“已经完成 DSH 解耦”：
 
 - `@perix/event-sdk/runtime` 目前仍整包导出 `@deepseek-ai/cordis`；
-- `@perix/event-sdk/messages` 目前仍整包导出 `@deepseek-ai/dsh-llm`；
-- core、persistence 和 UI 依赖闭包仍含需要分类处理的 DSH imports；
+- `@perix/event-sdk/messages` 已改为 Perix 自有的 `runtime/src/messages.ts`（R15）；
+- core 与 persistence 的 brand/values/timeout/llm 依赖已由 `runtime/` 替换（R14、R15）；
+  剩余 Cordis、dsh-scope、schemastery、typert 由 R16–R21 处理；UI 闭包按 R24 评估；
 - TypeScript 的 restore/resume 生命周期入口仍受 Cordis 组合方式影响，尚未
   收敛为与 Python 一样的独立 Event API；
 - Python v0 原生实现和当前跨语言 conformance 已完成，但不能代替上述

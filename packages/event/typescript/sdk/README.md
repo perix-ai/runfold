@@ -15,7 +15,7 @@ DSH Event source—not registry copies—into the published package:
 - `@perix/event-sdk/persistence-jsonl`
 - `@perix/event-sdk/runtime` for the runtime `Context` and service primitives
 - `@perix/event-sdk/messages` for Event-compatible message constructors and
-  value types
+  value types (Perix-owned; see `../runtime/README.md`)
 
 The upstream `*/invariant` companion modules are Cordis diagnostic plugins,
 not Event behavior, and are intentionally not exported.

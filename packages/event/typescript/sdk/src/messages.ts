@@ -1,3 +1,2 @@
-/** Perix namespace for message values and constructors accepted by Event sessions. */
-export * from '@deepseek-ai/dsh-llm'
-
+/** Message values, ids, and constructors accepted and produced by Event sessions. */
+export * from '../../runtime/src/messages.ts'

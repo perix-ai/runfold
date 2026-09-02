@@ -5,6 +5,12 @@ import { fileURLToPath } from 'node:url'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const typesRoot = resolve(root, 'lib/types')
 const targets = new Map([
+  ['@deepseek-ai/dsh-brand', 'runtime/src/brand.d.ts'],
+  ['@deepseek-ai/dsh-util-values', 'runtime/src/values.d.ts'],
+  ['@deepseek-ai/dsh-timeout', 'runtime/src/timeout.d.ts'],
+  ['@deepseek-ai/dsh-llm/brand', 'runtime/src/messages.d.ts'],
+  ['@deepseek-ai/dsh-llm/types', 'runtime/src/messages.d.ts'],
+  ['@deepseek-ai/dsh-llm', 'runtime/src/messages.d.ts'],
   ['@deepseek-ai/dsh-session', 'packages/core/session/src/index.d.ts'],
   ['@deepseek-ai/dsh-session/types', 'packages/core/session/src/types.d.ts'],
   ['@deepseek-ai/dsh-session/chunk-rows', 'packages/core/session/src/chunk-rows.d.ts'],

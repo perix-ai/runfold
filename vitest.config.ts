@@ -18,6 +18,11 @@ export default defineConfig({
       { find: /^@perix\/event-sdk\/runtime$/, replacement: source('./packages/event/typescript/sdk/src/runtime.ts') },
       { find: /^@perix\/event-sdk\/messages$/, replacement: source('./packages/event/typescript/sdk/src/messages.ts') },
       { find: /^@perix\/event-sdk$/, replacement: source('./packages/event/typescript/sdk/src/index.ts') },
+      // Perix runtime modules replace the DSH utility packages for every retained source and test.
+      { find: /^@deepseek-ai\/dsh-brand$/, replacement: source('./packages/event/typescript/runtime/src/brand.ts') },
+      { find: /^@deepseek-ai\/dsh-util-values$/, replacement: source('./packages/event/typescript/runtime/src/values.ts') },
+      { find: /^@deepseek-ai\/dsh-timeout$/, replacement: source('./packages/event/typescript/runtime/src/timeout.ts') },
+      { find: /^@deepseek-ai\/dsh-llm(?:\/brand|\/types)?$/, replacement: source('./packages/event/typescript/runtime/src/messages.ts') },
       { find: /^@deepseek-ai\/dsh-session$/, replacement: source('./packages/event/typescript/packages/core/session/src/index.ts') },
       { find: /^@deepseek-ai\/dsh-session\/invariant$/, replacement: source('./packages/event/typescript/packages/core/session/src/invariant.ts') },
       { find: /^@deepseek-ai\/dsh-session\/types$/, replacement: source('./packages/event/typescript/packages/core/session/src/types.ts') },
