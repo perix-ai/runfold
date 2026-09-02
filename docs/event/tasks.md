@@ -7,8 +7,9 @@
 > 总体状态（2026-09-02）：R01–R35 与第 7 节总验收全部完成，`npm run verify`
 > 全绿，SDK 与 UI 发布产物均不依赖任何 DSH 包。R33 已在与官方 tag
 > 逐文件一致的 Nexent v2.5.0 本地快照上完成真实进程、wheel 和轨迹 UI 验收；
-> 按用户约定，该 Nexent 分支仅用于本地实验，不推送远端。后续清理任务 R36
-> 与 Nexent 产品界面接入任务 R37 尚在执行，不改变 R01-R35 的既有验收结论。
+> R37 又完成了 Nexent 产品界面的读取、resume、fork 与浏览器验收。按用户约定，
+> 该 Nexent 分支仅用于本地实验，不推送远端。后续清理任务 R36 尚在执行，不改变
+> R01-R35 与 R37 的既有验收结论。
 
 ## 任务生命周期
 
@@ -550,7 +551,7 @@
   - **处理**：见 [`tasks/R36-test-imports.md`](tasks/R36-test-imports.md)。22 个可运行文件按映射表改写 import；3 个一直被排除的 shell/monorepo 测试删除；随后删除全部 `@deepseek-ai` 别名。
   - **依赖**：R25–R29。
 
-- [ ] **R37** · 难度 难 · 风险 中 · 位置 Nexent 本地实验分支、
+- [x] **R37** · 难度 难 · 风险 中 · 位置 Nexent 本地实验分支、
   `packages/event/typescript/{sdk,ui/trajectory}`
   - **问题**：R33 只证明真实 Nexent 轨迹能够被独立 Trajectory UI 自动化渲染；
     Nexent 前端没有改动，其原聊天面板不能直接读取 Event v0，也没有产品层的
@@ -560,6 +561,15 @@
     会话页嵌入 `@perix/event-ui`；由 Nexent 现有 Python 后端提供经过权限校验的
     Event 读取与操作边界，并完成真实父子轨迹的浏览器验收。
   - **依赖**：R33。
+  - **结果**：已完成（2026-09-02）：Nexent 本地分支以 5 个独立提交完成 Python
+    记录/读取/resume/fork、可复现 UI 包、前端客户端及同页“对话 / 轨迹”视图；
+    原聊天、Reasoning/Tool/Plan/Verification/Sources 与 Composer 保持原路径。
+    Session 映射先经过 tenant/user/conversation 权限，fork 同时生成 Event 子
+    Session 与 Nexent 子会话；该分支无 remote、未推送。
+  - **验证**：Nexent Python 539/539、前端 26/26、类型检查和生产构建通过；使用
+    R33 父子轨迹完成 1280×720 浏览器验收，搜索、折叠、详情、时长、刷新保持及
+    fork 第 3 Turn 均通过，证据见任务书。主仓 `npm run verify` 通过 969 个
+    Vitest、36 个 Python 测试、全部构建/类型检查及两种空白消费者安装。
 
 ## 7. 总体验收
 
