@@ -1,7 +1,7 @@
 # 任务：生产验收前的行为、互操作与文档收口
 
 > 对应清单：[`../tasks.md`](../tasks.md) R30–R32。
-> 执行者：Codex。状态：待执行。
+> 执行者：Codex。状态：进行中（R30 已完成，R31–R32 待执行）。
 >
 > 执行前先读 [`../requirements.md`](../requirements.md)、
 > [`../architecture.md`](../architecture.md)、

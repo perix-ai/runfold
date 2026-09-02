@@ -278,10 +278,10 @@
 
 ### 3.3 EventHost 生命周期校准
 
-待执行，详见
+进行中（R30 已完成，R31–R32 待执行），详见
 [`tasks/R30-R32-production-hardening.md`](tasks/R30-R32-production-hardening.md)。
 
-- [ ] **R30** · 难度 中 · 风险 高 · 位置
+- [x] **R30** · 难度 中 · 风险 高 · 位置
   `packages/event/typescript/runtime/src/host.ts`、
   `packages/event/typescript/tests/runtime/`
   - **问题**：R16 要求先为 `EventHost` 写独立测试，但目前只有公共导出 smoke
@@ -294,6 +294,12 @@
     异步初始化失败、反序清理、失败隔离、scope 与服务绑定行为和固定上游一致；
     不得借机扩展通用 runtime 能力。
   - **依赖**：R16。
+  - **结果**：已完成（2026-09-02）：新增 11 个 `EventHost` 直接测试并先复现
+    两个已知缺陷；`host.ts` 增加与固定 Cordis 对齐的 effect setup barrier、
+    Promise rejection 观察与 generator 最终 disposer 收集，重复或并发释放会加入
+    同一清理过程。未修改 Session、persistence 或 Trajectory 算法。
+  - **验证**：`test:runtime` 11/11、`test:upstream:event` 626/626、`test:sdk`
+    15/15、`test:system` 1/1；`test:types`、SDK build 与 `test:package` 通过。
 
 ## 4. Python 原生实现
 

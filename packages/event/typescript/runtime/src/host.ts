@@ -21,6 +21,11 @@
 /** A cleanup callback registered by an effect. */
 export type Disposer = () => void | Promise<void>
 
+/** A Cordis-compatible disposer for an effect whose setup may be asynchronous. */
+export interface EffectDisposer extends PromiseLike<Disposer> {
+  (): void | Promise<void>
+}
+
 /**
  * Accepted results of an effect body: nothing, one disposer, an iterable that
  * yields disposers as it runs, or a promise of a disposer.
@@ -197,29 +202,81 @@ export class EventHost {
    * @param _label - diagnostic label; accepted for call-site compatibility.
    * @returns a single-shot disposer for everything the body registered.
    */
-  effect(execute: (this: this) => Effect, _label?: string): () => void | Promise<void> {
+  effect(execute: (this: this) => Effect, _label?: string): EffectDisposer {
     this.assertActive()
     const state = stateOf(this)
     const collected: Array<() => void | Promise<void>> = []
-    let disposed = false
-    let disposal: void | Promise<void>
-    let setup: PromiseLike<unknown> | undefined
+    let disposing = false
+    let disposalTask: void | Promise<void>
 
     const collect = (value: unknown): void => {
       if (typeof value === 'function') collected.push(value as Disposer)
       else if (value !== undefined && value !== null) throw new TypeError('Invalid effect')
     }
-    const runAll = (): void | Promise<void> => {
-      if (disposed) return disposal
-      disposed = true
-      return disposal = runReversed(collected)
+    const disposeCollected = (): void | Promise<void> => {
+      if (disposing) return disposalTask
+      disposing = true
+      return disposalTask = runReversed(collected)
     }
-    const wrapper = (): void | Promise<void> => {
+
+    let setupTask: void | Promise<void> = undefined
+    let executing = true
+    let resolveSetup: (() => void) | undefined
+    let rejectSetup: ((reason: unknown) => void) | undefined
+    let setupBarrier: Promise<void> | undefined
+    let effectActive = true
+    let inFlight: void | Promise<void>
+    let linked = true
+
+    const waitForSetup = (): Promise<void> => {
+      setupBarrier ??= new Promise<void>((resolve, reject) => {
+        resolveSetup = resolve
+        rejectSetup = reject
+      })
+      return setupBarrier
+    }
+    const disposeAfter = (setup: PromiseLike<void>): Promise<void> => {
+      return Promise.resolve(setup).then(
+        () => disposeCollected(),
+        async (reason: unknown) => {
+          await disposeCollected()
+          throw reason
+        },
+      )
+    }
+    const removeWrapper = (): void => {
+      if (!linked) return
+      linked = false
       const index = state.disposables.indexOf(wrapper)
       if (index >= 0) state.disposables.splice(index, 1)
-      if (setup !== undefined) return Promise.resolve(setup).then(() => runAll(), () => runAll())
-      return runAll()
     }
+    const finalizeDisposal = (callback: () => void | Promise<void>): void | Promise<void> => {
+      let result: void | Promise<void>
+      try {
+        result = callback()
+      } catch (error: unknown) {
+        removeWrapper()
+        throw error
+      }
+      if (isPromiseLike(result)) {
+        const pending = Promise.resolve(result).finally(() => {
+          removeWrapper()
+          if (inFlight === pending) inFlight = undefined
+        })
+        return inFlight = pending
+      }
+      removeWrapper()
+      return result
+    }
+
+    const wrapper = (() => {
+      if (!effectActive) return inFlight ?? disposalTask
+      effectActive = false
+      return finalizeDisposal(() => {
+        if (executing) return disposeAfter(waitForSetup())
+        return setupTask !== undefined ? disposeAfter(setupTask) : disposeCollected()
+      })
+    }) as EffectDisposer
 
     // Visible to a reentrant scope disposal before the body runs.
     state.disposables.push(wrapper)
@@ -232,16 +289,55 @@ export class EventHost {
       } else if (typeof result !== 'object') {
         throw new TypeError('Invalid effect')
       } else if (isPromiseLike(result)) {
-        setup = result.then(collect)
+        setupTask = Promise.resolve(result).then(collect)
       } else if (Symbol.iterator in result) {
-        for (const value of result) collect(value)
+        const iterator = (result as Iterable<Disposer | void>)[Symbol.iterator]()
+        while (true) {
+          const item = iterator.next()
+          collect(item.value)
+          if (item.done) break
+        }
       } else {
         throw new TypeError('Invalid effect')
       }
     } catch (error: unknown) {
-      const cleanup = wrapper()
+      executing = false
+      effectActive = false
+      let cleanup: void | Promise<void>
+      try {
+        cleanup = finalizeDisposal(disposeCollected)
+      } finally {
+        rejectSetup?.(error)
+      }
       if (isPromiseLike(cleanup)) Promise.resolve(cleanup).catch((reason: unknown) => { this.logger.error(reason) })
       throw error
+    }
+
+    executing = false
+    if (setupBarrier !== undefined) {
+      Promise.resolve(setupTask).then(resolveSetup, rejectSetup)
+    }
+
+    // Match the fixed upstream fiber: asynchronous setup failure is handled
+    // immediately, cleans up anything already collected, and remains visible
+    // through the public effect disposer without becoming an unhandled
+    // rejection.
+    if (setupTask !== undefined) {
+      setupTask.catch(() => {
+        if (!effectActive) return disposeCollected()
+        return finalizeDisposal(disposeCollected)
+      }).catch((error: unknown) => { this.logger.error(error) })
+    }
+
+    const disposeAsync = (): void | Promise<void> => {
+      if (!effectActive) return
+      effectActive = false
+      return finalizeDisposal(disposeCollected)
+    }
+    wrapper.then = (onFulfilled, onRejected) => {
+      return Promise.resolve(setupTask)
+        .then(() => disposeAsync)
+        .then(onFulfilled, onRejected)
     }
     return wrapper
   }

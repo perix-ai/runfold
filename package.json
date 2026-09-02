@@ -11,11 +11,12 @@
   "scripts": {
     "build": "npm run build --workspace @perix/event-sdk && npm run build --workspace @perix/event-ui && npm run build --workspace @perix/event-trajectory-demo",
     "verify:upstream-identity": "node scripts/verify-upstream-identity.mjs",
-    "test": "npm run test:upstream && npm run test:types && npm run test:sdk && npm run test:ui && npm run test:python && npm run test:system && npm run test:conformance",
+    "test": "npm run test:upstream && npm run test:types && npm run test:runtime && npm run test:sdk && npm run test:ui && npm run test:python && npm run test:system && npm run test:conformance",
     "test:upstream": "npm run test:upstream:event && npm run test:upstream:trajectory",
     "test:upstream:event": "vitest run --config vitest.config.ts packages/event/typescript/packages/core/session/tests packages/event/typescript/packages/session/session-persistence/tests packages/event/typescript/packages/session/session-persistence-jsonl/tests",
     "test:upstream:trajectory": "vitest run --config vitest.config.ts --environment jsdom packages/event/typescript/packages/client/ui-trajectory/tests",
     "test:types": "tsc -p packages/event/typescript/tsconfig.tests.json",
+    "test:runtime": "vitest run --config vitest.config.ts packages/event/typescript/tests/runtime",
     "test:sdk": "vitest run --config vitest.config.ts packages/event/typescript/tests/sdk",
     "test:ui": "vitest run --config vitest.config.ts --environment jsdom packages/event/typescript/tests/ui",
     "test:system": "vitest run --config vitest.config.ts --environment jsdom packages/event/typescript/tests/integration",
