@@ -544,6 +544,11 @@
     10 个必要差异、87 个声明映射。R29 后的完整 `npm run verify` 已通过 1002 个
     行为测试、全部构建/类型检查及两种语言的空白消费者安装。
 
+- [ ] **R36** · 难度 中 · 风险 低 · 位置 `packages/event/typescript/packages/**/tests/`（25 个文件）、`vitest.config.ts`、`tsconfig.tests.json`
+  - **问题**：保留的上游测试文件仍写 `@deepseek-ai/*` 包名，靠 14 条 vitest 别名解析；仓库对 `@deepseek-ai/` 的代码级 grep 因此不为空。
+  - **处理**：见 [`tasks/R36-test-imports.md`](tasks/R36-test-imports.md)。22 个可运行文件按映射表改写 import；3 个一直被排除的 shell/monorepo 测试删除；随后删除全部 `@deepseek-ai` 别名。
+  - **依赖**：R25–R29。
+
 ## 7. 总体验收
 
 - [x] **R33** · 难度 中 · 风险 中 · 位置 Nexent 使用方仓库、
@@ -590,6 +595,7 @@
 | 6 | R22, R23, R09 | 收尾与泄漏门禁 | 批次 5 |
 | 7 | R10, R24 | 独立长线 | 无 |
 | 8 | R30 → R31 | 校准 EventHost 生命周期，并补齐双向公开 restore 门禁 | 批次 5 |
+| 9 | R36 | 上游测试文件的 DSH import 改写与别名清零（见 `tasks/R36-test-imports.md`） | 批次 8 |
 | 9 | R25 → R26 → R27 → R28 → R29 | 彻底移除 DSH 名称与注册表依赖（交由 Codex，见 `tasks/R25-R29-dsh-free.md`） | 批次 8 |
 | 10 | R32 | 按最终代码和验证结果同步全部文档事实 | 批次 9、R31 |
 | 11 | R34 | 校准多轮 restore 的 `session/end-seed` 边界语义 | R31 |
