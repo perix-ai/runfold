@@ -27,7 +27,7 @@ Focused commands are also available: `test:upstream`,
 `test:python:package`.
 
 The current complete run checks 207 retained files, 10 documented differences,
-87 declared specifier mappings, and 1002 behavior tests before the two blank
+87 declared specifier mappings, and 1004 behavior tests before the two blank
 consumer installation checks.
 
 ## Known gaps

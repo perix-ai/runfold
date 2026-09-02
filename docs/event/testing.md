@@ -40,8 +40,8 @@ Event 组件不具备的 shell 机制。
 ## 5. 入口
 
 当前完整门禁校验 207 个保留文件、10 个必要差异和 87 个声明映射，并运行
-1002 个行为测试（626 Event、182 UI runtime、94 Trajectory、11 EventHost、
-15 SDK、33 UI、35 Python、1 系统、5 跨语言），随后安装 TypeScript 与 Python
+1004 个行为测试（626 Event、182 UI runtime、94 Trajectory、11 EventHost、
+15 SDK、33 UI、36 Python、1 系统、6 跨语言），随后安装 TypeScript 与 Python
 空白消费者。
 
 ```bash

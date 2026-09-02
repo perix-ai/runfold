@@ -3,8 +3,8 @@
 > 对应清单：[`../tasks.md`](../tasks.md) R33、需求 A5。
 > 执行者：Codex。状态：待执行。
 >
-> 前置：R25–R32 全部完成；执行前确认用户指定的 Nexent 仓库、分支和依赖交付
-> 方式，不在未授权仓库中改动代码。
+> 前置：R25–R32、R34 全部完成；执行前确认用户指定的 Nexent 仓库、分支和依赖
+> 交付方式，不在未授权仓库中改动代码。
 
 ## 目标
 
@@ -30,7 +30,8 @@
 3. 在真实执行链路创建 Session，按共享类型写入至少一个完整 turn、assistant
    step 和 tool 调用/结果，并在退出前执行持久化屏障。
 4. 新进程对同一 Session 执行 restore/resume，继续追加后验证 seq 连续、旧前缀
-   不变、`session/end-seed` 不重复增长。
+   不变；每个带新 live 后缀的 replay 恰好增加一个 `session/end-seed` 边界，
+   已以该 marker 结尾的历史再次打开则不增长（DSH 语义见 R34）。
 5. 从稳定边界 fork，验证 `parentSession`、`seedLength`、cwd、独立后续追加以及
    父 Session 不被修改。
 6. 将一份去敏后的真实 Nexent 轨迹作为验收夹具或可重复生成的测试产物交给

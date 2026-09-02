@@ -61,8 +61,11 @@ TypeScript 通过 `createEventRuntime({ persistence })` 组合一个 `EventHost`
 - `inspect` 可以返回内存中的确定性 repair 视图，但不修改 torn physical tail。
 - `load` 丢弃最后一个不完整物理记录，保留已经完整写出的 Event，并按 DSH
   顺序补齐未完成的 tool result、`step/end` 和 `turn/end`。
-- resume 采用 restore 后的完整历史；构造生命周期写入一个
-  `session/end-seed` 标记，但重复恢复已经以该标记结束的历史不会继续增长。
+- resume 采用 restore 后的完整历史；每次完整历史在上一次 seed 边界之后包含
+  新的 live 后缀、且末尾不是 `session/end-seed` 时，构造生命周期追加一个新的
+  marker 来标记本次 seed/live 边界。重复恢复已经以该 marker 结尾的同一历史
+  则保持幂等，不会为单纯浏览或再次打开继续增长。这与固定 DSH property test
+  的“每个显式 replay 一个边界、terminal marker replay 幂等”一致。
 - fork 的 `boundary` 是 inclusive Event seq。子 Session 保存
   `parentSession` 与 `seedLength`，继承 parent 的 `cwd`，但拥有新的 id 和
   `createdAt`。

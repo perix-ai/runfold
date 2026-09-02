@@ -191,6 +191,6 @@ Trajectory; both execute the
 - `../../../tests/event/cross-language`: bidirectional TypeScript/Python
   compatibility and shared-conformance tests.
 
-Run all layers with `npm run verify`. The current matrix contains 1002 behavior
+Run all layers with `npm run verify`. The current matrix contains 1004 behavior
 tests plus TypeScript and Python blank-consumer installation checks. See
 `TESTING.md` for the exact matrix.

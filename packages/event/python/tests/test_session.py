@@ -104,6 +104,29 @@ class SessionTests(unittest.TestCase):
         self.assertEqual(len(reopened.events), len(replay.events))
         self.assertEqual(reopened.events[-1]["type"], "session/end-seed")
 
+    def test_each_live_suffix_gets_one_seed_boundary_and_terminal_replay_is_idempotent(self) -> None:
+        source = Session.create("source-segments")
+        append_closed_turn(source, 1)
+
+        first = Session.create("first-segment", source.events)
+        first_boundary = len(source.events)
+        append_closed_turn(first, 2)
+
+        second = Session.create("second-segment", first.events)
+        second_boundary = len(first.events)
+        self.assertEqual(
+            [event["seq"] for event in second.events if event["type"] == "session/end-seed"],
+            [first_boundary, second_boundary],
+        )
+        self.assertEqual(list(second.events[:second_boundary]), list(first.events))
+        self.assertEqual(
+            [event["seq"] for event in second.events],
+            list(range(len(second.events))),
+        )
+
+        reopened = Session.create("terminal-marker", second.events)
+        self.assertEqual(reopened.events, second.events)
+
     def test_seed_rejects_gaps_and_invalid_surface(self) -> None:
         with self.assertRaisesRegex(EventValidationError, "contiguous"):
             Session.create(

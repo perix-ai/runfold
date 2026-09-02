@@ -114,6 +114,87 @@ describe('TypeScript and Python Event conformance', () => {
     expect((loaded.events[7] as { sourceEventSeqs?: number[] })?.sourceEventSeqs).toEqual([4, 5, 6])
   })
 
+  it('preserves DSH seed boundaries across repeated cross-language restores', async () => {
+    const root = await storageRoot('seed-boundaries')
+    runPython(`
+import sys
+from perix_event import JsonlSessionPersistence, SessionStore
+
+persistence = JsonlSessionPersistence(sys.argv[1], compression='none')
+store = SessionStore(persistence)
+session = store.create('segments', meta={'cwd': '/workspace'})
+session.append('turn/start', {'turn': 1})
+session.append('turn/end', {'turn': 1, 'reason': {'kind': 'completed'}})
+store.close()
+`, root)
+
+    const firstRuntime = eventContext(root, 'none')
+    const first = await firstRuntime.restore(SessionId('segments'))
+    expect(first.events.filter(event => event.type === 'session/end-seed').map(event => event.seq))
+      .toEqual([2])
+    first.append('turn/start', { turn: 2 })
+    first.append('turn/end', { turn: 2, reason: { kind: 'completed' } })
+    await firstRuntime.sessions.flush(first)
+    await firstRuntime.dispose()
+    runtimes.splice(runtimes.indexOf(firstRuntime), 1)
+
+    const pythonRestore = JSON.parse(runPython(`
+import json
+import sys
+from perix_event import JsonlSessionPersistence, SessionStore
+
+persistence = JsonlSessionPersistence(sys.argv[1], compression='none')
+before = persistence.load('segments')
+store = SessionStore(persistence)
+session = store.restore('segments')
+result = {
+    'prefixPreserved': list(session.events[:len(before.events)]) == list(before.events),
+    'markers': [event['seq'] for event in session.events if event['type'] == 'session/end-seed'],
+    'seqsContiguous': [event['seq'] for event in session.events] == list(range(len(session.events))),
+}
+store.close()
+print(json.dumps(result))
+`, root)) as { prefixPreserved: boolean; markers: number[]; seqsContiguous: boolean }
+    expect(pythonRestore).toEqual({
+      prefixPreserved: true,
+      markers: [2, 5],
+      seqsContiguous: true,
+    })
+
+    const terminalRuntime = eventContext(root, 'none')
+    const terminal = await terminalRuntime.restore(SessionId('segments'))
+    expect(terminal.events).toHaveLength(6)
+    expect(terminal.events.filter(event => event.type === 'session/end-seed').map(event => event.seq))
+      .toEqual([2, 5])
+    terminal.append('turn/start', { turn: 3 })
+    terminal.append('turn/end', { turn: 3, reason: { kind: 'completed' } })
+    await terminalRuntime.sessions.flush(terminal)
+    await terminalRuntime.dispose()
+    runtimes.splice(runtimes.indexOf(terminalRuntime), 1)
+
+    const finalRestore = JSON.parse(runPython(`
+import json
+import sys
+from perix_event import JsonlSessionPersistence, SessionStore
+
+persistence = JsonlSessionPersistence(sys.argv[1], compression='none')
+before = persistence.load('segments')
+store = SessionStore(persistence)
+session = store.resume('segments')
+print(json.dumps({
+    'prefixPreserved': list(session.events[:len(before.events)]) == list(before.events),
+    'markers': [event['seq'] for event in session.events if event['type'] == 'session/end-seed'],
+    'seqsContiguous': [event['seq'] for event in session.events] == list(range(len(session.events))),
+}))
+store.close()
+`, root)) as { prefixPreserved: boolean; markers: number[]; seqsContiguous: boolean }
+    expect(finalRestore).toEqual({
+      prefixPreserved: true,
+      markers: [2, 5, 8],
+      seqsContiguous: true,
+    })
+  })
+
   for (const compression of ['none', 'zstd'] as const) {
     it(`reads, resumes, appends, and forks both directions with ${compression}`, async () => {
       const root = await storageRoot(`cross-${compression}`)

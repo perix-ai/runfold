@@ -4,9 +4,9 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R32 已完成，`npm run verify` 全绿，SDK 与 UI
-> 发布产物均不依赖任何 DSH 包。待执行的是 R33（Nexent 真实接入验收）和
-> 第 7 节总验收。
+> 总体状态（2026-09-02）：R01–R32、R34 已完成，`npm run verify` 全绿，SDK
+> 与 UI 发布产物均不依赖任何 DSH 包。待执行的是 R33（Nexent 真实接入验收）
+> 和第 7 节总验收。
 
 ## 任务生命周期
 
@@ -455,6 +455,26 @@
     上游文件一致性、全部构建、1002 个行为测试以及 TypeScript/Python 空白
     消费者安装。
 
+- [x] **R34** · 难度 易 · 风险 中 · 位置 `docs/event/specification.md`、
+  `docs/event/tasks/R33-nexent-acceptance.md`、Python 与跨语言测试
+  - **问题**：R33 把“已以 `session/end-seed` 结尾的 seed 重放不再增长”简写成
+    “`session/end-seed` 不重复增长”，容易误读为一个 Session 永远只能有一个
+    marker。固定 DSH 源码和 property test 的真实语义是：每次重放带有新 live
+    后缀、且末尾不是 marker 的完整历史时追加一个新 seed 边界；只有末尾已经是
+    marker 的重复重放才幂等。当前永久测试没有覆盖跨语言多轮恢复。
+  - **处理**：明确规范与 R33 验收措辞；增加 Python 多轮 seed 单测，以及
+    Python → TypeScript → Python 的跨进程多轮 restore 回归，同时证明 marker
+    增长与幂等条件、旧前缀和连续 seq 均与 DSH 一致。
+  - **依赖**：R31。
+  - **结果**：已完成（2026-09-02）：规范与 R33 任务书明确区分“带新 live
+    后缀的下一次 replay 增加一个边界”和“末尾已有 marker 的重复打开幂等”；
+    Python 单测锁定多段 seed，跨语言测试执行 Python 创建、TypeScript restore
+    与续写、Python restore、TypeScript 幂等 restore、再次续写及 Python resume，
+    marker seq 依次为 `[2]`、`[2, 5]`、`[2, 5]`、`[2, 5, 8]`。
+  - **验证**：Python 36/36、跨语言 6/6；完整门禁的 207/10/87 身份校验、全部
+    构建、类型检查和 1004 个行为测试通过；TypeScript 与 Python 空白消费者安装
+    另以联网权限通过。
+
 ## 6. 测试与交付
 
 - [x] 保留并通过 DSH 上游 Event 与 Trajectory 回归套件。
@@ -518,11 +538,11 @@
     Python 包，不增加 server/sidecar 或专属格式；覆盖记录、持久化重启、
     restore/resume、稳定前缀 fork，并把一份真实产出交给 TypeScript 读取和
     Trajectory UI 渲染。
-  - **依赖**：R25–R32。
+  - **依赖**：R25–R32、R34。
 
 - [ ] Event 轨迹设施达到生产可用。只有 DSH 依赖收口 R25–R29、生产加固
-  R30–R32 和 Nexent 真实接入 R33 全部完成，需求 A1–A6 均有验收证据、公共
-  产物无 DSH 运行时依赖，并通过完整验证后才能勾选此项。
+  R30–R32、边界校准 R34 和 Nexent 真实接入 R33 全部完成，需求 A1–A6 均有
+  验收证据、公共产物无 DSH 运行时依赖，并通过完整验证后才能勾选此项。
 
 ## 执行顺序
 
@@ -540,7 +560,8 @@
 | 8 | R30 → R31 | 校准 EventHost 生命周期，并补齐双向公开 restore 门禁 | 批次 5 |
 | 9 | R25 → R26 → R27 → R28 → R29 | 彻底移除 DSH 名称与注册表依赖（交由 Codex，见 `tasks/R25-R29-dsh-free.md`） | 批次 8 |
 | 10 | R32 | 按最终代码和验证结果同步全部文档事实 | 批次 9、R31 |
-| 11 | R33 | Nexent 真实消费者接入与需求 A5 验收 | R25–R32 |
+| 11 | R34 | 校准多轮 restore 的 `session/end-seed` 边界语义 | R31 |
+| 12 | R33 | Nexent 真实消费者接入与需求 A5 验收 | R25–R32、R34 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
