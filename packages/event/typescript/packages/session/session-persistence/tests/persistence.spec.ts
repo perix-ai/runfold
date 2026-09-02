@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import SessionStore, { Session, SessionId } from '@deepseek-ai/dsh-session'
-import { isJsonValue } from '@deepseek-ai/dsh-util-values'
-import type { SessionEvent, SessionHeader } from '@deepseek-ai/dsh-session'
+import { Context } from '../../../../test-support/cordis-shim.ts'
+import SessionStore, { Session, SessionId } from '../../../core/session/src/index.ts'
+import { isJsonValue } from '../../../../runtime/src/values.ts'
+import type { SessionEvent, SessionHeader } from '../../../core/session/src/index.ts'
 import {
   DEFAULT_PREPARED_SESSION_CACHE_SIZE, DEFAULT_WRITE_BATCH_MAX_DELAY_MS, MAX_WRITE_BATCH_DELAY_MS,
   SessionPersistence, SessionPersistenceRevision, PersistenceCoordinator,

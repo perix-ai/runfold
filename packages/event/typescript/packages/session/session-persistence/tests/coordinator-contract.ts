@@ -1,4 +1,4 @@
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
+import { createUserMessage } from '../../../../runtime/src/messages.ts'
 /**
  * Shared write-path orchestration contract for backends using {@link PersistenceCoordinator}.
  * Unlike the public storage-semantics suite in `contract.ts`, it covers SessionStore event wiring,
@@ -11,10 +11,10 @@ import { createUserMessage } from '@deepseek-ai/dsh-llm'
  */
 
 import { describe, expect, it, vi } from 'vitest'
-import { Context, type Fiber } from '@deepseek-ai/cordis'
-import { scopeTarget } from '@deepseek-ai/dsh-scope'
-import SessionStore, { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
+import { Context, type Fiber } from '../../../../test-support/cordis-shim.ts'
+import { scopeTarget } from '../../../../test-support/scope-shim.ts'
+import SessionStore, { SESSION_FORMAT_VERSION, Session, SessionId } from '../../../core/session/src/index.ts'
+import type { SessionEvent } from '../../../core/session/src/index.ts'
 import { meta, oneTurnLog, appendLog } from './contract.ts'
 
 /**

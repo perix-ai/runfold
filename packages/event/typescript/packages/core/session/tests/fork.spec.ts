@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import { createUserMessage, ToolCallId , createMessage } from '@deepseek-ai/dsh-llm'
-import SessionStore, { Session, SessionForkError, SessionId } from '@deepseek-ai/dsh-session'
-import type { SessionEvent, TurnEndReason } from '@deepseek-ai/dsh-session'
+import { Context } from '../../../../test-support/cordis-shim.ts'
+import { createUserMessage, ToolCallId , createMessage } from '../../../../runtime/src/messages.ts'
+import SessionStore, { Session, SessionForkError, SessionId } from '../src/index.ts'
+import type { SessionEvent, TurnEndReason } from '../src/index.ts'
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '../src/types.ts' {
   interface SessionEventMap {
     'test/log-only': { value: string }
     /** Stands in for a plugin's open/close bracket (`compaction/start`). */

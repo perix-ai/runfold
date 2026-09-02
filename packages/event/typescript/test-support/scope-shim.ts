@@ -1,7 +1,8 @@
 /**
- * Test-only stand-in for `@deepseek-ai/dsh-scope`. The Perix host has no
- * scope-filtered dispatch, so carriers are the subjects themselves and every
- * listener hears every session. Aliased in `vitest.config.ts`; never built.
+ * Test-only stand-in for the pinned DeepSeek Harness scope host. The Perix host
+ * has no scope-filtered dispatch, so carriers are the subjects themselves and
+ * every listener hears every session. Retained tests import this shim through
+ * identity-checked local specifiers; it is never built or published.
  */
 
 import type { Context } from './cordis-shim.ts'

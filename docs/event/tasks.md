@@ -4,12 +4,12 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R35 与第 7 节总验收全部完成，`npm run verify`
-> 全绿，SDK 与 UI 发布产物均不依赖任何 DSH 包。R33 已在与官方 tag
+> 总体状态（2026-09-02）：R01–R37 与第 7 节总验收全部完成，`npm run verify`
+> 全绿，SDK、UI、保留测试和构建配置均不依赖任何 DSH 包名解析。R33 已在与官方 tag
 > 逐文件一致的 Nexent v2.5.0 本地快照上完成真实进程、wheel 和轨迹 UI 验收；
 > R37 又完成了 Nexent 产品界面的读取、resume、fork 与浏览器验收。按用户约定，
-> 该 Nexent 分支仅用于本地实验，不推送远端。后续清理任务 R36 尚在执行，不改变
-> R01-R35 与 R37 的既有验收结论。
+> 该 Nexent 分支仅用于本地实验，不推送远端。R36 最终移除了保留测试中的 DSH
+> module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
 
 ## 任务生命周期
 
@@ -90,7 +90,7 @@
   - **处理**：二选一——补入快照，或如实列出"仅注册表引用"的包清单。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：按决策补入 24 个上游目录（含 `vendor/cordis`、`vendor/schemastery`），逐字节校验通过；README 按用途分三组列出。
-  - **验证**：`npm run verify:upstream-identity` 当前逐文件核对 207 个裁剪文件与
+  - **验证**：`npm run verify:upstream-identity` 当前逐文件核对 204 个裁剪文件与
     固定快照；来源 README 本地链接检查通过。
 
 - [x] **R05** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/README.md`、`packages/event/typescript/TESTING.md`
@@ -132,7 +132,7 @@
   - **依赖**：无（R17–R19 完成后更新允许差异清单）。
   - **结果**：已完成（2026-09-01）：新增 `scripts/verify-upstream-identity.mjs`，
     纳入 `npm run verify` 首步。初始门禁覆盖 132 个文件、7 处差异；经过宿主接缝
-    和 R25–R29 依赖收口后，当前覆盖 207 个文件、10 个必要差异和 87 个声明映射。
+    和 R25–R29、R36 依赖收口后，当前覆盖 204 个文件、10 个必要差异和 139 个声明映射。
   - **验证**：2026-09-02 `npm run verify:upstream-identity` 通过，未登记的字节
     差异、无效映射和缺失上游对应文件都会使命令失败。
 
@@ -179,7 +179,7 @@
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：本地模块放在 `runtime/`（`packages/` 目录保留给上游原样文件，受 R07 比对约束）；`values.ts` 正文与上游逐字节相同。保留源码零改动，SDK 构建、vitest、测试与 UI tsconfig 通过别名解析。
   - **验证**：上游 Event 626/626、TypeScript 类型检查、SDK build 与 15 个 SDK
-    用例通过；当前 import 改写另由 87 条身份映射约束。
+    用例通过；当前全部 import 改写另由 139 条身份映射约束。
 
 - [x] **R15** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/runtime/src/messages.ts`、`sdk/src/messages.ts`
   - **问题**：`@perix/event-sdk/messages` 整包 re-export `dsh-llm`，把完整 LLM
@@ -546,10 +546,18 @@
     10 个必要差异、87 个声明映射。R29 后的完整 `npm run verify` 已通过 1002 个
     行为测试、全部构建/类型检查及两种语言的空白消费者安装。
 
-- [ ] **R36** · 难度 中 · 风险 低 · 位置 `packages/event/typescript/packages/**/tests/`（25 个文件）、`vitest.config.ts`、`tsconfig.tests.json`
+- [x] **R36** · 难度 中 · 风险 低 · 位置 `packages/event/typescript/packages/**/tests/`（执行前实际 26 个文件）、`vitest.config.ts`、`tsconfig.tests.json`
   - **问题**：保留的上游测试文件仍写 `@deepseek-ai/*` 包名，靠 14 条 vitest 别名解析；仓库对 `@deepseek-ai/` 的代码级 grep 因此不为空。
-  - **处理**：见 [`tasks/R36-test-imports.md`](tasks/R36-test-imports.md)。22 个可运行文件按映射表改写 import；3 个一直被排除的 shell/monorepo 测试删除；随后删除全部 `@deepseek-ai` 别名。
+  - **处理**：见 [`tasks/R36-test-imports.md`](tasks/R36-test-imports.md)。23 个可运行测试/辅助文件按映射表改写 import；3 个一直被排除的 shell/monorepo 测试删除；随后删除全部 `@deepseek-ai` 别名。
   - **依赖**：R25–R29。
+  - **结果**：已完成（2026-09-02）：删除代码生成、DSH ModuleLoader 和完整
+    shell 三个从未运行的文件；23 个保留测试/辅助文件只改 import/export 或一个
+    module-augmentation specifier，新增 52 条逐文件身份映射；删除 vitest 的 14 条
+    DSH 别名。测试逻辑、断言和夹具未改，上游原件继续保存在 `third_party/`。
+  - **验证**：两条任务书 DSH import/config 扫描均为空；身份门禁通过 204 个
+    保留文件、10 个必要差异和 139 个映射；`npm run verify` 通过原有 626 Event、
+    182 UI runtime、94 Trajectory 和总计 1005 个行为测试，以及全部构建、类型
+    检查和 TypeScript/Python 空白消费者安装。
 
 - [x] **R37** · 难度 难 · 风险 中 · 位置 Nexent 本地实验分支、
   `packages/event/typescript/{sdk,ui/trajectory}`
@@ -599,7 +607,7 @@
   - **结果**：已完成（2026-09-02）。R01–R35 全部闭环，需求 A1–A6 均有代码、
     契约、失败场景和真实消费者证据；Nexent 的本地实验边界不改变公共 Event
     v0，也没有增加 server、sidecar 或专属格式。
-  - **验证**：最终 `npm run verify` 通过 207 个保留文件、10 个必要差异、87 个
+  - **验证**：最终 `npm run verify` 通过 204 个保留文件、10 个必要差异、139 个
     声明映射、1005 个行为测试、全部构建/类型检查与 TypeScript/Python 空白
     消费者安装；Nexent v2.5.0 另通过 515 项相关测试和真实轨迹跨语言 UI 验收。
 

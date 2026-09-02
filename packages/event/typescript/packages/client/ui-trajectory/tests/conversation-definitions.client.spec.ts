@@ -1,17 +1,17 @@
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '../../../../test-support/cordis-shim.ts'
 import { describe, expect, it } from 'vitest'
 import type {
   SessionEventLikeEntry, SessionLiveEventEntry,
-} from '@deepseek-ai/dsh-api-session-controller/client'
+} from '../../../../runtime/src/ui-types.ts'
 import type {
   ChunkRowEvent,
-} from '@deepseek-ai/dsh-api-session-controller/types'
+} from '../../../../runtime/src/ui-types.ts'
 import type {
   ConversationNodeDefinition, ConversationViewDefinition,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { ConversationNodeAssembler, inspectRequestPrompt } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { isChunkRow, packChunkRuns, type ChunkRow } from '@deepseek-ai/dsh-session/chunk-rows'
-import type { SessionEvent } from '@deepseek-ai/dsh-session/types'
+} from '../../../../ui/trajectory/src/conversation-client.ts'
+import { ConversationNodeAssembler, inspectRequestPrompt } from '../../../../ui/trajectory/src/conversation-client.ts'
+import { isChunkRow, packChunkRuns, type ChunkRow } from '../../../core/session/src/chunk-rows.ts'
+import type { SessionEvent } from '../../../core/session/src/types.ts'
 import { registerTrajectoryAssistantDefinition } from '../src/client/trajectory-assistant-definition.ts'
 import { registerTrajectoryCompactionDefinitions } from '../src/client/trajectory-compaction-definition.ts'
 import type { TrajectorySnapshot } from '../src/client/trajectory-contract.ts'

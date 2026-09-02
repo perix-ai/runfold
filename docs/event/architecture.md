@@ -87,9 +87,9 @@ Cordis 服务或 DSH shell 类型，按它在 Event 中承担的实际职责逐�
 
 完成解耦后的硬性要求：打包后的 JS、声明文件和 Python 包不能要求安装任何
 DSH 包；公共 API、类型、模块扩展和错误标识不能泄漏 DSH 命名空间；DSH
-名称只能存在于 `third_party`、逐字节保留但不参与发布解析的上游
-tests/manifests、来源说明、许可证或测试专用别名中；不能通过复制整个 DSH
-runtime 来规避依赖清理。
+名称只能存在于 `third_party`、不参与发布解析的审计 manifests、来源说明、
+许可证或用于断言名称不得泄漏的测试文本中；不能再作为源码 import、模块扩展或
+测试配置别名，也不能通过复制整个 DSH runtime 来规避依赖清理。
 
 ### 3.4 宿主接缝：EventHost
 

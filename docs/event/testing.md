@@ -33,14 +33,14 @@
 
 ## 4. 已知缺口
 
-被排除的上游测试及其理由记录在
+未纳入抽离树的上游测试及其理由记录在
 [`packages/event/typescript/TESTING.md`](../../packages/event/typescript/TESTING.md)
 的 "Known gaps" 一节；每一项要么已由独立宿主下的等价测试覆盖，要么测试的是
 Event 组件不具备的 shell 机制。
 
 ## 5. 入口
 
-当前完整门禁校验 207 个保留文件、10 个必要差异和 87 个声明映射，并运行
+当前完整门禁校验 204 个保留文件、10 个必要差异和 139 个声明映射，并运行
 1005 个行为测试（626 Event、182 UI runtime、94 Trajectory、11 EventHost、
 15 SDK、33 UI、36 Python、1 系统、7 跨语言），随后安装 TypeScript 与 Python
 空白消费者。

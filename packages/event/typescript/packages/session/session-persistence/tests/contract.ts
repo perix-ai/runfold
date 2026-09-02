@@ -9,9 +9,9 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { SESSION_FORMAT_VERSION, Session, SessionId, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from '@deepseek-ai/dsh-session'
-import type { SessionEvent, SessionHeader, SurfaceEventType, SurfaceIntent } from '@deepseek-ai/dsh-session'
-import { ToolCallId, MessageId, createMessage, freezeMessage } from '@deepseek-ai/dsh-llm'
+import { SESSION_FORMAT_VERSION, Session, SessionId, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from '../../../core/session/src/index.ts'
+import type { SessionEvent, SessionHeader, SurfaceEventType, SurfaceIntent } from '../../../core/session/src/index.ts'
+import { ToolCallId, MessageId, createMessage, freezeMessage } from '../../../../runtime/src/messages.ts'
 import type { SessionPersistence } from '../src/index.ts'
 
 /** A backend under test plus its teardown. */

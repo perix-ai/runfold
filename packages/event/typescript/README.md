@@ -21,10 +21,10 @@ The implementation is cut from DeepSeek Harness `0.1.2-alpha.3`, commit
 
 | DeepSeek Harness source | Local implementation | Treatment |
 | --- | --- | --- |
-| `packages/core/session` | `packages/core/session` | Complete `src/` and `tests/` retained; `src/index.ts` host seam edited (see below) |
-| `packages/session/session-persistence` | `packages/session/session-persistence` | Complete `src/` and `tests/` retained; `src/index.ts` and `src/coordinator.ts` host seam edited |
-| `packages/session/session-persistence-jsonl` | `packages/session/session-persistence-jsonl` | Complete `src/` and `tests/` retained; `src/index.ts` host seam edited |
-| `packages/client/ui-trajectory` | `packages/client/ui-trajectory` | Reusable source and 94 shell-independent tests retained; type-only imports are mapped locally, while the DSH plugin entry and invariants companion are omitted |
+| `packages/core/session` | `packages/core/session` | Complete runtime `src/` and runnable behavior tests retained except the host/code-generation files listed below; `src/index.ts` host seam edited |
+| `packages/session/session-persistence` | `packages/session/session-persistence` | Complete runtime `src/` and tests retained; source host seams and test dependency specifiers mapped locally |
+| `packages/session/session-persistence-jsonl` | `packages/session/session-persistence-jsonl` | Complete runtime `src/` and tests retained; source host seam and test dependency specifiers mapped locally |
+| `packages/client/ui-trajectory` | `packages/client/ui-trajectory` | Reusable source and 94 shell-independent tests retained; dependency specifiers are mapped locally, while the DSH plugin, invariants companion, and two shell/bundle tests are omitted |
 | `packages/client/ui-conversation` | same path | Assembler, location index, and four transitive contract files retained; their dependency specifiers alone are mapped locally |
 | `packages/client/ui-renderer` | same path | Snapshot binding retained with its type-only store specifier mapped locally |
 | `packages/client/store` | same path | The two-file observable store implementation and its complete 20-case upstream test retained; Cordis invariants companion omitted |
@@ -33,8 +33,8 @@ The implementation is cut from DeepSeek Harness `0.1.2-alpha.3`, commit
 | `packages/client/locale` | same path | Unchanged English and Chinese dictionaries retained |
 | `packages/test-support/client-runtime` | same path | Unchanged translation helper retained |
 
-The closed extraction currently contains 207 retained files. The identity
-verifier accepts 10 documented necessary differences and applies 87 declared
+The closed extraction currently contains 204 retained files. The identity
+verifier accepts 10 documented necessary differences and applies 139 declared
 module-specifier mappings before byte comparison; every other retained byte
 must match the pinned snapshot.
 
@@ -48,12 +48,12 @@ The publishable boundaries added around this source are:
 
 All consumer-facing package, component, and test names use the Perix namespace:
 `@perix/event-sdk`, `@perix/event-ui`, and `EventTrajectory`. Core Session and
-persistence implementation imports and retained UI type imports use explicit
-local relative paths; every such import-only rewrite is declared and checked
-against the audited upstream bytes by `scripts/verify-upstream-identity.mjs`.
-DSH module specifiers remain only in unchanged retained upstream tests and
-source provenance text—not in implementation imports, package manifests,
-lockfiles, installed dependencies, or published artifacts.
+persistence implementation imports, retained UI type imports, and retained test
+imports use explicit local relative paths; every such import-only rewrite is
+declared and checked against the audited upstream bytes by
+`scripts/verify-upstream-identity.mjs`. DSH module specifiers no longer appear
+in implementation or test imports, module augmentations, build/test aliases,
+package manifests, lockfiles, installed dependencies, or published artifacts.
 
 ## Necessary local changes
 
@@ -91,15 +91,18 @@ lockfiles, installed dependencies, or published artifacts.
   request inspection, eliminating the Cordis cast without changing any
   definition or projection algorithm. All import-only rewrites remain covered
   by the identity verifier.
-- **Retained tests kept unmodified.** `vitest.config.ts` aliases
-  `@deepseek-ai/cordis` and `@deepseek-ai/dsh-scope` to `test-support/`, a
-  test-only shim that provides `ctx.plugin` / `fiber.dispose` on top of host
-  scopes. Its remaining core DSH aliases serve unchanged upstream tests only.
-  Three host-only tests are not retained: `scoped.spec.ts` (scope-filtered
-  dispatch), `typert.spec.ts` (Typert lookup registry), and `invariant.spec.ts`
-  (the invariants plugin). The three corresponding `src/invariant.ts`
-  companions are also not retained. All six original files remain available
-  in `third_party/deepseek-harness/upstream/`.
+- **Retained test specifiers mapped locally.** Twenty-three retained test or
+  test-helper files replace only DSH imports and one module-augmentation target
+  with relative paths to the retained implementation, `runtime/`, or
+  `test-support/`. Fifty-two per-file mappings prove every other byte still
+  matches the fixed snapshot. `vitest.config.ts` therefore has no DSH aliases.
+  Three upstream-only tests are omitted: `gen-persistence-catalog.spec.ts`
+  (monorepo code generation), `client-bundle.client.spec.ts` (DSH ModuleLoader),
+  and `views.client.spec.tsx` (full DSH shell; its 25 applicable cases were
+  ported in R10). Three further host-only tests are not retained:
+  `scoped.spec.ts` (scope-filtered dispatch), `typert.spec.ts` (Typert lookup
+  registry), and `invariant.spec.ts` (the invariants plugin). Their originals
+  remain available in `third_party/deepseek-harness/upstream/`.
 - The DSH browser-plugin entry
   `packages/client/ui-trajectory/src/client/index.ts` and its package-level
   `src/invariant.ts` are not part of the standalone component and are omitted;
@@ -137,10 +140,11 @@ lockfiles, installed dependencies, or published artifacts.
   `ImageAttachmentRef` shape from `@deepseek-ai/dsh-attachment`). Core and
   persistence sources import these modules by relative path; `ui-types.ts` and
   `event-types.ts` provide the host-bound UI contracts and Event augmentations.
-  The SDK bundles its imports directly. `vitest.config.ts` still resolves the
-  original DSH names used by unchanged upstream tests; TypeScript and
-  Trajectory compiler configs contain no DSH aliases. The published SDK depends
-  on none of the replaced packages.
+  The SDK bundles its imports directly. `vitest.config.ts` resolves only Perix
+  public entry points; retained tests reach local seams through the declared
+  relative specifiers. TypeScript and Trajectory compiler configs likewise
+  contain no DSH aliases. The published SDK depends on none of the replaced
+  packages.
   `runtime/README.md` records each file's provenance.
 - `sdk/` adds only package exports; the implementation remains in the retained
   DSH package trees above and in `runtime/`. `@perix/event-sdk/runtime` is the
@@ -159,9 +163,10 @@ lockfiles, installed dependencies, or published artifacts.
   details rather than leaking the full Harness type graph to consumers.
 
 Retained DSH Event and persistence algorithms are unchanged; only documented
-host seams and declared module-specifier rewrites differ, while the six listed
-host-only files are omitted. `npm run verify:upstream-identity` (the first step
-of `npm run verify`) enforces those boundaries against every retained file.
+host seams and declared module-specifier rewrites differ, while the explicitly
+listed host-, monorepo-, and shell-only files are omitted.
+`npm run verify:upstream-identity` (the first step of `npm run verify`) enforces
+those boundaries against every retained file.
 The native Python peer is in
 `packages/event/python/`, parallel to this implementation rather than to
 Trajectory; both execute the

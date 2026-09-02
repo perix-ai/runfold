@@ -1,9 +1,9 @@
 /**
- * Test-only stand-in for `@deepseek-ai/cordis`, aliased in `vitest.config.ts`
- * so the retained upstream Event and persistence test suites run unmodified
- * against the Perix {@link EventHost}. It adds the plugin-loading vocabulary
- * those tests use (`ctx.plugin`, `fiber.dispose`) on top of host scopes and
- * nothing else. It is never built or published.
+ * Test-only stand-in for the pinned DeepSeek Harness Cordis host, imported by
+ * retained Event and persistence tests through identity-checked local
+ * specifiers. It adds the plugin-loading vocabulary those tests use
+ * (`ctx.plugin`, `fiber.dispose`) on top of the Perix {@link EventHost} scopes
+ * and nothing else. It is never built or published.
  */
 
 import { EventHost } from '../runtime/src/host.ts'

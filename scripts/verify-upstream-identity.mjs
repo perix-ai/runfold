@@ -209,6 +209,105 @@ const SPECIFIER_MAPPINGS = new Map([
     { from: '@deepseek-ai/dsh-client-ui-slots', target: 'runtime/src/ui-types.ts' },
     { from: '@deepseek-ai/dsh-client-store', target: 'packages/client/store/src/index.ts' },
   ]],
+  // Retained upstream tests use the same local seams as the implementation.
+  ['core/session/tests/chunk-rows.spec.ts', [
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-session/chunk-rows', target: 'packages/core/session/src/chunk-rows.ts' },
+  ]],
+  ['core/session/tests/derived-cache.spec.ts', [
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['core/session/tests/fork.spec.ts', [
+    { from: '@deepseek-ai/cordis', target: 'test-support/cordis-shim.ts' },
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-session/types', target: 'packages/core/session/src/types.ts' },
+  ]],
+  ['core/session/tests/json.spec.ts', [
+    { from: '@deepseek-ai/dsh-util-values', target: 'runtime/src/values.ts' },
+  ]],
+  ['core/session/tests/properties.spec.ts', [
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['core/session/tests/repair.spec.ts', [
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+  ]],
+  ['core/session/tests/request-header.spec.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+  ]],
+  ['core/session/tests/seq-ranges.spec.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['core/session/tests/session.spec.ts', [
+    { from: '@deepseek-ai/cordis', target: 'test-support/cordis-shim.ts' },
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['core/session/tests/surface.spec.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-session/surface', target: 'packages/core/session/src/surface.ts' },
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+  ]],
+  ['session/session-persistence/tests/preparations.spec.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['session/session-persistence/tests/coordinator-contract.ts', [
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/cordis', target: 'test-support/cordis-shim.ts' },
+    { from: '@deepseek-ai/dsh-scope', target: 'test-support/scope-shim.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['session/session-persistence/tests/write-behind.spec.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+  ]],
+  ['session/session-persistence/tests/persistence.spec.ts', [
+    { from: '@deepseek-ai/cordis', target: 'test-support/cordis-shim.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-util-values', target: 'runtime/src/values.ts' },
+  ]],
+  ['session/session-persistence/tests/contract.ts', [
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+  ]],
+  ['session/session-persistence-jsonl/tests/zstd.spec.ts', [
+    { from: '@deepseek-ai/cordis', target: 'test-support/cordis-shim.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-session-persistence-jsonl', target: 'packages/session/session-persistence-jsonl/src/index.ts' },
+  ]],
+  ['session/session-persistence-jsonl/tests/jsonl.spec.ts', [
+    { from: '@deepseek-ai/dsh-llm', target: 'runtime/src/messages.ts' },
+    { from: '@deepseek-ai/cordis', target: 'test-support/cordis-shim.ts' },
+    { from: '@deepseek-ai/dsh-session', target: 'packages/core/session/src/index.ts' },
+    { from: '@deepseek-ai/dsh-session-persistence-jsonl', target: 'packages/session/session-persistence-jsonl/src/index.ts' },
+  ]],
+  ['client/ui-trajectory/tests/table.client.spec.tsx', [
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/tests/snapshot-builder.client.spec.ts', [
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/tests/conversation-definitions.client.spec.ts', [
+    { from: '@deepseek-ai/cordis', target: 'test-support/cordis-shim.ts' },
+    { from: '@deepseek-ai/dsh-api-session-controller/client', target: 'runtime/src/ui-types.ts' },
+    { from: '@deepseek-ai/dsh-api-session-controller/types', target: 'runtime/src/ui-types.ts' },
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+    { from: '@deepseek-ai/dsh-session/chunk-rows', target: 'packages/core/session/src/chunk-rows.ts' },
+    { from: '@deepseek-ai/dsh-session/types', target: 'packages/core/session/src/types.ts' },
+  ]],
+  ['client/ui-trajectory/tests/layout.client.spec.tsx', [
+    { from: '@deepseek-ai/dsh-client-ui-conversation/client', target: 'ui/trajectory/src/conversation-client.ts' },
+  ]],
+  ['client/ui-trajectory/tests/event-projection.client.spec.ts', [
+    { from: '@deepseek-ai/dsh-llm/types', target: 'runtime/src/messages.ts' },
+  ]],
+  ['client/ui-trajectory/tests/locale.client.ts', [
+    { from: '@deepseek-ai/dsh-client-locale/src/locales/en.ts', target: 'packages/client/locale/src/locales/en.ts' },
+    { from: '@deepseek-ai/dsh-client-locale/src/locales/zh.ts', target: 'packages/client/locale/src/locales/zh.ts' },
+  ]],
 ])
 
 /**

@@ -68,9 +68,10 @@
   使 import 改写后上游一致性仍可机器验证；`@perix/event-sdk/runtime` 自引用
   保留，因为 `declare module` 用相对 `.ts` 路径无法进入发布的 d.ts。
 - 后果：R25–R29 完成后，生产实现 import、参与安装的 manifests、lockfile、
-  `npm ls --all` 和 SDK/UI 发布产物均无 DSH registry namespace。固定上游名称
-  只保留在未修改的上游测试、审计用 manifests、来源说明和测试专用别名中；
-  这些保留文件不参与 npm workspace 或发布依赖解析。身份校验覆盖 207 个文件、
-  10 个必要差异和 87 个声明映射；完整验证共通过 1002 个行为测试及
-  TypeScript/Python 空白消费者安装测试。
-- 相关：tasks.md 3.2 节。
+  `npm ls --all` 和 SDK/UI 发布产物均无 DSH registry namespace；R36 又把保留
+  测试中的模块 specifier 与测试配置别名改为受身份校验约束的本地相对路径。
+  固定上游名称只保留在审计 manifests、来源/许可证文字和用于断言名称不得泄漏
+  的测试文本中，不参与模块解析。身份校验当前覆盖 204 个文件、10 个必要差异和
+  139 个声明映射；完整验证共通过 1005 个行为测试及 TypeScript/Python 空白
+  消费者安装测试。
+- 相关：tasks.md 3.2 节、R36。

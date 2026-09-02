@@ -26,15 +26,16 @@ Focused commands are also available: `test:upstream`,
 `test:conformance`, `test:types`, `test:python`, `test:package`, and
 `test:python:package`.
 
-The current complete run checks 207 retained files, 10 documented differences,
-87 declared specifier mappings, and 1005 behavior tests before the two blank
+The current complete run checks 204 retained files, 10 documented differences,
+139 declared specifier mappings, and 1005 behavior tests before the two blank
 consumer installation checks.
 
 ## Known gaps
 
-Three upstream test files are excluded in the root `vitest.config.ts`:
+The root `vitest.config.ts` no longer excludes retained files or carries DSH
+aliases. Three upstream-only test files are intentionally not retained:
 
-| Excluded test | Reason | Coverage status |
+| Test in pinned snapshot | Reason | Coverage status |
 | --- | --- | --- |
 | `packages/core/session/tests/gen-persistence-catalog.spec.ts` | Verifies DSH monorepo code generation, not Session behavior | Not applicable to the extraction |
 | `packages/client/ui-trajectory/tests/client-bundle.client.spec.ts` | Asserts the DSH browser `ModuleLoader` packaging contract; the extraction ships Vite ESM | Replaced by `tests/package` |
