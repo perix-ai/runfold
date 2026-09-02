@@ -202,14 +202,14 @@ schema 和 conformance 契约，因此其轨迹也能由现有 Trajectory UI 读
 - 生成物 `lib/types` 仍有 `from '@deepseek-ai/cordis'` 与
   `declare module '@deepseek-ai/cordis'`；`rewrite-public-namespaces.mjs`
   只做字符串替换，打包测试也只检查 `dsh-session*`，所以泄漏测不出来（R09、R22）；
-- 三个 `invariant` 子路径是 Cordis companion plugin，不应出现在 SDK 出口（R13）；
+- 三个 `invariant` 子路径曾是 SDK 出口，它们是 Cordis companion plugin，已删除（R13）；
 - Python 曾有 DSH 没有的 `.event.lock` 文件锁，`contract.md` 还误把它写成共同
   契约；锁已删除，`resume()` 保留为文档化的 `restore()` 别名（R01、R11、R12）；
-- `KNOWN_SESSION_EVENT_TYPES` 两份手抄副本无一致性测试（R08）；
+- `KNOWN_SESSION_EVENT_TYPES` 两份手抄副本已由 conformance 单一来源与双侧测试锁定（R08）；
 - `views.client.spec.tsx` 被排除，独立宿主桩掉的 Trajectory 能力未登记（R05、R10）；
 - 根目录早期的 `spec/`、`rfcs/`、`schemas/v0`、`conformance/cases` 从零设计草案与
   Event 实现矛盾，已于 2026-09-01 删除（R03）；
-- 没有脚本校验裁剪源码与 `third_party` 快照一致（R07）。
+- 裁剪源码与 `third_party` 快照的一致性已由 `verify:upstream-identity` 校验（R07）。
 
 ## 完成标准
 
