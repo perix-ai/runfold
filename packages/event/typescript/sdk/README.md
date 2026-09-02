@@ -9,21 +9,21 @@ DSH Event source—not registry copies—into the published package:
 
 - `@perix/event-sdk` and `@perix/event-sdk/session`
 - `@perix/event-sdk/session/types`
-- `@perix/event-sdk/session/invariant`
 - `@perix/event-sdk/session/chunk-rows`
 - `@perix/event-sdk/session/surface`
 - `@perix/event-sdk/persistence`
-- `@perix/event-sdk/persistence/invariant`
 - `@perix/event-sdk/persistence-jsonl`
-- `@perix/event-sdk/persistence-jsonl/invariant`
 - `@perix/event-sdk/runtime` for the runtime `Context` and service primitives
 - `@perix/event-sdk/messages` for Event-compatible message constructors and
   value types
 
+The upstream `*/invariant` companion modules are Cordis diagnostic plugins,
+not Event behavior, and are intentionally not exported.
+
 Consumers can therefore construct and host the Event system using only
 `@perix/*` import specifiers. Names from the upstream implementation remain
 internal provenance and transitive implementation details. Generated SDK
-artifacts also translate the retained Session, persistence, invariant, and
+artifacts also translate the retained Session, persistence, and
 type-symbol identities to their matching `@perix/event-sdk/*` paths.
 
 The package's own tests live in `../tests/sdk`; the complete cross-package and

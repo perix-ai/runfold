@@ -78,13 +78,17 @@ package identity, are marked private, and are never the consumer-facing SDK.
 - The SDK build mechanically maps retained runtime package identifiers
   (`@deepseek-ai/dsh-session*`) to their corresponding `@perix/event-sdk/*`
   public identities in generated JavaScript and declarations. This includes
-  invariant labels and Typert type-symbol strings; retained source is unchanged.
+  Typert type-symbol strings; retained source is unchanged.
 - `ui/trajectory/index.d.ts` intentionally exposes only the browser component
   boundary. Internal DSH shell and projection types remain implementation
   details rather than leaking the full Harness type graph to consumers.
 
 No retained DSH Event, persistence, projection, view, style, or behavioral test
-source is modified. The native Python peer is in
+source is modified. `npm run verify:upstream-identity` (the first step of
+`npm run verify`) enforces this: every file under `packages/` must be
+byte-identical to the pinned snapshot except the seven manifests and configs
+listed in `scripts/verify-upstream-identity.mjs`, each of which is explained
+above. The native Python peer is in
 `packages/event/python/`, parallel to this implementation rather than to
 Trajectory; both execute the
 [`Event v0 contract`](../../../docs/event/contract.md) and fixtures under

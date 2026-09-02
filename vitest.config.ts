@@ -10,13 +10,10 @@ export default defineConfig({
     alias: [
       { find: /^@perix\/event-ui$/, replacement: source('./packages/event/typescript/ui/trajectory/src/index.ts') },
       { find: /^@perix\/event-sdk\/session\/types$/, replacement: source('./packages/event/typescript/sdk/src/session-types.ts') },
-      { find: /^@perix\/event-sdk\/session\/invariant$/, replacement: source('./packages/event/typescript/sdk/src/session-invariant.ts') },
       { find: /^@perix\/event-sdk\/session\/chunk-rows$/, replacement: source('./packages/event/typescript/sdk/src/session-chunk-rows.ts') },
       { find: /^@perix\/event-sdk\/session\/surface$/, replacement: source('./packages/event/typescript/sdk/src/session-surface.ts') },
       { find: /^@perix\/event-sdk\/session$/, replacement: source('./packages/event/typescript/sdk/src/session.ts') },
-      { find: /^@perix\/event-sdk\/persistence\/invariant$/, replacement: source('./packages/event/typescript/sdk/src/persistence-invariant.ts') },
       { find: /^@perix\/event-sdk\/persistence$/, replacement: source('./packages/event/typescript/sdk/src/persistence.ts') },
-      { find: /^@perix\/event-sdk\/persistence-jsonl\/invariant$/, replacement: source('./packages/event/typescript/sdk/src/persistence-jsonl-invariant.ts') },
       { find: /^@perix\/event-sdk\/persistence-jsonl$/, replacement: source('./packages/event/typescript/sdk/src/persistence-jsonl.ts') },
       { find: /^@perix\/event-sdk\/runtime$/, replacement: source('./packages/event/typescript/sdk/src/runtime.ts') },
       { find: /^@perix\/event-sdk\/messages$/, replacement: source('./packages/event/typescript/sdk/src/messages.ts') },

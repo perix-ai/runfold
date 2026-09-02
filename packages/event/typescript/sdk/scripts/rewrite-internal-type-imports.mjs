@@ -7,13 +7,10 @@ const typesRoot = resolve(root, 'lib/types')
 const targets = new Map([
   ['@deepseek-ai/dsh-session', 'packages/core/session/src/index.d.ts'],
   ['@deepseek-ai/dsh-session/types', 'packages/core/session/src/types.d.ts'],
-  ['@deepseek-ai/dsh-session/invariant', 'packages/core/session/src/invariant.d.ts'],
   ['@deepseek-ai/dsh-session/chunk-rows', 'packages/core/session/src/chunk-rows.d.ts'],
   ['@deepseek-ai/dsh-session/surface', 'packages/core/session/src/surface.d.ts'],
   ['@deepseek-ai/dsh-session-persistence', 'packages/session/session-persistence/src/index.d.ts'],
-  ['@deepseek-ai/dsh-session-persistence/invariant', 'packages/session/session-persistence/src/invariant.d.ts'],
   ['@deepseek-ai/dsh-session-persistence-jsonl', 'packages/session/session-persistence-jsonl/src/index.d.ts'],
-  ['@deepseek-ai/dsh-session-persistence-jsonl/invariant', 'packages/session/session-persistence-jsonl/src/invariant.d.ts'],
 ])
 
 async function declarations(directory) {
