@@ -221,12 +221,13 @@
   - **依赖**：R14–R21。
   - **结果**：已完成（2026-09-01）：`dependencies` 只剩 `koffi`（win32）与 `@types/node`。
 
-- [ ] **R24** · 难度 评估 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/`
+- [x] **R24** · 难度 评估 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/`
   - **问题**：`@perix/event-ui` 从注册表 bundle `dsh-client-ui-primitives`
     （含 shiki 全语法，`lib` 约 5 MB JS、1.5 MB CSS）与 `dsh-client-store`。
   - **处理**：按"UI 闭包优先原样裁剪"规则可接受，消费者无需安装 DSH 包；本项
     只评估并记录结论，是否裁剪 shiki 语法由 UI 体积要求决定。
   - **依赖**：无。
+  - **结果**：已完成评估（2026-09-01）：`@perix/event-ui` 产物 5.1 MB：主 chunk 1.35 MB，`style.css` 1.5 MB（其中 20 个 `@font-face` 以 data: URI 内嵌字体，占绝大部分），23 个 shiki 语法 chunk 约 2.3 MB 按需动态加载。`package.json` 只依赖 `@perix/event-sdk` 与 React peer，消费者不安装任何 DSH 包。结论：保持"原样裁剪"，不裁 shiki；若日后有体积要求，可选的后续项是把字体改为外部文件、收窄 shiki 语法集，两者都不影响 Event 行为。
 
 ## 4. Python 原生实现
 
@@ -291,12 +292,13 @@
   - **依赖**：R23（通过条件）。
   - **结果**：已完成（2026-09-01）：断言改为：安装后的 `package.json` 各依赖字段无 `@deepseek-ai/`；`lib/**/*.js` 完全不含该命名空间；`*.d.ts` 不得 import/re-export/`declare module` DSH 模块（来源注释允许）。已纳入 `verify`。
 
-- [ ] **R10** · 难度 难 · 风险 低 · 位置 `packages/event/typescript/tests/ui/`
+- [x] **R10** · 难度 难 · 风险 低 · 位置 `packages/event/typescript/tests/ui/`
   - **问题**：`views.client.spec.tsx`（1338 行）是 Trajectory 最大的行为测试，
     被排除后"UI 水准不退化"缺少证明。
   - **处理**：在独立宿主下移植等价用例，去掉依赖完整 DSH shell 的
     slot/workspace 部分。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-01）：`tests/ui/trajectory-view.spec.tsx` 移植 25 个用例（7 个账本/详情面板交互、13 个 timeline 投影、2 个视图状态），断言与上游逐句相同，只把 ConversationRoot+tab 挂载换成直接渲染 `TrajectoryView`。未移植的 6 个用例（插件注册 4、tab 本地化 1、Node 侧 apply 1）测试的是 shell 机制，已在 TESTING.md 说明。
 
 ## 7. 总体验收
 
