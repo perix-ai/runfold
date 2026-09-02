@@ -5,8 +5,9 @@
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
 > 总体状态（2026-09-01）：R01–R24 全部完成，`npm run verify` 全绿，SDK 发布
-> 产物不依赖任何 DSH 包。待执行的是 3.2 节 R25–R29（彻底移除代码中的 DSH
-> 名称与仓库开发时的注册表依赖）和第 7 节总验收。
+> 产物不依赖任何 DSH 包。待执行的是 R25–R29（彻底移除代码中的 DSH 名称与
+> 仓库开发时的注册表依赖）、R30–R32（生产验收前的行为、测试与文档收口）、
+> R33（Nexent 真实接入验收）和第 7 节总验收。
 
 ## 任务生命周期
 
@@ -275,6 +276,25 @@
   - **处理**：按任务书第 5 步逐项更新，并把第 7 节总验收的前置条件补上本任务。
   - **依赖**：R28。
 
+### 3.3 EventHost 生命周期校准
+
+待执行，详见
+[`tasks/R30-R32-production-hardening.md`](tasks/R30-R32-production-hardening.md)。
+
+- [ ] **R30** · 难度 中 · 风险 高 · 位置
+  `packages/event/typescript/runtime/src/host.ts`、
+  `packages/event/typescript/tests/runtime/`
+  - **问题**：R16 要求先为 `EventHost` 写独立测试，但目前只有公共导出 smoke
+    test。实测 effect 执行期间重入 `dispose()` 会漏掉随后返回的 disposer；
+    Promise effect 初始化失败会先产生未处理 rejection，且 dispose 时吞掉错误。
+    两者都与固定版本 Cordis 的行为不同。
+  - **处理**：按
+    [`R30–R32 任务书`](tasks/R30-R32-production-hardening.md) 先建立不依赖
+    生产 Cordis 包的独立生命周期回归套件，再只修改最小宿主接缝，使重入释放、
+    异步初始化失败、反序清理、失败隔离、scope 与服务绑定行为和固定上游一致；
+    不得借机扩展通用 runtime 能力。
+  - **依赖**：R16。
+
 ## 4. Python 原生实现
 
 - [x] 建立可安装的 `perix-event-sdk` 包及清晰的公开 API。
@@ -320,6 +340,19 @@
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：新增 `conformance/event/v0/cases/known-event-types.json`（51 个类型），TS `public-api.spec.ts` 与 Python `test_conformance.py` 各加一条集合相等断言。
 
+- [ ] **R31** · 难度 易 · 风险 中 · 位置
+  `tests/event/cross-language/python-conformance.spec.ts`
+  - **问题**：Python 写、TypeScript 续写的永久测试先调用
+    `persistence.load()`，再用 `sessions.create({ seed })` 发布，并未经过对外
+    承诺的 `runtime.restore()`；因此清单与验证策略声称的双向公开 restore
+    路径没有回归门禁。
+  - **处理**：按
+    [`R30–R32 任务书`](tasks/R30-R32-production-hardening.md) 将明文与
+    Zstandard 两组都改为经 `runtime.restore()` 恢复 Python 轨迹，再 append、
+    flush、fork，并由 Python 重新读取验证；保留现有反向链路，证明双方通过
+    公开 API 等价互操作。
+  - **依赖**：R21、R30。
+
 ## 6. 测试与交付
 
 - [x] 保留并通过 DSH 上游 Event 与 Trajectory 回归套件。
@@ -346,10 +379,34 @@
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：`tests/ui/trajectory-view.spec.tsx` 移植 25 个用例（7 个账本/详情面板交互、13 个 timeline 投影、2 个视图状态），断言与上游逐句相同，只把 ConversationRoot+tab 挂载换成直接渲染 `TrajectoryView`。未移植的 6 个用例（插件注册 4、tab 本地化 1、Node 侧 apply 1）测试的是 shell 机制，已在 TESTING.md 说明。
 
+- [ ] **R32** · 难度 易 · 风险 低 · 位置 `docs/event/`、
+  `packages/event/typescript/README.md`、根 `README.md`
+  - **问题**：文档仍有与代码不一致的历史结论：R07 写 7 处差异而校验脚本
+    报告 9 处；TS README 一边登记五个宿主接缝源码修改，一边又称没有保留源码
+    被修改且只例外七个 manifest/config；部分完成状态和测试能力描述也早于
+    当前实现。
+  - **处理**：按
+    [`R30–R32 任务书`](tasks/R30-R32-production-hardening.md)，在行为与依赖
+    任务完成后逐项核对当前代码、校验输出、测试矩阵和决策记录，修正数字、
+    措辞、状态与链接；只记录事实，不把计划写成已完成。
+  - **依赖**：R29–R31。
+
 ## 7. 总体验收
 
-- [ ] Event 轨迹设施达到生产可用。只有以上所有任务均完成、公共产物不再
-  泄漏 DSH 运行时依赖（R09 通过），并通过完整验证后才能勾选此项。
+- [ ] **R33** · 难度 中 · 风险 中 · 位置 Nexent 使用方仓库、
+  `packages/event/python/`、`tests/event/`
+  - **问题**：需求 A5 明确要求 Nexent 仅依赖 Python 包完成记录、restore、
+    resume 和 fork，但当前只有本仓库的空白消费者测试，没有 Nexent 真实调用链、
+    重启恢复或产出轨迹进入 TypeScript UI 的验收证据。
+  - **处理**：按
+    [`R33 任务书`](tasks/R33-nexent-acceptance.md) 在 Nexent 真实进程内接入
+    Python 包，不增加 server/sidecar 或专属格式；覆盖记录、持久化重启、
+    restore/resume、稳定前缀 fork，并把一份真实产出交给 TypeScript 读取和
+    Trajectory UI 渲染。
+  - **依赖**：R25–R32。
+
+- [ ] Event 轨迹设施达到生产可用。只有 R25–R33 全部完成、需求 A1–A6 均有
+  验收证据、公共产物无 DSH 运行时依赖，并通过完整验证后才能勾选此项。
 
 ## 执行顺序
 
@@ -364,7 +421,10 @@
 | 5 | R16 → R19 → R17 → R18 → R20 → R21 | 宿主接口与保留源码改动 | 批次 4 |
 | 6 | R22, R23, R09 | 收尾与泄漏门禁 | 批次 5 |
 | 7 | R10, R24 | 独立长线 | 无 |
-| 8 | R25 → R26 → R27 → R28 → R29 | 彻底移除 DSH 名称与注册表依赖（交由 Codex，见 `tasks/R25-R29-dsh-free.md`） | 批次 6 |
+| 8 | R30 → R31 | 校准 EventHost 生命周期，并补齐双向公开 restore 门禁 | 批次 5 |
+| 9 | R25 → R26 → R27 → R28 → R29 | 彻底移除 DSH 名称与注册表依赖（交由 Codex，见 `tasks/R25-R29-dsh-free.md`） | 批次 8 |
+| 10 | R32 | 按最终代码和验证结果同步全部文档事实 | 批次 9、R31 |
+| 11 | R33 | Nexent 真实消费者接入与需求 A5 验收 | R25–R32 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
