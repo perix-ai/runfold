@@ -210,7 +210,7 @@ TypeScript 裁剪版的 DSH/Cordis 解耦已于 2026-09-01 完成（tasks.md R13
   Event 实现矛盾，已于 2026-09-01 删除（R03）；
 - 裁剪源码与 `third_party` 快照的一致性已由 `verify:upstream-identity` 校验（R07）。
 
-下一阶段（待执行，任务书见 [`codex-task-dsh-free.md`](codex-task-dsh-free.md)，
+下一阶段（待执行，任务书见 [`tasks/R25-R29-dsh-free.md`](tasks/R25-R29-dsh-free.md)，
 清单 R25–R29）：保留源码里的 `@deepseek-ai/*` import 名字改为相对路径，UI 闭包
 真正用到的 `dsh-client-store` 与 `dsh-client-ui-primitives` 子集从快照裁入仓库，
 其余仅类型的包本地化，最终仓库开发也不再从注册表安装任何 DSH 包。

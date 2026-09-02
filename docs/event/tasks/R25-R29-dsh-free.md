@@ -1,11 +1,12 @@
 # 任务：彻底移除 TypeScript 侧对 DeepSeek Harness 的一切依赖
 
-> 执行者：Codex。本文自包含；执行前先读 [`README.md`](README.md)（抽离原则）、
-> [`tasks.md`](tasks.md) 第 3 节（已完成的解耦）、
-> [`../../packages/event/typescript/README.md`](../../packages/event/typescript/README.md)
-> 和 [`../../AGENTS.md`](../../AGENTS.md)（提交与推送规则）。
+> 对应清单：[`../tasks.md`](../tasks.md) 第 3.2 节 R25–R29。
+> 执行者：Codex。状态：待执行。
 >
-> 状态：待执行。对应 `tasks.md` 的 R25–R29。
+> 本文自包含；执行前先读 [`../README.md`](../README.md)（抽离原则）、
+> [`../tasks.md`](../tasks.md) 第 3 节（已完成的解耦）、
+> [`../../../packages/event/typescript/README.md`](../../../packages/event/typescript/README.md)
+> 和 [`../../../AGENTS.md`](../../../AGENTS.md)（提交与推送规则）。
 
 ## 目标
 
