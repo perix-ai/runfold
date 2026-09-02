@@ -19,17 +19,27 @@ These rules apply to every automated change in this repository.
 
 ## Change lifecycle
 
-1. Make the smallest coherent logical change. Do not accumulate unrelated work
+1. Before implementing any code, test, configuration, or documentation change,
+   record the intended logical change as an unchecked item in the applicable
+   `docs/<domain>/tasks.md`. Create that domain task list if it does not exist.
+   Maintaining the task list itself does not require a recursive meta-task.
+2. For work handed to another person or tool, add a self-contained task brief
+   under `docs/<domain>/tasks/` and link it from the checklist item.
+3. Make the smallest coherent logical change. Do not accumulate unrelated work
    into one large commit.
-2. Verify in proportion to risk. Documentation-only changes need link and diff
+4. Verify in proportion to risk. Documentation-only changes need link and diff
    checks; path or workspace changes need resolver, type, build, and targeted
    integration checks; behavioral or release changes require the complete
    relevant test matrix.
-3. Commit each completed logical change with a descriptive conventional commit
+5. After verification, mark the task complete and record its date, result, and
+   verification evidence. Do this in the implementation commit or in an
+   immediate follow-up documentation commit before starting unrelated work.
+6. Commit each completed logical change with a descriptive conventional commit
    message.
-4. Push that commit immediately to the current branch's configured upstream.
+7. Push that commit immediately to the current branch's configured upstream.
    Do not wait until the end of a long task to push a large batch.
-5. Do not commit or push a known failing or incomplete logical change. If a
+8. Do not mark a task complete or commit and push it while its required checks
+   are known to fail or the logical change is incomplete. If a
    required check is blocked by credentials, network, or external state, report
    the blocker instead.
 
