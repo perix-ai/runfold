@@ -1,7 +1,7 @@
 # 任务：Nexent 真实消费者接入与验收
 
 > 对应清单：[`../tasks.md`](../tasks.md) R33、需求 A5。
-> 执行者：Codex。状态：执行中（本地实现与验收完成，等待可写 Nexent 远端）。
+> 执行者：Codex。状态：已完成（2026-09-02，本地互操作实验）。
 >
 > 前置：R25–R32、R34–R35 全部完成；执行前确认用户指定的 Nexent 仓库、分支和
 > 依赖交付方式，不在未授权仓库中改动代码。
@@ -57,11 +57,17 @@
 
 ## 实施记录（2026-09-02）
 
-- 使用官方 Nexent `develop` 基线
-  `4e1fb31dd169917edcee549efc59957124d9d449`；集成位于本地分支
-  `codex/event-trajectory`，提交
-  `94c06828e4633c73d9da56c47482bc8da43fed9a`。该提交尚未发布到可写远端，
-  因此本任务与总体验收暂不标记完成。
+- 用户指定的源码是 `perix-ai/open-source/agent_platform/nexent` 中的官方
+  `v2.5.0` Release ZIP 快照（目录记录的 ZIP SHA-256 为
+  `a4be5bc01472dd12947b2dce21a4b74ee58735cbd4de8668d367695b866ce77f`）。
+  不跟随符号链接的身份校验确认其 2,886 个条目、2,463 个文件和 85,150,229
+  字节与官方 tag commit
+  `86d75923dd549008d725d83db18a93d654c84fb0` 的 archive 逐字节一致。
+- 为保留可审计实验，快照建立本地基线分支 `snapshot/v2.5.0`（提交
+  `1b184cf019fe2a539fe1c340afd526544492a90c`）和实验分支
+  `codex/event-trajectory-v2.5.0`（提交
+  `5c597209bb4a01866dc073ddacf7a2e682dd6d71`）。仓库没有配置 remote；按用户
+  明确约定，这只是本地互操作验证，不推送，也不代表向 Nexent 上游提交方案。
 - Nexent 的 `event` extra 精确固定到 Perix commit
   `2eea3f17e6a917ef3d640405b360664728d31e84` 的
   `perix-event-sdk` 0.1.0；默认 `dev` 测试 extra 会同时安装 `event`，避免
@@ -77,7 +83,7 @@
   `CoreAgent` 工具运行、三进程 create/resume/fork、安装包来源、跨进程重复
   writer 拒绝、非法 Event 原子失败、open-turn fork 拒绝、cwd 漂移拒绝以及
   assistant/tool-call 两个崩溃边界的确定性 repair。
-- 从 rebased Nexent 提交与固定 Event 提交分别构建 wheel，在全新 Python 3.11
+- 从本地 Nexent 实验提交与固定 Event 提交分别构建 wheel，在全新 Python 3.11
   环境中以 `--no-index --no-deps` 只安装两个 wheel；两个模块均从
   `site-packages` 加载并成功持久化完整 7-Event turn。Nexent wheel metadata
   同时包含固定 Event URL 和 `dev -> event` 依赖。
@@ -88,11 +94,11 @@
   根/子工具因果和 seed marker，并由保留的 Trajectory UI 渲染三轮轨迹。
 - 本仓完整门禁的全部阶段通过：207 个保留文件、10 个必要差异、87 个声明
   映射和 1005 个行为测试全部通过，TypeScript 与 Python 空白消费者均从发布
-  产物安装成功。两个需要联网安装依赖的消费者阶段在允许联网的环境中分别
-  补跑通过。
+  产物安装成功。Nexent 新增实现与验收文件另通过 Ruff、格式和模块编译检查；
+  未为本实验顺手改写 `v2.5.0` 的既有 lint backlog。
 
-## 剩余步骤
+## 验收结论
 
-1. 将 `94c06828` 推送到用户授权且可写的 Nexent 远端，记录可访问的 branch/PR
-   URL；当前官方 `git@github.com:ModelEngine-Group/nexent.git` 对现有凭据拒绝
-   写入，现有 `gh` 凭据也无效。发布后将 `tasks.md` 的 R33 与总验收同时勾选。
+任务书中的真实进程、安装包、失败场景、跨进程 restore/resume/fork、共享格式
+和 TypeScript UI 证据均已满足，R33 可以完成。远端 branch/PR 不是本次验收条件：
+若未来要把实验提交给 Nexent 官方，需要先与其团队沟通，并作为独立工作处理。

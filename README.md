@@ -82,11 +82,12 @@ after each verified commit instead of being accumulated into one large batch.
 
 ## Status
 
-The repository implementation and all internal acceptance work through R35 are
-complete: the current full gate verifies 207 retained upstream files, runs 1005
+The Event trajectory facility has completed its production acceptance through
+R35: the current full gate verifies 207 retained upstream files, runs 1005
 behavior tests, and installs both language packages into blank consumers. R33
-now also proves the Python package in Nexent's real process and passes the
+also proves the Python package in Nexent v2.5.0's real process and passes the
 resulting parent/fork trajectory through the TypeScript public restore API and
-retained UI. Production acceptance remains open only until the Nexent
-integration commit is published to an authorized writable remote. See
-[`docs/event/tasks.md`](docs/event/tasks.md) for the evidence and remaining work.
+retained UI. The Nexent branch is intentionally a local interoperability
+experiment with no remote; any upstream proposal requires separate coordination
+with the Nexent team. See [`docs/event/tasks.md`](docs/event/tasks.md) for the
+evidence.
