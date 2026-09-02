@@ -118,8 +118,10 @@ Python 返回独立快照，避免调用方修改内部日志；TypeScript 返�
 `conformance/event/v0/` 同时包含有效/无效 Session、确定性 repair 和 packed
 JSONL 投影。系统测试还执行以下真实文件链路：
 
-- Python 写明文/Zstandard，TypeScript restore、resume、append、fork；
-- TypeScript 写明文/Zstandard，Python restore、resume、append、fork；
+- Python 写明文/Zstandard，TypeScript 经 `runtime.restore()` 恢复，再 append、
+  flush、fork，最后由 Python 经 `restore/resume` 重读；
+- TypeScript 写明文/Zstandard，Python 经 `restore/resume` 恢复、append、fork，
+  最后由 TypeScript 经 `runtime.restore()` 重读；
 - Python 轨迹进入保留的 TypeScript Trajectory UI 并渲染消息；
 - 规范化后的 header、Event、surface、messages 和 repair 逐字段相等。
 

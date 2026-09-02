@@ -82,4 +82,9 @@ after each verified commit instead of being accumulated into one large batch.
 
 ## Status
 
-See the status block at the top of [`docs/event/tasks.md`](docs/event/tasks.md).
+The repository implementation and internal acceptance through R32 are complete:
+the current full gate verifies 207 retained upstream files, runs 1002 behavior
+tests, and installs both language packages into blank consumers. Production
+acceptance remains open until R33 proves the Python package in Nexent's real
+process and passes one resulting trajectory through the TypeScript UI. See
+[`docs/event/tasks.md`](docs/event/tasks.md) for the evidence and remaining work.

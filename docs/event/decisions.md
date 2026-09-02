@@ -16,7 +16,8 @@
   组合槽，并复现"经作用域读取的服务视图绑定该作用域"这一条 Cordis 语义。
 - 后果：五个保留文件进入允许差异清单；scope 过滤分发、typert、invariants
   插件不再保留，对应三个上游测试排除；其余 626 个上游测试经测试专用垫片
-  原样通过。
+  原样通过。R30 又用 11 个独立测试锁定 EventHost 的事件、effect、scope、释放
+  和服务绑定行为，并修复 effect 初始化期间重入释放与异步拒绝观察两处偏差。
 - 相关：tasks.md R16–R21；`architecture.md` 3.4。
 
 ## D02 · 删除早期从零设计的 Runtime Data 草案

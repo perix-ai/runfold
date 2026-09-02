@@ -82,21 +82,24 @@ Cordis 服务或 DSH shell 类型，按它在 Event 中承担的实际职责逐�
 | Event 核心行为 | 保留源码和算法，只改独立化必需的导入与组合边界 | Session、追加、fork、repair、projection | 保留 |
 | Event 必需但由 DSH 定义的类型/小工具 | 裁剪最小实现到 `runtime/` | Message/ContentBlock、ID brand、deep-freeze、JSON snapshot、timeout 常量 | 已替换 |
 | Harness 宿主与插件机制 | 删除；影响生命周期的部分用最小本地接口重现 | Cordis Context/Service、scope、typert、插件注册 | 已由 `EventHost` 替换，见 [`decisions.md`](decisions.md) D01 |
-| Trajectory 所需的 UI 依赖闭包 | 优先原样裁剪；只替换完整 DSH shell 才提供的宿主接口 | conversation assembler、renderer binding、slots、locale、theme | 运行时子集仍从注册表打包，裁入计划见 `tasks/R25-R29-dsh-free.md` |
+| Trajectory 所需的 UI 依赖闭包 | 优先原样裁剪；只替换完整 DSH shell 才提供的宿主接口 | conversation assembler、renderer binding、store、UI primitives、locale、theme | 已从固定快照裁入实际闭包；宿主类型与 Event 增强已本地化，见 [`tasks/R25-R29-dsh-free.md`](tasks/R25-R29-dsh-free.md) |
 | 与 DSH 无关且确有必要的通用第三方库 | 可以保留并锁定版本 | React、shiki、压缩或文件处理库 | 保留 |
 
 完成解耦后的硬性要求：打包后的 JS、声明文件和 Python 包不能要求安装任何
 DSH 包；公共 API、类型、模块扩展和错误标识不能泄漏 DSH 命名空间；DSH
-名称只能存在于 `third_party`、来源说明、许可证或明确的回归夹具中；不能
-通过复制整个 DSH runtime 来规避依赖清理。
+名称只能存在于 `third_party`、逐字节保留但不参与发布解析的上游
+tests/manifests、来源说明、许可证或测试专用别名中；不能通过复制整个 DSH
+runtime 来规避依赖清理。
 
 ### 3.4 宿主接缝：EventHost
 
 DSH 的 Event 代码通过 Cordis 插件平台获得三样东西：`session/*` 生命周期
 事件的总线、带反序释放的所有权作用域、按名字查找的服务槽。`EventHost`
-只提供这三样，并复现 Cordis 唯一被生命周期依赖的语义：经作用域读取的服务
-是绑定该作用域的视图，因此在子作用域创建的 Session 随该作用域销毁。没有
-插件注册、依赖注入、scope 过滤分发和类型注册表。
+只提供这三样，并复现保留代码依赖的 Cordis 生命周期子集：事件顺序与 carrier、
+effect 初始化与反序释放、失败隔离、父子 scope 释放，以及经作用域读取的服务
+视图绑定该作用域。因此在子作用域创建的 Session 随该作用域销毁。没有插件
+注册、依赖注入、scope 过滤分发和类型注册表；这组边界由 11 个独立宿主测试
+锁定。
 
 `createEventRuntime({ persistence })` 是组合根：一个 host、一个
 `SessionStore`、一个可选持久化后端，外加与 Python `SessionStore.restore`

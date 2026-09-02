@@ -1,7 +1,7 @@
 # 任务：生产验收前的行为、互操作与文档收口
 
 > 对应清单：[`../tasks.md`](../tasks.md) R30–R32。
-> 执行者：Codex。状态：进行中（R30–R31 已完成，R32 待执行）。
+> 执行者：Codex。状态：已完成（R30–R32）。
 >
 > 执行前先读 [`../requirements.md`](../requirements.md)、
 > [`../architecture.md`](../architecture.md)、
@@ -18,10 +18,10 @@ Cordis 生命周期子集的行为一致性，以及 Python/TypeScript 通过公
 本任务不是重写 EventHost、设计通用 Event Bus、恢复完整 Cordis，也不增加
 server、adapter 或 DSH shell 能力。
 
-## 已确认的现状
+## 立项基线（2026-09-01，缺口已由 R30–R32 消除）
 
 2026-09-01 审查时，构建、809 个测试、两个空白消费者安装测试和 132 文件的
-上游一致性校验均通过；以下缺口仍能独立复现：
+上游一致性校验均通过；当时以下缺口均可独立复现：
 
 1. `packages/event/typescript/tests/` 没有直接覆盖 `EventHost` 的测试文件，
    `tests/sdk/public-api.spec.ts` 只验证它能导出和构造。
@@ -38,6 +38,10 @@ server、adapter 或 DSH shell 能力。
    宿主接缝源码、四个是 tsconfig。
 
 ## R30：EventHost 生命周期校准
+
+**完成（2026-09-02）。** 新增 11 个独立生命周期用例，并只修改
+`runtime/src/host.ts` 的 setup barrier、Promise rejection 观察和最终 disposer
+收集；Event、persistence 与 Trajectory 算法未改动。
 
 先新增 `packages/event/typescript/tests/runtime/event-host.spec.ts`，并为它增加
 明确的根级测试入口，纳入 `npm test`。测试至少覆盖：
@@ -60,6 +64,10 @@ server、adapter 或 DSH shell 能力。
 
 ## R31：双向公开 restore 门禁
 
+**完成（2026-09-02）。** 明文与 Zstandard 的 Python → TypeScript 链路均改为
+调用 `runtime.restore()`，续写与 fork 后再由 Python 的公开 `restore/resume`
+验证；反向链路最终也由 TypeScript 的公开 restore 重读。
+
 修改 `tests/event/cross-language/python-conformance.spec.ts`：
 
 1. Python 分别写出 `none` 与 `zstd` 轨迹并关闭真实 store；
@@ -75,6 +83,11 @@ server、adapter 或 DSH shell 能力。
 restore 验收；底层 load 可以作为额外断言，但不能替代第 2 步。
 
 ## R32：文档事实同步
+
+**完成（2026-09-02）。** 所有项目自有 Event 文档已按最终代码和验证结果核对；
+当前门禁统一记录为 207 个保留文件、10 个必要差异、87 个声明映射和 1002 个
+行为测试。架构、公开 restore 链路、EventHost 覆盖、发布边界与剩余 Nexent
+验收均使用当前事实；既有已完成任务的验证证据已补齐。
 
 R29–R31 完成后，逐项核对并更新：
 

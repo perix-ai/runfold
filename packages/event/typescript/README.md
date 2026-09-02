@@ -173,6 +173,8 @@ Trajectory; both execute the
 - `packages/**/tests`: upstream behavioral regression tests, including 626
   Event, 182 selected UI-runtime, and 94 Trajectory cases; import-only test
   rewrites are identity-checked against the fixed snapshot;
+- `tests/runtime`: 11 direct `EventHost` lifecycle cases covering event order,
+  effect setup/disposal/failure, scope teardown, and scoped service views;
 - `tests/sdk`: Perix public exports, lifecycle, fork, immutability, JSONL,
   restart, suffix/raw reads, and concurrent-session isolation;
 - `tests/ui`: Perix component API, projection, localization,
@@ -189,4 +191,6 @@ Trajectory; both execute the
 - `../../../tests/event/cross-language`: bidirectional TypeScript/Python
   compatibility and shared-conformance tests.
 
-Run all layers with `npm run verify`. See `TESTING.md` for the exact matrix.
+Run all layers with `npm run verify`. The current matrix contains 1002 behavior
+tests plus TypeScript and Python blank-consumer installation checks. See
+`TESTING.md` for the exact matrix.

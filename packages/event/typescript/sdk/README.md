@@ -1,7 +1,8 @@
 # @perix/event-sdk
 
-The installable TypeScript boundary for the unchanged DeepSeek Harness Event,
-persistence, and JSONL persistence implementations retained in this repository.
+The installable TypeScript boundary for the retained, minimally adapted
+DeepSeek Harness Event, persistence, and JSONL persistence implementations in
+this repository.
 
 The package contains no Event business logic. Its modules expose the
 corresponding DSH package surfaces while the build bundles the retained local
@@ -41,7 +42,9 @@ session.append('user/message', createUserMessage({
 await runtime.sessions.flush(session)
 const restored = await runtime.restore(SessionId('example'))
 await runtime.dispose()
-``` Names from the upstream implementation remain
+```
+
+Names from the upstream implementation remain
 internal provenance only: the published JavaScript mentions no DSH package,
 the declarations reference none, and the package depends on none.
 

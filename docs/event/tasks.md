@@ -4,9 +4,9 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R31 已完成，`npm run verify` 全绿，SDK 与 UI
-> 发布产物均不依赖任何 DSH 包。待执行的是 R32（生产验收文档收口）、R33
-> （Nexent 真实接入验收）和第 7 节总验收。
+> 总体状态（2026-09-02）：R01–R32 已完成，`npm run verify` 全绿，SDK 与 UI
+> 发布产物均不依赖任何 DSH 包。待执行的是 R33（Nexent 真实接入验收）和
+> 第 7 节总验收。
 
 ## 任务生命周期
 
@@ -54,6 +54,8 @@
     删锁，则整段删除。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：删除锁段落，改为"两种实现都不使用跨进程文件锁，与 DSH 一致"。
+  - **验证**：2026-09-02 完整 `npm run verify` 通过；Python persistence 35/35，
+    双向明文/Zstandard 跨语言用例 5/5。
 
 - [x] **R02** · 难度 易 · 风险 低 · 位置 `docs/event/specification.md` 行为接口映射表
   - **问题**：表格只写了"共同语义"，读者会把"逻辑等价"误读为"API 等价"。
@@ -63,6 +65,8 @@
   - **处理**：表格增加"仅某一语言提供"一列，逐项标注。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：新增"仅单侧提供的接口"表。
+  - **验证**：规格本地链接检查通过；TypeScript 类型检查、Python 35/35 与
+    跨语言 5/5 均包含在 2026-09-02 完整验证中。
 
 - [x] **R03** · 难度 易 · 风险 低 · 位置 根 `README.md`、`rfcs/0001`、`spec/`、`schemas/v0`、`conformance/cases`、`conformance/fixtures/v0`
   - **问题**：这些文件描述另一套模型（namespace、event_id、seq 从 1 起、经
@@ -73,6 +77,8 @@
     README 改为指向 `docs/event/`。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：按决策直接删除 `spec/`、`rfcs/`、`schemas/v0`、`conformance/cases`、`conformance/fixtures`、`adapters/`、`docs/architecture.md`、`docs/invariants.md`；根 README、`schemas/README.md`、`conformance/README.md` 改为只描述 Event。
+  - **验证**：旧路径不存在；项目自有 Markdown 本地链接检查通过，根 README
+    只指向当前 `docs/event/` 文档集。
 
 - [x] **R04** · 难度 易 · 风险 低 · 位置 `third_party/deepseek-harness/README.md`
   - **问题**：声称快照包含 Trajectory 依赖闭包，但 `dsh-client-ui-primitives`、
@@ -81,6 +87,8 @@
   - **处理**：二选一——补入快照，或如实列出"仅注册表引用"的包清单。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：按决策补入 24 个上游目录（含 `vendor/cordis`、`vendor/schemastery`），逐字节校验通过；README 按用途分三组列出。
+  - **验证**：`npm run verify:upstream-identity` 当前逐文件核对 207 个裁剪文件与
+    固定快照；来源 README 本地链接检查通过。
 
 - [x] **R05** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/README.md`、`packages/event/typescript/TESTING.md`
   - **问题**：独立宿主用 `as never` 桩掉了 `useSessions`、`useWorkspaces`、
@@ -91,6 +99,8 @@
     已知缺口。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：UI README 新增 "Known limitations of the standalone host"，TESTING.md 新增 "Known gaps"。
+  - **验证**：Trajectory 94/94、Perix UI 33/33 通过；README 与 TESTING 的
+    本地链接检查通过。
 
 - [x] **R06** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/packages/client/ui-trajectory/package.json` 等非 workspace 保留包
   - **问题**：这些 manifest 不参与构建，却把 `workspace:^` 改成了一整套注册表
@@ -99,6 +109,8 @@
     它们接入 workspaces 与构建。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：`package.json` 恢复上游原样；`tsconfig.json` 必须保留本地版本（Vite 读取最近的 tsconfig，上游 `references` 指向不存在的目录），已在 TS README 登记为例外。
+  - **验证**：身份校验确认审计 manifests 与固定快照一致，并把读取中的两个 UI
+    tsconfig 计入 10 个必要差异；TypeScript/UI 构建通过。
 
 ## 2. 仓库组织
 
@@ -115,7 +127,11 @@
   - **处理**：新增脚本并纳入 `npm run verify`；维护一份"允许差异清单"，
     R17–R19 修改保留源码后，清单之外的文件必须逐字节一致。
   - **依赖**：无（R17–R19 完成后更新允许差异清单）。
-  - **结果**：已完成（2026-09-01）：新增 `scripts/verify-upstream-identity.mjs`，纳入 `npm run verify` 首步；当前 132 个保留文件，7 处登记差异（3 个 workspace manifest、4 个 tsconfig）。
+  - **结果**：已完成（2026-09-01）：新增 `scripts/verify-upstream-identity.mjs`，
+    纳入 `npm run verify` 首步。初始门禁覆盖 132 个文件、7 处差异；经过宿主接缝
+    和 R25–R29 依赖收口后，当前覆盖 207 个文件、10 个必要差异和 87 个声明映射。
+  - **验证**：2026-09-02 `npm run verify:upstream-identity` 通过，未登记的字节
+    差异、无效映射和缺失上游对应文件都会使命令失败。
 
 ## 3. TypeScript 解耦
 
@@ -148,6 +164,8 @@
     源码留在 `packages/` 供审计，不进入 SDK 构建。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：删除三个子路径的 exports、vite entry、源文件、测试别名与 README 条目；同时移除 sdk 对 `@deepseek-ai/dsh-invariants` 的依赖（只有 invariant 模块引用它）。
+  - **验证**：SDK build、15 个 SDK 用例与 TypeScript 空白消费者通过；发布
+    exports 中不存在三个 invariant 子路径。
 
 - [x] **R14** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/runtime/src/{brand,values,timeout}.ts`
   - **问题**：核心源码依赖 `dsh-brand`（`brandString/Branded`）、
@@ -157,6 +175,8 @@
     import 行。上游 `json.spec.ts`、`properties.spec.ts` 锁定行为。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：本地模块放在 `runtime/`（`packages/` 目录保留给上游原样文件，受 R07 比对约束）；`values.ts` 正文与上游逐字节相同。保留源码零改动，SDK 构建、vitest、测试与 UI tsconfig 通过别名解析。
+  - **验证**：上游 Event 626/626、TypeScript 类型检查、SDK build 与 15 个 SDK
+    用例通过；当前 import 改写另由 87 条身份映射约束。
 
 - [x] **R15** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/runtime/src/messages.ts`、`sdk/src/messages.ts`
   - **问题**：`@perix/event-sdk/messages` 整包 re-export `dsh-llm`，把完整 LLM
@@ -167,7 +187,9 @@
     `createToolResultMessage` 和 `callConfigEquals`；以 Python `messages.py`、
     `request_header.py` 为对照，保证两边接受同一 JSON 形状。
   - **依赖**：无。
-  - **结果**：已完成（2026-09-01）：`runtime/src/messages.ts` 只含 Event 用到的 id、content block、message、StreamChunk、`LlmCallConfig` 与构造函数；vitest 里全部上游 core 测试改为在该模块上运行；SDK 依赖去掉 `dsh-brand/dsh-util-values/dsh-timeout/dsh-llm/dsh-attachment`。剩余运行时依赖：cordis、dsh-scope、schemastery。
+  - **结果**：已完成（2026-09-01）：`runtime/src/messages.ts` 只含 Event 用到的 id、content block、message、StreamChunk、`LlmCallConfig` 与构造函数；vitest 里全部上游 core 测试改为在该模块上运行；SDK 依赖去掉 `dsh-brand/dsh-util-values/dsh-timeout/dsh-llm/dsh-attachment`。R15 提交时剩余的 Cordis、dsh-scope、schemastery 依赖已由 R16–R23 后续移除。
+  - **验证**：上游 Event 626/626、类型检查、SDK 15/15、跨语言 5/5 与空白
+    TypeScript 消费者通过。
 
 - [x] **R16** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/runtime/`
   - **问题**：没有可替代 Cordis 的本地宿主抽象。
@@ -179,6 +201,8 @@
     不提供 scope、typert、plugin 注册、HMR。先为 `EventHost` 单独写测试。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：`runtime/src/host.ts`。`EventHost` = 事件总线（四个 `session/*` 事件 + Cordis 同款 `internal/dispatch` 钩子）、`effect/scope/dispose`（反序释放，失败记录日志不中断，与 Cordis fiber unload 一致）、`provide/get` 组合槽（经作用域读取得到 `ctx` 绑定的 Proxy 视图）。
+  - **验证**：R30 的 11 个 EventHost 直接用例、上游 Event 626/626、SDK 15/15
+    与系统 1/1 通过。
 
 - [x] **R19** · 难度 中 · 风险 低 · 位置 `packages/session/session-persistence-jsonl/src/index.ts`
   - **问题**：构造函数签名 `(ctx, config)`，`static inject = ['sessions']`，
@@ -188,6 +212,8 @@
     "Necessary local changes" 逐行登记。
   - **依赖**：R16。
   - **结果**：已完成（2026-09-01）：构造函数保持 `(host, config)`；删除 `static inject`、schemastery `Config` 与 `JsonlCompressionSchema`，改为构造时校验 `root`/`compression`。三个保留包不再是 npm workspace，`package.json` 恢复上游字节，SDK 直接从源码打包。
+  - **验证**：上游 Event/持久化 626/626、SDK 15/15、类型检查和 SDK build
+    通过；身份校验登记该宿主接缝差异。
 
 - [x] **R17** · 难度 难 · 风险 中 · 位置 `packages/core/session/src/index.ts`
   - **问题**：`SessionStore extends Service`，注册 typert lookup，事件 carrier
@@ -199,6 +225,8 @@
     `Session` 类与 append/fork/repair/surface 逻辑逐字节不动，改动逐行登记。
   - **依赖**：R14、R15、R16。
   - **结果**：已完成（2026-09-01）：只改 import、`declare module`、构造函数（`ctx.provide('sessions', this)`）、carrier 三行；`Session` 与 append/fork/repair/surface 逻辑逐字节不动。scope 过滤未保留：所有监听器收到所有 Session。`types.ts` 另删除 5 行 Typert 远程错误增强。
+  - **验证**：身份校验登记两处 Session 宿主差异及全部 import 映射；上游 Event
+    626/626、SDK 15/15 和系统 1/1 通过。
 
 - [x] **R18** · 难度 难 · 风险 中 · 位置 `packages/session/session-persistence/src/{index,coordinator}.ts`
   - **问题**：`SessionPersistence extends Service`；`installWritePath` 用
@@ -208,6 +236,8 @@
     `ctx.invariants` 用法。write-behind、prepared cache、torn-tail 逻辑不动。
   - **依赖**：R17。
   - **结果**：已完成（2026-09-01）：`SessionPersistence` 改为普通抽象类并增加 `name` 标签；coordinator 只改一个类型导入，`installWritePath` 无需改动（host 的 `on/effect` 契约相同）。
+  - **验证**：身份校验登记两处 persistence 宿主差异及 import 映射；上游
+    Event/持久化 626/626、SDK 15/15 与系统 1/1 通过。
 
 - [x] **R20** · 难度 中 · 风险 中 · 位置 `packages/test-support/`、上游 `tests/`
   - **问题**：上游测试大量使用 `new Context()`、`ctx.plugin`、`ctx.fiber.dispose`。
@@ -217,6 +247,8 @@
     的用例，并在 R07 允许差异清单中登记。
   - **依赖**：R17、R18、R19。
   - **结果**：已完成（2026-09-01）：`test-support/cordis-shim.ts`、`scope-shim.ts` 通过 vitest 别名让上游测试原样运行，626/626 通过；排除 `scoped.spec`、`typert.spec`、`invariant.spec` 三个测试宿主机制的文件并在 TESTING.md 登记。
+  - **验证**：`npm run test:upstream:event` 626/626；身份校验确保保留的上游
+    测试除声明映射外与固定快照一致。
 
 - [x] **R21** · 难度 中 · 风险 低 · 位置 `sdk/src/runtime.ts`、`sdk/package.json`
   - **问题**：`@perix/event-sdk/runtime` 是 `export * from '@deepseek-ai/cordis'`；
@@ -226,12 +258,18 @@
     即 `specification.md` 中"`prepare` 后由 `SessionStore` 发布"的封装。
   - **依赖**：R16–R20。
   - **结果**：已完成（2026-09-01）：`@perix/event-sdk/runtime` 只导出 `EventHost`；根入口新增 `createEventRuntime({ persistence })` 返回 `sessions/persistence/restore/dispose`；`restore` = `prepare` + `enter` + `announce`。Perix 测试与打包消费者已迁移。
+  - **验证**：SDK 15/15、系统 1/1、双向公开 restore 5/5 与 TypeScript 空白
+    消费者通过。
 
 - [x] **R22** · 难度 易 · 风险 低 · 位置 `sdk/scripts/rewrite-public-namespaces.mjs`
   - **问题**：脚本对生成物做字符串替换（含 typert 符号字符串），是去痕不是解耦。
   - **处理**：typert 注册删除后不再需要，删除脚本及其 build 步骤。
   - **依赖**：R17。
-  - **结果**：已完成（2026-09-01）：脚本与 build 步骤删除。不改写后，产物里仅剩 d.ts 的 `@module @deepseek-ai/...` 来源注释，JS 中无任何 DSH 名称。
+  - **结果**：已完成（2026-09-01）：脚本与 build 步骤删除。R22 提交时产物只剩
+    d.ts 的上游包名来源注释；R28 已把它机械转换为固定源码路径，当前 JS 与 d.ts
+    均无 DSH registry namespace。
+  - **验证**：SDK build 与空白消费者逐文件扫描通过，manifest、生成的 JS 和
+    d.ts 均无 DSH package specifier。
 
 - [x] **R23** · 难度 易 · 风险 低 · 位置 `sdk/package.json`
   - **问题**：`dependencies` 列出 12 个 `@deepseek-ai/*`/schemastery 包，
@@ -239,6 +277,8 @@
   - **处理**：全部移除；`koffi` 仅 win32 使用、与 DSH 一致，保留并在 README 注明。
   - **依赖**：R14–R21。
   - **结果**：已完成（2026-09-01）：`dependencies` 只剩 `koffi`（win32）与 `@types/node`。
+  - **验证**：`npm ls --all` 无 DSH 包；SDK build、15 个 SDK 用例与空白消费者
+    安装通过。
 
 - [x] **R24** · 难度 评估 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/`
   - **问题**：`@perix/event-ui` 从注册表 bundle `dsh-client-ui-primitives`
@@ -247,6 +287,8 @@
     只评估并记录结论，是否裁剪 shiki 语法由 UI 体积要求决定。
   - **依赖**：无。
   - **结果**：已完成评估（2026-09-01）：`@perix/event-ui` 产物 5.1 MB：主 chunk 1.35 MB，`style.css` 1.5 MB（其中 20 个 `@font-face` 以 data: URI 内嵌字体，占绝大部分），23 个 shiki 语法 chunk 约 2.3 MB 按需动态加载。`package.json` 只依赖 `@perix/event-sdk` 与 React peer，消费者不安装任何 DSH 包。结论：保持"原样裁剪"，不裁 shiki；若日后有体积要求，可选的后续项是把字体改为外部文件、收窄 shiki 语法集，两者都不影响 Event 行为。
+  - **验证**：UI build、UI runtime 182/182、Trajectory 94/94、Perix UI 33/33
+    和 TypeScript 空白消费者通过；R28 已进一步把闭包从注册表裁入本地。
 
 ### 3.2 彻底移除 DSH 名称与注册表依赖（已完成，详见 [`tasks/R25-R29-dsh-free.md`](tasks/R25-R29-dsh-free.md)）
 
@@ -319,7 +361,7 @@
 
 ### 3.3 EventHost 生命周期校准
 
-进行中（R30–R31 已完成，R32 待执行），详见
+已完成（R30–R32），详见
 [`tasks/R30-R32-production-hardening.md`](tasks/R30-R32-production-hardening.md)。
 
 - [x] **R30** · 难度 中 · 风险 高 · 位置
@@ -364,12 +406,16 @@
     增加 TS 读取含 `.event.lock` 目录的跨语言测试。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：删除 `_exclusive_file_lock`、`_lock_path` 及三处调用，只保留进程内 `RLock`；不再写 `.event.lock`。
+  - **验证**：Python 35/35、双向持久化 5/5 与 Python 空白消费者通过；测试
+    临时目录不产生 `.event.lock`。
 
 - [x] **R12** · 难度 易 · 风险 低 · 位置 `packages/event/python/src/perix_event/session.py`
   - **问题**：`SessionStore.resume()` 只是 `restore()` 别名，DSH 没有该 API。
   - **处理**：保留则在 docstring 与 `specification.md` 明确"别名"（R02）；否则删除。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：保留别名，docstring 与 `specification.md` 均注明"与 `restore` 相同、Python-only、不增加行为"。
+  - **验证**：Python 35/35 与跨语言 5/5 通过，后者通过公开 `restore/resume`
+    重读双方续写和 fork 的轨迹。
 
 ## 5. 跨语言契约
 
@@ -386,6 +432,7 @@
     的测试。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：新增 `conformance/event/v0/cases/known-event-types.json`（51 个类型），TS `public-api.spec.ts` 与 Python `test_conformance.py` 各加一条集合相等断言。
+  - **验证**：SDK 15/15、Python 35/35 与跨语言 conformance 5/5 通过。
 
 - [x] **R31** · 难度 易 · 风险 中 · 位置
   `tests/event/cross-language/python-conformance.spec.ts`
@@ -404,8 +451,9 @@
     单次 `session/end-seed`，再续写、flush、fork；Python 使用公开
     `restore/resume` 验证父子轨迹、连续 seq、稳定前缀和 lineage。反向链路保留，
     最终读取也改用 TypeScript 公开 `runtime.restore()`。
-  - **验证**：`test:conformance` 5/5；完整 `npm run verify` 通过，包括 132 个
-    上游文件一致性、全部构建、820 个测试以及 TypeScript/Python 空白消费者安装。
+  - **验证**：`test:conformance` 5/5；完整 `npm run verify` 通过，包括 207 个
+    上游文件一致性、全部构建、1002 个行为测试以及 TypeScript/Python 空白
+    消费者安装。
 
 ## 6. 测试与交付
 
@@ -424,6 +472,8 @@
     作为第 7 节验收门禁，不放进当前 `verify`。
   - **依赖**：R23（通过条件）。
   - **结果**：已完成（2026-09-01）：断言改为：安装后的 `package.json` 各依赖字段无 `@deepseek-ai/`；`lib/**/*.js` 完全不含该命名空间；`*.d.ts` 不得 import/re-export/`declare module` DSH 模块（来源注释允许）。已纳入 `verify`。
+  - **验证**：TypeScript 空白消费者安装、严格类型检查、运行时 smoke 和 SDK/UI
+    产物逐文件命名空间扫描通过；R28 后来源注释也已改为固定源码路径。
 
 - [x] **R10** · 难度 难 · 风险 低 · 位置 `packages/event/typescript/tests/ui/`
   - **问题**：`views.client.spec.tsx`（1338 行）是 Trajectory 最大的行为测试，
@@ -432,8 +482,10 @@
     slot/workspace 部分。
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：`tests/ui/trajectory-view.spec.tsx` 移植 25 个用例（7 个账本/详情面板交互、13 个 timeline 投影、2 个视图状态），断言与上游逐句相同，只把 ConversationRoot+tab 挂载换成直接渲染 `TrajectoryView`。未移植的 6 个用例（插件注册 4、tab 本地化 1、Node 侧 apply 1）测试的是 shell 机制，已在 TESTING.md 说明。
+  - **验证**：Trajectory 94/94 与 Perix UI 33/33 通过；后者包含移植的 25 个
+    shell-independent view 用例。
 
-- [ ] **R32** · 难度 易 · 风险 低 · 位置 `docs/event/`、
+- [x] **R32** · 难度 易 · 风险 低 · 位置 `docs/event/`、
   `packages/event/typescript/README.md`、根 `README.md`
   - **问题**：文档仍有与代码不一致的历史结论：R07 写 7 处差异而校验脚本
     报告 9 处；TS README 一边登记五个宿主接缝源码修改，一边又称没有保留源码
@@ -444,6 +496,15 @@
     任务完成后逐项核对当前代码、校验输出、测试矩阵和决策记录，修正数字、
     措辞、状态与链接；只记录事实，不把计划写成已完成。
   - **依赖**：R29–R31。
+  - **结果**：已完成（2026-09-02）：架构删除 UI 仍从注册表打包的过期结论；
+    需求与规格明确公开 restore 双向链路；测试文档补入 EventHost 层及当前
+    207/10/87 身份数据和 1002 个行为测试；根、TypeScript、runtime、SDK、Python
+    README 与 R30–R32 任务书同步。R07/R31 的历史与当前数量已明确区分，31 个
+    既有已完成 R 条目均补有日期、结果和验证证据。
+  - **验证**：项目自有 28 个 Markdown 文件的本地链接与围栏检查通过，
+    `git diff --check` 通过；任务证据审计 31/31 通过；身份校验仍为 207 个文件、
+    10 个必要差异、87 个声明映射。R29 后的完整 `npm run verify` 已通过 1002 个
+    行为测试、全部构建/类型检查及两种语言的空白消费者安装。
 
 ## 7. 总体验收
 

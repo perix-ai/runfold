@@ -1,12 +1,13 @@
 # Event verification matrix
 
-The Event implementations are verified at nine independent layers.
+The Event implementations are verified at ten independent layers.
 
 | Layer | Location | What it proves |
 | --- | --- | --- |
 | Upstream Event regression | `packages/core/session/tests`, `packages/session/**/tests` | Retained Session and persistence behavior still matches the pinned source |
 | Upstream UI-runtime regression | `packages/client/store/tests`, selected `packages/client/ui-primitives/tests` | The locally retained store, Tooltip, JsonTree, Markdown parser/renderer, streaming highlighter, and 48 DOM baselines match the pinned implementation |
 | Upstream Trajectory regression | `packages/client/ui-trajectory/tests` | Retained projection, layout, table, timeline, and view behavior remains intact |
+| EventHost lifecycle | `tests/runtime` | 11 direct cases lock event order/carriers, effect setup and reverse disposal, rejection handling, nested scopes, and scoped service views to the fixed Cordis subset |
 | Perix SDK | `tests/sdk` | Public exports, lifecycle, immutability, replay, fork, JSONL round-trip/restart, raw/suffix reads, and isolation work through `@perix/*` imports |
 | Perix UI | `tests/ui` | `EventTrajectory` projects, renders, localizes, pages, replaces input, and handles 20,000 events; the ported upstream view cases cover ledger, inspector, timeline, and duration state on the standalone host |
 | Complete system | `tests/integration` | One log crosses validation, fork, JSONL durability, process-style restart, and React rendering |
@@ -21,9 +22,13 @@ npm run verify
 ```
 
 Focused commands are also available: `test:upstream`,
-`test:upstream:ui-runtime`, `test:sdk`, `test:ui`, `test:system`,
+`test:upstream:ui-runtime`, `test:runtime`, `test:sdk`, `test:ui`, `test:system`,
 `test:conformance`, `test:types`, `test:python`, `test:package`, and
 `test:python:package`.
+
+The current complete run checks 207 retained files, 10 documented differences,
+87 declared specifier mappings, and 1002 behavior tests before the two blank
+consumer installation checks.
 
 ## Known gaps
 

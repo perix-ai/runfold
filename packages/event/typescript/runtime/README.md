@@ -19,16 +19,19 @@ Core and UI source imports under `../packages/` are rewritten only through the
 per-file mappings enforced by `../../../../scripts/verify-upstream-identity.mjs`.
 They resolve directly to these modules, the retained implementation, or the
 public `@perix/event-sdk` type path. Original DSH module names remain only in
-upstream tests and provenance text; the UI store and primitive runtime closure
-now resolves to the retained local source as well.
+unchanged upstream tests, audit-only manifests, provenance text, and test
+aliases; the UI store and primitive runtime closure now resolves to retained
+local source as well.
 
-`EventHost` reproduces the one Cordis behavior the retained lifecycle relies
-on: a service read through a scope (`scope.sessions`) is a proxy view whose
-`ctx` is that scope, so a Session created through a child scope is owned by
-the child and torn down with it. Views forward every other read and write to
-the single underlying instance.
+`EventHost` reproduces the Cordis lifecycle subset the retained code relies on:
+event order and carriers, effect setup and reverse disposal, failure isolation,
+nested scope teardown, and scoped service views. A service read through a
+scope (`scope.sessions`) is a proxy whose `ctx` is that scope, so a Session
+created through a child scope is owned by the child and torn down with it.
+Views forward every other read and write to the single underlying instance.
 
-Behavior is locked by the retained upstream test suites, which run against
-these modules through the same resolution (`../test-support/cordis-shim.ts`
+Behavior is locked by 11 direct `../tests/runtime` cases and the retained
+upstream test suites, which run against these modules through the same
+resolution (`../test-support/cordis-shim.ts`
 adapts their `ctx.plugin` / `fiber.dispose` vocabulary onto host scopes), and
 by `../tests/sdk/`.

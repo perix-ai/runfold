@@ -87,7 +87,8 @@ schema 和 conformance 契约，因此其轨迹也能由现有 Trajectory UI 读
 
 ## 6. 质量要求
 
-- 行为：所有 DSH 上游 Event、持久化与 Trajectory 回归测试在裁剪版上继续通过。
+- 行为：所有保留的 DSH 上游回归测试在裁剪版上继续通过；当前门禁为 626 个
+  Event/持久化、182 个 UI runtime 和 94 个 Trajectory 用例。
 - 互操作：一方写出的持久化轨迹可由另一方 restore、继续追加和 fork；规范化
   后的 header、Event、surface、messages 和 repair 结果逐字段相等。
 - 依赖：发布产物不要求安装任何 DSH 包，公共 API 与类型不泄漏 DSH 命名空间。
@@ -99,7 +100,8 @@ schema 和 conformance 契约，因此其轨迹也能由现有 Trajectory UI 读
 
 - A1 DSH 行为基线和 Trajectory UI 水准未退化；
 - A2 TypeScript/Python 均有完整原生实现和完整测试；
-- A3 两种语言通过同一 conformance 套件并能双向操作持久化轨迹；
+- A3 两种语言通过同一 conformance 套件，并经各自公开 restore API 双向操作
+  持久化轨迹；
 - A4 发布产物不存在 DSH 运行时或公共命名空间泄漏；
 - A5 Nexent 可以仅依赖 Python 包完成记录、restore、resume 和 fork；
 - A6 所有必要偏离都有来源说明、理由和防回归测试。

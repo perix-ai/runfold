@@ -56,5 +56,10 @@ npm run test:python
 npm run test:python:package
 ```
 
+The current Python suite has 35 behavior tests. The root cross-language suite
+also exercises plain and Zstandard files in both directions through Python's
+public `restore/resume` methods and TypeScript's public `runtime.restore()`;
+Python-generated Events are rendered by the TypeScript Trajectory UI.
+
 The public API and exact TypeScript/Python behavior mapping are documented in
 [`docs/event/specification.md`](../../../docs/event/specification.md).
