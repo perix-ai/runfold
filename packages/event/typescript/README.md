@@ -49,11 +49,21 @@ package identity, are marked private, and are never the consumer-facing SDK.
 
 ## Necessary local changes
 
-- The three SDK package manifests replace DSH monorepo-only `workspace:^`
-  references with the exact published versions and expose direct TypeScript
-  build output.
-- Their TypeScript configs remove references to packages that are not part of
-  this extraction; local base configs replace the upstream monorepo base.
+- Only the three Event packages (`core/session`, `session/session-persistence`,
+  `session/session-persistence-jsonl`) are npm workspaces. Their manifests
+  replace DSH monorepo-only `workspace:^` references with the exact published
+  versions and expose direct TypeScript build output; their TypeScript configs
+  remove references to packages that are not part of this extraction, and local
+  base configs replace the upstream monorepo base.
+- The other retained directories under `packages/client/` and
+  `packages/test-support/` are source-only: their files are imported by
+  relative path from `ui/trajectory/src`, and their `package.json` and
+  `tsdown.config.ts` are kept byte-identical to upstream because npm and Vite
+  never read them. The one exception is
+  `packages/client/ui-trajectory/tsconfig.json`: Vite's esbuild transform reads
+  the nearest `tsconfig.json`, and the upstream file references monorepo
+  directories that do not exist here, so its `references` array is removed.
+  Compiler options are unchanged.
 - `ui/trajectory/src/conversation-client.ts` only
   re-exports the two unchanged conversation runtime modules needed by
   Trajectory.
