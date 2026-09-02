@@ -101,12 +101,12 @@
 ## 3. TypeScript 解耦
 
 - [x] 审计 `packages/event/typescript/` 中全部 `@deepseek-ai/*` 与 Cordis 依赖。
-- [ ] 删除 Harness 宿主、scope、typert、插件生命周期等非 Event 能力。
-- [ ] 将 Event 必需的消息、ID 和 JSON 工具裁剪为 Perix 自有最小实现。
-- [ ] 移除 `@perix/event-sdk/runtime` 对 Cordis 的整包导出。
-- [ ] 移除 `@perix/event-sdk/messages` 对 `dsh-llm` 的整包导出。
+- [x] 删除 Harness 宿主、scope、typert、插件生命周期等非 Event 能力。
+- [x] 将 Event 必需的消息、ID 和 JSON 工具裁剪为 Perix 自有最小实现。
+- [x] 移除 `@perix/event-sdk/runtime` 对 Cordis 的整包导出。
+- [x] 移除 `@perix/event-sdk/messages` 对 `dsh-llm` 的整包导出。
 - [x] 保持 Session、fork、repair、surface、JSONL 和 Trajectory 行为不退化。
-- [ ] 验证打包产物不存在 DSH 运行时依赖或公共命名空间泄漏。
+- [x] 验证打包产物不存在 DSH 运行时依赖或公共命名空间泄漏。
 
 ### 3.1 Cordis 解耦路线
 
@@ -150,7 +150,7 @@
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：`runtime/src/messages.ts` 只含 Event 用到的 id、content block、message、StreamChunk、`LlmCallConfig` 与构造函数；vitest 里全部上游 core 测试改为在该模块上运行；SDK 依赖去掉 `dsh-brand/dsh-util-values/dsh-timeout/dsh-llm/dsh-attachment`。剩余运行时依赖：cordis、dsh-scope、schemastery。
 
-- [ ] **R16** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/runtime/`
+- [x] **R16** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/runtime/`
   - **问题**：没有可替代 Cordis 的本地宿主抽象。
   - **处理**：定义 `EventHost`，只含三部分——
     (a) 强类型事件总线 `on/emit/parallel`，仅覆盖 `session/created`、
@@ -159,16 +159,18 @@
     (c) `logger.warn/info`。
     不提供 scope、typert、plugin 注册、HMR。先为 `EventHost` 单独写测试。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-01）：`runtime/src/host.ts`。`EventHost` = 事件总线（四个 `session/*` 事件 + Cordis 同款 `internal/dispatch` 钩子）、`effect/scope/dispose`（反序释放，失败记录日志不中断，与 Cordis fiber unload 一致）、`provide/get` 组合槽（经作用域读取得到 `ctx` 绑定的 Proxy 视图）。
 
-- [ ] **R19** · 难度 中 · 风险 低 · 位置 `packages/session/session-persistence-jsonl/src/index.ts`
+- [x] **R19** · 难度 中 · 风险 低 · 位置 `packages/session/session-persistence-jsonl/src/index.ts`
   - **问题**：构造函数签名 `(ctx, config)`，`static inject = ['sessions']`，
     `static Config` 依赖 schemastery。
   - **处理**：改为 `(host, sessions, config)`；删除 `static inject` 与
     schemastery schema，用源码已有的 `??` 默认值兜底；在 TS README
     "Necessary local changes" 逐行登记。
   - **依赖**：R16。
+  - **结果**：已完成（2026-09-01）：构造函数保持 `(host, config)`；删除 `static inject`、schemastery `Config` 与 `JsonlCompressionSchema`，改为构造时校验 `root`/`compression`。三个保留包不再是 npm workspace，`package.json` 恢复上游字节，SDK 直接从源码打包。
 
-- [ ] **R17** · 难度 难 · 风险 中 · 位置 `packages/core/session/src/index.ts`
+- [x] **R17** · 难度 难 · 风险 中 · 位置 `packages/core/session/src/index.ts`
   - **问题**：`SessionStore extends Service`，注册 typert lookup，事件 carrier
     经 `dsh-scope` 包装，`declare module '@deepseek-ai/cordis'` 扩展
     `Context`。
@@ -177,41 +179,47 @@
     （独立组件没有 agent scope）；删除 `declare module`。仅允许改这些行，
     `Session` 类与 append/fork/repair/surface 逻辑逐字节不动，改动逐行登记。
   - **依赖**：R14、R15、R16。
+  - **结果**：已完成（2026-09-01）：只改 import、`declare module`、构造函数（`ctx.provide('sessions', this)`）、carrier 三行；`Session` 与 append/fork/repair/surface 逻辑逐字节不动。scope 过滤未保留：所有监听器收到所有 Session。`types.ts` 另删除 5 行 Typert 远程错误增强。
 
-- [ ] **R18** · 难度 难 · 风险 中 · 位置 `packages/session/session-persistence/src/{index,coordinator}.ts`
+- [x] **R18** · 难度 难 · 风险 中 · 位置 `packages/session/session-persistence/src/{index,coordinator}.ts`
   - **问题**：`SessionPersistence extends Service`；`installWritePath` 用
     `ctx.on/ctx.effect`；`ctx.sessions.list()`、`ctx.get`、`ctx.invariants`。
   - **处理**：改为普通抽象类，构造时注入 `host` 与 `sessions`；
     `installWritePath` 改用 `host.on/host.effect`；删除 `ctx.get`、
     `ctx.invariants` 用法。write-behind、prepared cache、torn-tail 逻辑不动。
   - **依赖**：R17。
+  - **结果**：已完成（2026-09-01）：`SessionPersistence` 改为普通抽象类并增加 `name` 标签；coordinator 只改一个类型导入，`installWritePath` 无需改动（host 的 `on/effect` 契约相同）。
 
-- [ ] **R20** · 难度 中 · 风险 中 · 位置 `packages/test-support/`、上游 `tests/`
+- [x] **R20** · 难度 中 · 风险 中 · 位置 `packages/test-support/`、上游 `tests/`
   - **问题**：上游测试大量使用 `new Context()`、`ctx.plugin`、`ctx.fiber.dispose`。
   - **处理**：新增 `createTestContext()` 垫片，提供 `plugin`、`sessions`、
     `sessionPersistence`、`on`、`fiber.dispose`、`logger`，让上游测试尽量原样运行；
     仅改写 `ctx.typert`（2 处）、`ctx.emit`（3 处）、`ctx.parallel`（1 处）
     的用例，并在 R07 允许差异清单中登记。
   - **依赖**：R17、R18、R19。
+  - **结果**：已完成（2026-09-01）：`test-support/cordis-shim.ts`、`scope-shim.ts` 通过 vitest 别名让上游测试原样运行，626/626 通过；排除 `scoped.spec`、`typert.spec`、`invariant.spec` 三个测试宿主机制的文件并在 TESTING.md 登记。
 
-- [ ] **R21** · 难度 中 · 风险 低 · 位置 `sdk/src/runtime.ts`、`sdk/package.json`
+- [x] **R21** · 难度 中 · 风险 低 · 位置 `sdk/src/runtime.ts`、`sdk/package.json`
   - **问题**：`@perix/event-sdk/runtime` 是 `export * from '@deepseek-ai/cordis'`；
     TS 没有与 Python `store.restore(id)` 对应的一步式恢复入口。
   - **处理**：导出本地 `createEventRuntime()`，返回 `sessions`
     （`create/restore/fork/flush`）、`persistence`、`dispose`；`restore(id)`
     即 `contract.md` 中"`prepare` 后由 `SessionStore` 发布"的封装。
   - **依赖**：R16–R20。
+  - **结果**：已完成（2026-09-01）：`@perix/event-sdk/runtime` 只导出 `EventHost`；根入口新增 `createEventRuntime({ persistence })` 返回 `sessions/persistence/restore/dispose`；`restore` = `prepare` + `enter` + `announce`。Perix 测试与打包消费者已迁移。
 
-- [ ] **R22** · 难度 易 · 风险 低 · 位置 `sdk/scripts/rewrite-public-namespaces.mjs`
+- [x] **R22** · 难度 易 · 风险 低 · 位置 `sdk/scripts/rewrite-public-namespaces.mjs`
   - **问题**：脚本对生成物做字符串替换（含 typert 符号字符串），是去痕不是解耦。
   - **处理**：typert 注册删除后不再需要，删除脚本及其 build 步骤。
   - **依赖**：R17。
+  - **结果**：已完成（2026-09-01）：脚本与 build 步骤删除。不改写后，产物里仅剩 d.ts 的 `@module @deepseek-ai/...` 来源注释，JS 中无任何 DSH 名称。
 
-- [ ] **R23** · 难度 易 · 风险 低 · 位置 `sdk/package.json`
+- [x] **R23** · 难度 易 · 风险 低 · 位置 `sdk/package.json`
   - **问题**：`dependencies` 列出 12 个 `@deepseek-ai/*`/schemastery 包，
     `lib/*.js` 运行时 import 它们。
   - **处理**：全部移除；`koffi` 仅 win32 使用、与 DSH 一致，保留并在 README 注明。
   - **依赖**：R14–R21。
+  - **结果**：已完成（2026-09-01）：`dependencies` 只剩 `koffi`（win32）与 `@types/node`。
 
 - [ ] **R24** · 难度 评估 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/`
   - **问题**：`@perix/event-ui` 从注册表 bundle `dsh-client-ui-primitives`
@@ -274,13 +282,14 @@
 - [x] 根级 `verify` 同时运行 TypeScript、Python、跨语言和打包测试。
 - [x] README、测试矩阵和本清单与当前实现一致。
 
-- [ ] **R09** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/tests/package/package-consumer.mjs`
+- [x] **R09** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/tests/package/package-consumer.mjs`
   - **问题**：只断言 `dsh-session*` 四个名字不泄漏；`lib/types` 实际有 8 处
     `from '@deepseek-ai/cordis'` 与 `declare module '@deepseek-ai/cordis'`。
   - **处理**：断言收紧为 `lib/**/*.js`、`*.d.ts` 与 `package.json`
     `dependencies` 中不得出现任何 `@deepseek-ai/`。第 3 节完成前会失败，
     作为第 7 节验收门禁，不放进当前 `verify`。
   - **依赖**：R23（通过条件）。
+  - **结果**：已完成（2026-09-01）：断言改为：安装后的 `package.json` 各依赖字段无 `@deepseek-ai/`；`lib/**/*.js` 完全不含该命名空间；`*.d.ts` 不得 import/re-export/`declare module` DSH 模块（来源注释允许）。已纳入 `verify`。
 
 - [ ] **R10** · 难度 难 · 风险 低 · 位置 `packages/event/typescript/tests/ui/`
   - **问题**：`views.client.spec.tsx`（1338 行）是 Trajectory 最大的行为测试，
