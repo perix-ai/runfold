@@ -6,9 +6,11 @@
 *.log
 tmp/
 dist/
+packages/event/typescript/**/lib/
 build/
 coverage/
 __pycache__/
 *.py[cod]
+*.egg-info/
 node_modules/
 target/

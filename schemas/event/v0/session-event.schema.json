@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://perix.ai/schemas/event/v0/session-event.schema.json",
+  "title": "Perix Session Event Envelope v0",
+  "type": "object",
+  "required": ["type", "seq", "time", "data"],
+  "properties": {
+    "type": { "type": "string" },
+    "seq": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "time": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "data": {},
+    "surfaceOp": {
+      "oneOf": [
+        { "const": "append" },
+        {
+          "type": "object",
+          "required": ["op", "start", "end"],
+          "additionalProperties": false,
+          "properties": {
+            "op": { "const": "replace" },
+            "start": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "end": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        }
+      ]
+    },
+    "sourceEventSeqs": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "ignorable": { "const": true }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": ["user/message", "assistant/message", "tool/result"]
+          }
+        },
+        "required": ["type"]
+      },
+      "then": { "required": ["surfaceOp"] },
+      "else": {
+        "not": {
+          "anyOf": [
+            { "required": ["surfaceOp"] },
+            { "required": ["sourceEventSeqs"] }
+          ]
+        }
+      }
+    }
+  ]
+}

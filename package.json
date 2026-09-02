@@ -1,0 +1,46 @@
+{
+  "name": "perix-runtime-data",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/event/typescript/trajectory-demo",
+    "packages/event/typescript/sdk",
+    "packages/event/typescript/ui/trajectory",
+    "packages/event/typescript/packages/core/session",
+    "packages/event/typescript/packages/session/session-persistence",
+    "packages/event/typescript/packages/session/session-persistence-jsonl"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace ./packages/event/typescript/packages/core/session && npm run build --workspace ./packages/event/typescript/packages/session/session-persistence && npm run build --workspace ./packages/event/typescript/packages/session/session-persistence-jsonl && npm run build --workspace @perix/event-sdk && npm run build --workspace @perix/event-ui && npm run build --workspace @perix/event-trajectory-demo",
+    "test": "npm run test:upstream && npm run test:types && npm run test:sdk && npm run test:ui && npm run test:python && npm run test:system && npm run test:conformance",
+    "test:upstream": "npm run test:upstream:event && npm run test:upstream:trajectory",
+    "test:upstream:event": "vitest run --config vitest.config.ts packages/event/typescript/packages/core/session/tests packages/event/typescript/packages/session/session-persistence/tests packages/event/typescript/packages/session/session-persistence-jsonl/tests",
+    "test:upstream:trajectory": "vitest run --config vitest.config.ts --environment jsdom packages/event/typescript/packages/client/ui-trajectory/tests",
+    "test:types": "tsc -p packages/event/typescript/tsconfig.tests.json",
+    "test:sdk": "vitest run --config vitest.config.ts packages/event/typescript/tests/sdk",
+    "test:ui": "vitest run --config vitest.config.ts --environment jsdom packages/event/typescript/tests/ui",
+    "test:system": "vitest run --config vitest.config.ts --environment jsdom packages/event/typescript/tests/integration",
+    "test:conformance": "vitest run --config vitest.config.ts --environment jsdom tests/event/cross-language",
+    "test:package": "node packages/event/typescript/tests/package/package-consumer.mjs",
+    "test:python": "python3 -m unittest discover -s packages/event/python/tests -t packages/event/python -v",
+    "test:python:package": "python3 packages/event/python/tests/package_consumer.py",
+    "verify": "npm run build && npm test && npm run test:package && npm run test:python:package",
+    "dev:event-ui": "npm run dev --workspace @perix/event-trajectory-demo"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^24.3.0",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.0",
+    "fast-check": "^4.8.0",
+    "jsdom": "^29.1.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "vitest": "^4.1.8"
+  }
+}

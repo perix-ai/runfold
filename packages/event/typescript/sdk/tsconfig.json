@@ -1,0 +1,19 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "target": "ES2024",
+    "paths": {
+      "@deepseek-ai/dsh-session": ["../packages/core/session/src/index.ts"],
+      "@deepseek-ai/dsh-session/*": ["../packages/core/session/src/*"],
+      "@deepseek-ai/dsh-session-persistence": ["../packages/session/session-persistence/src/index.ts"],
+      "@deepseek-ai/dsh-session-persistence/*": ["../packages/session/session-persistence/src/*"],
+      "@deepseek-ai/dsh-session-persistence-jsonl": ["../packages/session/session-persistence-jsonl/src/index.ts"],
+      "@deepseek-ai/dsh-session-persistence-jsonl/*": ["../packages/session/session-persistence-jsonl/src/*"]
+    },
+    "noEmit": true
+  },
+  "include": ["src"]
+}

@@ -1,0 +1,25 @@
+{
+  "header": {
+    "version": 0,
+    "id": "conformance-v0",
+    "createdAt": 1725000000000,
+    "cwd": "/workspace",
+    "delegationDepth": 0
+  },
+  "eventCount": 10,
+  "surface": [1, 7],
+  "messages": [
+    {
+      "id": "user-1",
+      "role": "user",
+      "content": [{ "type": "text", "text": "Cross-language Event fixture" }],
+      "source": { "kind": "user" }
+    },
+    {
+      "id": "assistant-1",
+      "role": "assistant",
+      "content": [{ "type": "text", "text": "Cross-language works." }],
+      "source": { "kind": "model", "provider": "conformance", "model": "event-v0" }
+    }
+  ]
+}

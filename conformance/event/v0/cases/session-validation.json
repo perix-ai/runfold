@@ -1,0 +1,192 @@
+[
+  {
+    "name": "empty-session",
+    "accepted": true,
+    "header": {
+      "version": 0,
+      "id": "case-empty",
+      "createdAt": 1725000000000
+    },
+    "events": []
+  },
+  {
+    "name": "surface-message",
+    "accepted": true,
+    "header": {
+      "version": 0,
+      "id": "case-surface",
+      "createdAt": 1725000000000,
+      "cwd": "/workspace"
+    },
+    "events": [
+      {
+        "type": "user/message",
+        "seq": 0,
+        "time": 1725000000001,
+        "data": {
+          "id": "case-user",
+          "role": "user",
+          "content": [{ "type": "text", "text": "valid" }],
+          "source": { "kind": "user" }
+        },
+        "surfaceOp": "append"
+      }
+    ]
+  },
+  {
+    "name": "ignorable-future-event",
+    "accepted": true,
+    "header": {
+      "version": 0,
+      "id": "case-ignorable",
+      "createdAt": 1725000000000
+    },
+    "events": [
+      {
+        "type": "future/informational",
+        "seq": 0,
+        "time": 1725000000001,
+        "data": { "value": true },
+        "ignorable": true
+      }
+    ]
+  },
+  {
+    "name": "sequence-gap",
+    "accepted": false,
+    "header": {
+      "version": 0,
+      "id": "case-gap",
+      "createdAt": 1725000000000
+    },
+    "events": [
+      {
+        "type": "turn/start",
+        "seq": 1,
+        "time": 1725000000001,
+        "data": { "turn": 1 }
+      }
+    ]
+  },
+  {
+    "name": "missing-surface-operation",
+    "accepted": false,
+    "header": {
+      "version": 0,
+      "id": "case-missing-surface",
+      "createdAt": 1725000000000
+    },
+    "events": [
+      {
+        "type": "user/message",
+        "seq": 0,
+        "time": 1725000000001,
+        "data": {
+          "id": "case-user",
+          "role": "user",
+          "content": [],
+          "source": { "kind": "user" }
+        }
+      }
+    ]
+  },
+  {
+    "name": "surface-operation-on-boundary",
+    "accepted": false,
+    "header": {
+      "version": 0,
+      "id": "case-extra-surface",
+      "createdAt": 1725000000000
+    },
+    "events": [
+      {
+        "type": "turn/start",
+        "seq": 0,
+        "time": 1725000000001,
+        "data": { "turn": 1 },
+        "surfaceOp": "append"
+      }
+    ]
+  },
+  {
+    "name": "duplicate-provenance",
+    "accepted": false,
+    "header": {
+      "version": 0,
+      "id": "case-provenance",
+      "createdAt": 1725000000000
+    },
+    "events": [
+      {
+        "type": "user/message",
+        "seq": 0,
+        "time": 1725000000001,
+        "data": {
+          "id": "case-user-1",
+          "role": "user",
+          "content": [],
+          "source": { "kind": "user" }
+        },
+        "surfaceOp": "append"
+      },
+      {
+        "type": "user/message",
+        "seq": 1,
+        "time": 1725000000002,
+        "data": {
+          "id": "case-user-2",
+          "role": "user",
+          "content": [],
+          "source": { "kind": "user" }
+        },
+        "surfaceOp": "append",
+        "sourceEventSeqs": [0, 0]
+      }
+    ]
+  },
+  {
+    "name": "legacy-request-header-delta",
+    "accepted": false,
+    "header": {
+      "version": 0,
+      "id": "case-legacy-header",
+      "createdAt": 1725000000000
+    },
+    "events": [
+      {
+        "type": "request/header-delta",
+        "seq": 0,
+        "time": 1725000000001,
+        "data": {}
+      }
+    ]
+  },
+  {
+    "name": "relative-working-directory",
+    "accepted": false,
+    "header": {
+      "version": 0,
+      "id": "case-relative-cwd",
+      "createdAt": 1725000000000,
+      "cwd": "workspace"
+    },
+    "events": []
+  },
+  {
+    "name": "unsafe-sequence-number",
+    "accepted": false,
+    "header": {
+      "version": 0,
+      "id": "case-unsafe-seq",
+      "createdAt": 1725000000000
+    },
+    "events": [
+      {
+        "type": "turn/start",
+        "seq": 9007199254740992,
+        "time": 1725000000001,
+        "data": { "turn": 1 }
+      }
+    ]
+  }
+]
