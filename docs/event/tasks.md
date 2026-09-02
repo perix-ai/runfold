@@ -130,15 +130,16 @@
   - **依赖**：无。
   - **结果**：已完成（2026-09-01）：删除三个子路径的 exports、vite entry、源文件、测试别名与 README 条目；同时移除 sdk 对 `@deepseek-ai/dsh-invariants` 的依赖（只有 invariant 模块引用它）。
 
-- [ ] **R14** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/packages/util/`
+- [x] **R14** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/runtime/src/{brand,values,timeout}.ts`
   - **问题**：核心源码依赖 `dsh-brand`（`brandString/Branded`）、
     `dsh-util-values`（`deepFreeze/snapshotJsonValue/assertNever`）、
     `dsh-timeout`（`MAX_TIMER_DELAY_MS`），这些是几十行的小工具。
   - **处理**：逐函数从上游复制到本地包（MIT，保留来源注释），核心源码只改
     import 行。上游 `json.spec.ts`、`properties.spec.ts` 锁定行为。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-01）：本地模块放在 `runtime/`（`packages/` 目录保留给上游原样文件，受 R07 比对约束）；`values.ts` 正文与上游逐字节相同。保留源码零改动，SDK 构建、vitest、测试与 UI tsconfig 通过别名解析。
 
-- [ ] **R15** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/packages/messages/`、`sdk/src/messages.ts`
+- [x] **R15** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/runtime/src/messages.ts`、`sdk/src/messages.ts`
   - **问题**：`@perix/event-sdk/messages` 整包 re-export `dsh-llm`，把完整 LLM
     runtime 类型图暴露给消费者。
   - **处理**：本地模块只保留 Event 接受与产生的类型（`Message`、`ContentBlock`、
@@ -147,6 +148,7 @@
     `createToolResultMessage` 和 `callConfigEquals`；以 Python `messages.py`、
     `request_header.py` 为对照，保证两边接受同一 JSON 形状。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-01）：`runtime/src/messages.ts` 只含 Event 用到的 id、content block、message、StreamChunk、`LlmCallConfig` 与构造函数；vitest 里全部上游 core 测试改为在该模块上运行；SDK 依赖去掉 `dsh-brand/dsh-util-values/dsh-timeout/dsh-llm/dsh-attachment`。剩余运行时依赖：cordis、dsh-scope、schemastery。
 
 - [ ] **R16** · 难度 中 · 风险 低 · 位置 新增 `packages/event/typescript/runtime/`
   - **问题**：没有可替代 Cordis 的本地宿主抽象。
