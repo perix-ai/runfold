@@ -26,6 +26,11 @@ Focused commands are also available: `test:upstream`,
 `test:conformance`, `test:types`, `test:python`, `test:package`, and
 `test:python:package`.
 
+The root Vitest configuration sets a 20-second `testTimeout` for the fixture-driven
+persistence and coordinator suites. These cases exercise durable file I/O and
+cross-process-style coordination; the explicit headroom prevents the default
+5-second timeout from becoming flaky on shared or parallel CI runners.
+
 The current complete run checks 204 retained files, 10 documented differences,
 139 declared specifier mappings, and 1005 behavior tests before the two blank
 consumer installation checks.

@@ -921,10 +921,12 @@
   - **处理**：在 `NOTICE.md` 增加 demo 资产来源与条款结论；若结论不明确，改用可自证许可的方案（本地 TTS、无旁白版本或字幕替代）。
   - **依赖**：无。**需你先确认条款口径再执行。**
 
-- [ ] **R56** · 难度 易 · 风险 低 · 位置 `vitest.config.ts`、`packages/event/typescript/TESTING.md`
+- [x] **R56** · 难度 易 · 风险 低 · 位置 `vitest.config.ts`、`packages/event/typescript/TESTING.md`
   - **问题**：`jsonl.spec.ts` 与 `zstd.spec.ts` 的协调器用例依赖固定的 vitest 默认 5000 ms 超时。复核时与其他任务并行运行，两个用例超时失败（单例报告约 459 秒）；串行重跑 626/626 通过、总耗时 3.95 秒。CI 并行或共享 runner 上会间歇性失败。
   - **处理**：为这两个套件设置明确的 `testTimeout`，并在 TESTING.md 说明用途。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-03）：根 Vitest 配置统一设置 20 秒测试超时，并在 TESTING.md 记录其针对持久化 fixture 与协调器用例的用途。
+  - **验证**：`npm run test:upstream:event` 通过（17 个测试文件、626 个测试）；`git diff --check` 通过。
 
 - [ ] **R57** · 难度 易 · 风险 低 · 位置 `docs/event/README.md`、`AGENTS.md`
   - **问题**：`docs/event/evidence/`（7 张验收截图）不在文档地图中；`AGENTS.md` 的布局规则未涵盖 `scripts/`、`integrations/`、`docs/<domain>/demos/`、`docs/<domain>/evidence/`；`scripts/` 同时放校验脚本与 demo 合成源码，职责不单一。

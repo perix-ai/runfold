@@ -21,6 +21,8 @@ export default defineConfig({
     ],
   },
   test: {
+    // Fixture-driven persistence/coordinator cases need headroom on shared CI runners.
+    testTimeout: 20_000,
     setupFiles: [source('./packages/event/typescript/test-support/jsdom-storage.ts')],
     exclude: [
       '**/node_modules/**',
