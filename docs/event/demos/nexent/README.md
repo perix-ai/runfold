@@ -4,15 +4,16 @@
 
 ▶ [直接播放或下载 MP4](trajectory-restore-fork-demo.mp4)
 
-这段 101 秒 Demo 展示同一套真实 Event 数据如何进入 Nexent 产品页面：先看
+这段 83 秒 Demo 展示同一套真实 Event 数据如何进入 Nexent 产品页面：先看
 完整轨迹与右侧 Schema 详情，再验证跨进程冷恢复，最后分别从聊天回答和轨迹
-Event 两个入口执行真实 Fork。视频包含普通话旁白、同步字幕，以及用于指示操作
-目标的鼠标、点击波纹和高亮。
+Event 两个入口执行真实 Fork。视频包含 `zh-CN-XiaoxiaoNeural` 自然中文神经
+语音、同步字幕，以及用于指示操作目标的鼠标、点击波纹和高亮。
 
 画面来自 1440×900 真实浏览器验收：聊天 Fork 和轨迹 Fork 均实际点击并进入
-子会话，错误边界会被测试桩拒绝。为让动作在文档视频中清楚可见，鼠标移动、
-点击波纹、高亮和字幕为后期指示层；底层页面、按钮状态、选择值、导航结果与
-Event 内容均来自对应操作前后的真实页面，不把它表述为未经剪辑的屏幕录像。
+子会话，错误边界会被测试桩拒绝。为让动作在正常播放速度下一眼可辨，关键
+控件使用快速鼠标移入、短暂停留、按钮按下态、中心闪光、双脉冲、点击音和局部
+放大；这些指示与字幕属于后期层。底层页面、按钮状态、选择值、导航结果与 Event
+内容均来自对应操作前后的真实页面，不把它表述为未经剪辑的屏幕录像。
 
 ## 章节
 
@@ -20,10 +21,10 @@ Event 内容均来自对应操作前后的真实页面，不把它表述为未�
 | --- | --- | --- |
 | 00:00 | 导览 | DSH 原样轨迹、自动 Resume 和两个 Fork 入口 |
 | 00:14 | 完整轨迹 | Session、时间线、Turn/Tool 层级与右侧 Schema 详情 |
-| 00:32 | 中断恢复 | 进程 A 的 10 Turn 冷恢复为同一 Session 的 21 Turn |
-| 00:52 | 聊天快捷 Fork | 在第 20 轮回答旁显示按钮、点击并进入子会话 |
-| 01:08 | 轨迹精确 Fork | 选择“第 20 轮 · Event 188”、点击并核对父子血缘 |
-| 01:25 | 验证摘要 | 两个入口的共同边界、DSH 一致性与测试结果 |
+| 00:29 | 中断恢复 | 进程 A 的 10 Turn 冷恢复为同一 Session 的 21 Turn |
+| 00:45 | 聊天快捷 Fork | 在第 20 轮回答旁显示按钮、点击并进入子会话 |
+| 00:57 | 轨迹精确 Fork | 选择“第 20 轮 · Event 188”、点击并核对父子血缘 |
+| 01:11 | 验证摘要 | 两个入口的共同边界、DSH 一致性与测试结果 |
 
 ## 两个 Fork 入口
 
@@ -78,22 +79,26 @@ Nexent 页面外围的 user、agent 和 conversation HTTP 数据来自确定性�
 | 恢复前父 Session JSONL | `f00e0b9ef7ae5e79b3e21d0e85946fb0f009b51b0eb477f676dc4599b37ba940` |
 | 最终父 Session JSONL | `5bd9cffa495667ae49b0b51623c5a6f668bace79ea2c2cf18f76972641664b74` |
 | 最终子 Session JSONL | `ac19f80cf285ca9607f51402b64fae43910647fae30086e1ccdd584f1aca8530` |
-| [`trajectory-restore-fork-demo.mp4`](trajectory-restore-fork-demo.mp4) | `a1340fb17b620f451e126e3246ee9f9fb75864bee1a70af161131490eeb98c6c` |
-| [`cover.jpg`](cover.jpg) | `046a6bded8dcdeb5147635c93358662c15387fd843189aacc5377c02d96c09c6` |
+| [`trajectory-restore-fork-demo.mp4`](trajectory-restore-fork-demo.mp4) | `d27fc35a58fcddade5be724a5ff971fc7482d119467fcec9a9a8377bee08f64c` |
+| [`cover.jpg`](cover.jpg) | `8d239e43655ca375ecc302e74fa2fd10ef97cfcfc9080a7e5046428f7e902f91` |
 
-MP4 为 H.264 High / yuv420p、1440×900、15 fps；声音为 AAC-LC、48 kHz、
-单声道、128 kb/s。实测时长 `00:01:40.63`，大小约 3.1 MiB；平均音量
-`-15.8 dB`，峰值 `-1.4 dB`。完整解码、音轨和关键帧复核命令：
+MP4 为 H.264 High / yuv420p、1440×900、24 fps；声音为 AAC-LC、48 kHz、
+单声道、约 118 kb/s。实测时长 `00:01:23.07`，大小约 2.81 MiB；平均音量
+`-16.4 dB`，峰值 `-1.4 dB`，且未检测到持续两秒以上的静音。旁白通过临时安装
+在仓库外的 `edge-tts 7.2.8` 生成；生成工具、缓存和凭据均未进入仓库。完整
+解码、音轨和关键帧复核命令：
 
 ```bash
 ffmpeg -v error -i trajectory-restore-fork-demo.mp4 -f null -
 ffmpeg -i trajectory-restore-fork-demo.mp4 -map 0:a:0 \
   -af volumedetect -f null -
-ffmpeg -ss 00:00:48 -i trajectory-restore-fork-demo.mp4 \
-  -frames:v 1 restore-keyframe.jpg
-ffmpeg -ss 00:00:58 -i trajectory-restore-fork-demo.mp4 \
+ffmpeg -ss 00:00:23.4 -i trajectory-restore-fork-demo.mp4 \
+  -frames:v 1 detail-click-keyframe.jpg
+ffmpeg -ss 00:00:39.2 -i trajectory-restore-fork-demo.mp4 \
+  -frames:v 1 restore-click-keyframe.jpg
+ffmpeg -ss 00:00:49 -i trajectory-restore-fork-demo.mp4 \
   -frames:v 1 chat-fork-keyframe.jpg
-ffmpeg -ss 00:01:17 -i trajectory-restore-fork-demo.mp4 \
+ffmpeg -ss 00:01:04.5 -i trajectory-restore-fork-demo.mp4 \
   -frames:v 1 precise-fork-keyframe.jpg
 shasum -a 256 trajectory-restore-fork-demo.mp4 cover.jpg
 ```
@@ -101,4 +106,6 @@ shasum -a 256 trajectory-restore-fork-demo.mp4 cover.jpg
 更完整的测试与浏览器证据见
 [`R38 任务书`](../../tasks/R38-nexent-long-trajectory.md)；本 Demo 的制作和验收
 记录见 [`R39 任务书`](../../tasks/R39-nexent-trajectory-demo.md) 与
-[`R40 任务书`](../../tasks/R40-nexent-narrated-interaction-demo.md)。
+[`R40 任务书`](../../tasks/R40-nexent-narrated-interaction-demo.md)；自然人声与
+点击反馈重制记录见
+[`R41 任务书`](../../tasks/R41-demo-natural-voice-clicks.md)。
