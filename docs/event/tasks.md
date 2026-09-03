@@ -17,8 +17,8 @@
 > 最终移除了保留测试中的 DSH
 > module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
 >
-> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**；R45–R48 已完成，
-> R49 待执行。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
+> 后续状态（2026-09-03）：独立项目 **Runfold** 的 R45–R49 身份迁移全部完成。
+> 迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
 > 不改变 Event 数据模型、restore/resume/fork 行为、Trajectory 交互或 DSH 快照。
 > R01–R44 中出现的旧项目名、旧包名和本地 `perix-ai/...` 路径是迁移前的历史
 > 验收证据，不代表当前公共技术命名；当前名称以 R45 及后续条目为准。
@@ -822,13 +822,21 @@
     `npm run verify` 通过 204 个保留文件、10 个必要差异、139 个映射、三个构建、
     1005 个行为测试及两个隔离包消费者；`git diff --check` 通过。
 
-- [ ] **R49** · 难度 易 · 风险 中 · 位置 GitHub `perix-ai/perix-runtime-data`、
+- [x] **R49** · 难度 易 · 风险 中 · 位置 GitHub `perix-ai/perix-runtime-data`、
   本地 `origin`
   - **问题**：代码完成身份迁移后，仓库 slug 与公共项目名仍不一致。
   - **处理**：全量验证通过并推送代码后，将 GitHub 仓库改名为
     `perix-ai/runfold`，更新本地 `origin` 并验证 fetch/push；本次任务不发布 npm
     或 PyPI 包，也不改名当前 Codex 工作目录。
   - **依赖**：R48，完整 `npm run verify`。
+  - **结果**：已完成（2026-09-03）：确认目标名未占用、当前账号对源仓库拥有
+    ADMIN 权限且 R48 已经完整验证并推送后，将公开 GitHub 仓库重命名为
+    `perix-ai/runfold`；本地 `origin` 更新为
+    `git@github.com:perix-ai/runfold.git`。本机工作目录保持原名，未发布 npm 或
+    PyPI 包。
+  - **验证**：GitHub API 返回 `nameWithOwner: perix-ai/runfold`、默认分支 `main`；
+    新 origin fetch 成功，`HEAD` 与 `origin/main` 在 R48 提交 `ba50409` 上一致；
+    本条完成记录通过新 origin 推送，验证写权限与 main 跟踪链路。
 
 ## 执行顺序
 
