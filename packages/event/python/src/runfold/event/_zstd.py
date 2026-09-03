@@ -49,7 +49,7 @@ def backend_name() -> str | None:
 def _require() -> None:
     if not available():
         raise ZstdUnavailableError(
-            "Zstandard support requires Python 3.14+ or the 'perix-event-sdk[zstd]' extra"
+            "Zstandard support requires Python 3.14+ or the 'runfold-event[zstd]' extra"
         )
 
 

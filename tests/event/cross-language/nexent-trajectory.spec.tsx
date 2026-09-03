@@ -36,7 +36,7 @@ async function readFixture(sessionId: string): Promise<Fixture> {
 }
 
 async function installedFixtureRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'perix-event-nexent-r33-'))
+  const root = await mkdtemp(join(tmpdir(), 'runfold-event-nexent-r33-'))
   roots.push(root)
   await cp(
     join(fixtureRoot, projectDirectory),

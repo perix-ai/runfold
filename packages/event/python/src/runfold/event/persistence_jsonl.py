@@ -97,7 +97,7 @@ class JsonlSessionPersistence:
             raise ValueError('compression must be "zstd" or "none"')
         if compression == "zstd" and not _zstd.available():
             raise _zstd.ZstdUnavailableError(
-                "Zstandard support requires Python 3.14+ or the 'perix-event-sdk[zstd]' extra"
+                "Zstandard support requires Python 3.14+ or the 'runfold-event[zstd]' extra"
             )
         self.root = Path(root).expanduser().resolve()
         self.pack_chunks = pack_chunks

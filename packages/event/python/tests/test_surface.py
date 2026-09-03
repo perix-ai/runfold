@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from perix_event import EventValidationError, Session, fold_surface
+from runfold.event import EventValidationError, Session, fold_surface
 
 from tests.test_session import assistant_message, user_message
 

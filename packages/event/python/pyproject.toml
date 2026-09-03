@@ -3,9 +3,9 @@ requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "perix-event-sdk"
+name = "runfold-event"
 version = "0.1.0"
-description = "Native Python implementation of the Perix Event trajectory SDK"
+description = "Native Python implementation of the Runfold Event trajectory SDK"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -31,6 +31,7 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
+namespaces = true
 
 [tool.setuptools.package-data]
-perix_event = ["py.typed"]
+"runfold.event" = ["py.typed"]

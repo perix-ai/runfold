@@ -6,17 +6,31 @@ import sys
 import tempfile
 import venv
 from pathlib import Path
+from shutil import copytree, ignore_patterns
+from zipfile import ZipFile
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:
-    with tempfile.TemporaryDirectory(prefix="perix-event-package-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="runfold-event-package-") as temporary:
         root = Path(temporary)
         builder = root / "builder"
         environment = root / "consumer"
         wheel_dir = root / "dist"
+        source = root / "source"
+        copytree(
+            PACKAGE_ROOT,
+            source,
+            ignore=ignore_patterns(
+                "build",
+                "dist",
+                "*.egg-info",
+                "__pycache__",
+                "*.pyc",
+            ),
+        )
         venv.EnvBuilder(with_pip=True, clear=True).create(builder)
         builder_python = builder / (
             "Scripts/python.exe" if sys.platform == "win32" else "bin/python"
@@ -31,7 +45,7 @@ def main() -> None:
                 "--no-deps",
                 "--wheel-dir",
                 str(wheel_dir),
-                str(PACKAGE_ROOT),
+                str(source),
             ],
             check=True,
         )
@@ -40,6 +54,25 @@ def main() -> None:
             raise RuntimeError(f"expected one built wheel, found: {wheels!r}")
 
         wheel = wheels[0]
+        with ZipFile(wheel) as archive:
+            members = set(archive.namelist())
+        required_members = {
+            "runfold/event/__init__.py",
+            "runfold/event/py.typed",
+        }
+        if not required_members.issubset(members):
+            raise RuntimeError(
+                f"wheel is missing Runfold namespace files: "
+                f"{sorted(required_members - members)!r}"
+            )
+        legacy_members = sorted(
+            member for member in members if member.startswith("perix_event/")
+        )
+        if legacy_members:
+            raise RuntimeError(
+                f"wheel still contains the legacy perix_event package: {legacy_members!r}"
+            )
+
         venv.EnvBuilder(with_pip=True, clear=True).create(environment)
         python = environment / (
             "Scripts/python.exe" if sys.platform == "win32" else "bin/python"
@@ -61,16 +94,16 @@ import json
 import sys
 from pathlib import Path
 
-import perix_event
+import runfold.event
 
-persistence = perix_event.JsonlSessionPersistence(sys.argv[1], compression="none")
-writer = perix_event.SessionStore(persistence)
+persistence = runfold.event.JsonlSessionPersistence(sys.argv[1], compression="none")
+writer = runfold.event.SessionStore(persistence)
 session = writer.create("installed")
 session.append("turn/start", {"turn": 1})
 session.append("turn/end", {"turn": 1, "reason": {"kind": "completed"}})
 writer.close()
 
-resumed_store = perix_event.SessionStore(persistence)
+resumed_store = runfold.event.SessionStore(persistence)
 resumed = resumed_store.resume("installed")
 resumed.append("turn/start", {"turn": 2})
 resumed.append("turn/end", {"turn": 2, "reason": {"kind": "completed"}})
@@ -78,10 +111,10 @@ resumed_store.fork(resumed, child_session_id="installed-child")
 resumed_store.close()
 
 print(json.dumps({
-    "version": perix_event.__version__,
+    "version": runfold.event.__version__,
     "events": len(persistence.load("installed").events),
     "parent": persistence.load("installed-child").meta["parentSession"],
-    "modulePath": str(Path(perix_event.__file__).resolve()),
+    "modulePath": str(Path(runfold.event.__file__).resolve()),
 }))
 """
         output = subprocess.check_output(

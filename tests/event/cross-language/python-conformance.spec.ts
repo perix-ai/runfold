@@ -17,7 +17,7 @@ const roots: string[] = []
 const runtimes: EventRuntime[] = []
 
 async function storageRoot(label: string): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), `perix-event-${label}-`))
+  const root = await mkdtemp(join(tmpdir(), `runfold-event-${label}-`))
   roots.push(root)
   return root
 }
@@ -118,7 +118,7 @@ describe('TypeScript and Python Event conformance', () => {
     const root = await storageRoot('seed-boundaries')
     runPython(`
 import sys
-from perix_event import JsonlSessionPersistence, SessionStore
+from runfold.event import JsonlSessionPersistence, SessionStore
 
 persistence = JsonlSessionPersistence(sys.argv[1], compression='none')
 store = SessionStore(persistence)
@@ -141,7 +141,7 @@ store.close()
     const pythonRestore = JSON.parse(runPython(`
 import json
 import sys
-from perix_event import JsonlSessionPersistence, SessionStore
+from runfold.event import JsonlSessionPersistence, SessionStore
 
 persistence = JsonlSessionPersistence(sys.argv[1], compression='none')
 before = persistence.load('segments')
@@ -175,7 +175,7 @@ print(json.dumps(result))
     const finalRestore = JSON.parse(runPython(`
 import json
 import sys
-from perix_event import JsonlSessionPersistence, SessionStore
+from runfold.event import JsonlSessionPersistence, SessionStore
 
 persistence = JsonlSessionPersistence(sys.argv[1], compression='none')
 before = persistence.load('segments')
@@ -200,7 +200,7 @@ store.close()
       const root = await storageRoot(`cross-${compression}`)
       runPython(`
 import sys
-from perix_event import JsonlSessionPersistence, SessionStore
+from runfold.event import JsonlSessionPersistence, SessionStore
 
 root, compression = sys.argv[1], sys.argv[2]
 persistence = JsonlSessionPersistence(root, compression=compression)
@@ -284,7 +284,7 @@ store.close()
       const result = JSON.parse(runPython(`
 import json
 import sys
-from perix_event import JsonlSessionPersistence, SessionStore
+from runfold.event import JsonlSessionPersistence, SessionStore
 
 root, compression = sys.argv[1], sys.argv[2]
 persistence = JsonlSessionPersistence(root, compression=compression)

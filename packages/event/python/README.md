@@ -1,30 +1,30 @@
 # Python Event package
 
 This directory is the native Python implementation of the Event trajectory
-facility and the installable `perix-event-sdk` distribution. The public SDK and
+facility and the installable `runfold-event` distribution. The public SDK and
 its implementation intentionally ship as one in-process package; there is no
 TypeScript bridge or server client.
 
 ```text
 python/
 ├── pyproject.toml
-├── src/perix_event/   # Public API and complete implementation
-└── tests/             # Unit, integration, and package-consumer tests
+├── src/runfold/event/  # Public API and complete implementation
+└── tests/              # Unit, integration, and package-consumer tests
 ```
 
 Unlike the TypeScript extraction, Python has no retained DSH package workspaces
-to wrap. `src/perix_event/__init__.py` defines the supported public API, while
+to wrap. `src/runfold/event/__init__.py` defines the supported public API, while
 the sibling modules contain Session, surface, repair, message, chunk codec, and
 JSONL persistence behavior.
 
 ## Install and use
 
 ```bash
-pip install perix-event-sdk
+pip install runfold-event
 ```
 
 ```python
-from perix_event import JsonlSessionPersistence, SessionStore, create_user_message
+from runfold.event import JsonlSessionPersistence, SessionStore, create_user_message
 
 persistence = JsonlSessionPersistence("./sessions", compression="none")
 store = SessionStore(persistence)
@@ -43,10 +43,10 @@ store.close()
 ```
 
 Python 3.14 uses standard-library Zstandard support. On Python 3.10–3.13,
-install `perix-event-sdk[zstd]`; plaintext JSONL needs no optional dependency.
+install `runfold-event[zstd]`; plaintext JSONL needs no optional dependency.
 
 The implementation preserves DSH format v0 field names and behavior while using
-Perix package names. Shared cross-language fixtures live under
+Runfold package names. Shared cross-language fixtures live under
 `conformance/event/v0/`.
 
 Run the Python suite from the repository root:

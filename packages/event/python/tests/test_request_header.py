@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from perix_event import (
+from runfold.event import (
     Session,
     call_config_equals,
     canonical_header,

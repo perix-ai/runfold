@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 import unittest
 
-from perix_event import (
+from runfold.event import (
     EventValidationError,
     Session,
     SessionForkError,

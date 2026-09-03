@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from perix_event import (
+from runfold.event import (
     TOOL_NOT_STARTED,
     TOOL_OUTCOME_UNKNOWN,
     interrupted_turn_closers,

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from perix_event import (
+from runfold.event import (
     EventValidationError,
     JsonlSessionPersistence,
     SessionFormatUnsupportedError,
@@ -13,14 +13,14 @@ from perix_event import (
     encode_segment,
     project_dir,
 )
-from perix_event import _zstd
+from runfold.event import _zstd
 
 from tests.test_session import append_closed_turn, user_message
 
 
 class PersistenceTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.temporary = tempfile.TemporaryDirectory(prefix="perix-event-python-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="runfold-event-python-")
         self.root = Path(self.temporary.name)
 
     def tearDown(self) -> None:

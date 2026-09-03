@@ -8,8 +8,8 @@
  * Every type and function is copied from DeepSeek Harness 0.1.2-alpha.3
  * (dd6322d6) with identical field names and semantics; the LLM runtime,
  * adapters, retry policy, and image projection helpers that Event never uses
- * are intentionally absent. Python's `perix_event.messages` and
- * `perix_event.request_header` implement the same JSON shapes.
+ * are intentionally absent. Python's `runfold.event.messages` and
+ * `runfold.event.request_header` implement the same JSON shapes.
  *
  * MIT licensed.
  */

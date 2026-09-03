@@ -14,9 +14,9 @@ not a hand-authored Event sample.
   `5c597209bb4a01866dc073ddacf7a2e682dd6d71` on branch
   `codex/event-trajectory-v2.5.0`. It is intentionally not pushed; this is an
   interoperability experiment, not a proposed Nexent upstream change.
-- Perix Event package: 0.1.0 from commit
+- Runfold Event package: 0.1.0 from commit
   2eea3f17e6a917ef3d640405b360664728d31e84.
-- Interpreter: Python 3.11.15; perix_event resolved from site-packages with
+- Interpreter: Python 3.11.15; runfold.event resolved from site-packages with
   PYTHONPATH removed.
 
 The parent was created in one process, resumed in a second process, and forked

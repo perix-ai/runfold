@@ -1,4 +1,4 @@
-"""Perix native Python Event SDK."""
+"""Runfold native Python Event implementation and public API."""
 
 from .chunk_rows import (
     decode_seq_ranges,

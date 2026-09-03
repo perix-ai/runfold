@@ -4,8 +4,8 @@ import json
 import unittest
 from pathlib import Path
 
-from perix_event import KNOWN_SESSION_EVENT_TYPES, EventValidationError, Session
-from perix_event import interrupted_turn_closers
+from runfold.event import KNOWN_SESSION_EVENT_TYPES, EventValidationError, Session
+from runfold.event import interrupted_turn_closers
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[4]

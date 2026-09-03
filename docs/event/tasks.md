@@ -17,8 +17,8 @@
 > 最终移除了保留测试中的 DSH
 > module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
 >
-> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**；R45 已完成，
-> R46–R49 待执行。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
+> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**；R45–R46 已完成，
+> R47–R49 待执行。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
 > 不改变 Event 数据模型、restore/resume/fork 行为、Trajectory 交互或 DSH 快照。
 
 ## 任务生命周期
@@ -753,7 +753,7 @@
     tarball 安装 `@runfold/event` 与 `@runfold/trajectory-ui` 后通过类型检查和运行时
     生命周期验证。
 
-- [ ] **R46** · 难度 中 · 风险 中 · 位置 `packages/event/python/`、
+- [x] **R46** · 难度 中 · 风险 中 · 位置 `packages/event/python/`、
   `tests/event/cross-language/`
   - **问题**：Python distribution 与 import 使用 `perix-event-sdk` / `perix_event`，
     既把组织名写入下游代码，也无法形成与 TypeScript `@runfold/event` 对等的项目优先
@@ -762,6 +762,15 @@
     `runfold.event`；移动实现和类型标记，更新单语言、跨语言与独立 wheel 消费者，
     不修改 Python Event 逻辑。
   - **依赖**：R45。
+  - **结果**：已完成（2026-09-03）：14 个 Python 实现/类型文件原样移动到 PEP
+    420 `src/runfold/event/` 命名空间，distribution 改为 `runfold-event`，全部单语言
+    和跨语言调用改为 `runfold.event`。PyPI 对完整 distribution 名称返回 404；
+    本任务未发布。wheel 消费者改为从排除 build/egg-info 的隔离源码副本构建，并
+    新增归档内容门禁，要求包含 `runfold/event/{__init__.py,py.typed}` 且拒绝任何
+    `perix_event/` 成员；由此发现并清除了本地旧构建缓存，不涉及受控源码。
+  - **验证**：Python 36/36、跨语言 7/7 通过；隔离构建得到
+    `runfold_event-0.1.0-py3-none-any.whl`，在第二个无源码路径的空白 venv 中以
+    `runfold.event` 完成 create、append、resume 和 fork，wheel 内容门禁通过。
 
 - [ ] **R47** · 难度 中 · 风险 中 · 位置 `schemas/event/`、
   `conformance/event/`、`scripts/event/demos/nexent/`、`docs/event/demos/nexent/`、
