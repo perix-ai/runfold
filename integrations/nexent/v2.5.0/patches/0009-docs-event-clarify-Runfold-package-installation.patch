@@ -1,4 +1,4 @@
-From 431adb15b45ca79109bf1df0d04fae1fe8f89f53 Mon Sep 17 00:00:00 2001
+From 54ae0144a776334019166137d14f231ce76d904e Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Thu, 3 Sep 2026 00:33:08 -0700
 Subject: [PATCH 9/9] docs(event): clarify Runfold package installation

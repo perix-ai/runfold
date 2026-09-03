@@ -66,7 +66,7 @@ integration_dir=/absolute/path/to/integrations/nexent/v2.5.0
 while IFS= read -r patch; do
   git am --3way "$integration_dir/$patch" || exit
 done < "$integration_dir/series"
-test "$(git rev-parse HEAD^{tree})" = dce67cdda790e6e88507a00442613d83e47c8329
+test "$(git rev-parse HEAD^{tree})" = 31c9fc070c80b8ee33ba165a42474e5cb1a19806
 ```
 
 The full path in `integration_dir` is intentional: run the commands inside
@@ -74,8 +74,11 @@ Nexent while the patches remain in this repository. If either tree assertion
 fails, stop instead of forcing the patches; the checked-out source is not the
 verified baseline or the replay is not identical.
 
-The series includes two frontend package tarballs built from Runfold commit
-`2249c5f811fdaf632bc75a685fb9c12fc7ac3c75`. Their package-level hashes are
+The series includes two frontend package tarballs built from the exact Runfold
+source revision `d79ae963500b961d17a48503bc76df416f414660`. Rebuild both
+packages whenever their published contents change, then regenerate patch 0003
+and all descendant patches so the manifest's commit and tree chain remains
+replayable. Their package-level hashes are
 recorded in the manifest and in Nexent's resulting
 `frontend/vendor/SHA256SUMS`. The Python dependency is `runfold-event==0.1.0`,
 validated from Runfold commit `cb5916e02409e8c83e02ee4f99699c1be9c9fb40`;

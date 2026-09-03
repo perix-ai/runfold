@@ -1,4 +1,4 @@
-From a8866104697655116d2dfa10b7b9f4e99def9141 Mon Sep 17 00:00:00 2001
+From 8fddef9d76c94d1238e128b2c811a1cccf15fc47 Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Wed, 2 Sep 2026 18:21:42 -0700
 Subject: [PATCH 7/9] feat(event): verify long Nexent trajectories

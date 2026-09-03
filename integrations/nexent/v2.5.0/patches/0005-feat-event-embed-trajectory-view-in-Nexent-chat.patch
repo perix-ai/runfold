@@ -1,4 +1,4 @@
-From 77214e574ab34874d4e9956c22b5d885cb08e8a7 Mon Sep 17 00:00:00 2001
+From 50da5b7b1e58d41d9fc0970a1ed4f85d9f8ea6e2 Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Wed, 2 Sep 2026 07:15:15 -0700
 Subject: [PATCH 5/9] feat(event): embed trajectory view in Nexent chat

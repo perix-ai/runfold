@@ -1,4 +1,4 @@
-From 84f7725ca241b42a512acd6f96e7a4158c804d28 Mon Sep 17 00:00:00 2001
+From 8c9be579a8db5b1a9c85d5095091228958aba89c Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Wed, 2 Sep 2026 07:48:31 -0700
 Subject: [PATCH 6/9] docs(event): document trajectory UI verification

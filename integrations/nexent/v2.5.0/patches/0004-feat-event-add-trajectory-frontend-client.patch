@@ -1,4 +1,4 @@
-From 8fdcf03810ad6287970df7f9850c5885561e21b8 Mon Sep 17 00:00:00 2001
+From a2cc77ade6a9ff315a9a9cd67c4ded5ac9ad51c5 Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Wed, 2 Sep 2026 06:45:36 -0700
 Subject: [PATCH 4/9] feat(event): add trajectory frontend client

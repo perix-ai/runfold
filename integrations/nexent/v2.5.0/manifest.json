@@ -18,8 +18,8 @@
   },
   "result": {
     "sourceBranch": "codex/runfold-event-v2.5.0",
-    "sourceHead": "431adb15b45ca79109bf1df0d04fae1fe8f89f53",
-    "expectedTree": "dce67cdda790e6e88507a00442613d83e47c8329",
+    "sourceHead": "54ae0144a776334019166137d14f231ce76d904e",
+    "expectedTree": "31c9fc070c80b8ee33ba165a42474e5cb1a19806",
     "commitCount": 9,
     "changedFiles": 38,
     "insertions": 4375,
@@ -32,19 +32,19 @@
       "sourceRevision": "cb5916e02409e8c83e02ee4f99699c1be9c9fb40"
     },
     "typescript": {
-      "sourceRevision": "2249c5f811fdaf632bc75a685fb9c12fc7ac3c75",
+      "sourceRevision": "d79ae963500b961d17a48503bc76df416f414660",
       "packages": [
         {
           "file": "frontend/vendor/runfold-event-0.1.0.tgz",
           "name": "@runfold/event",
           "version": "0.1.0",
-          "sha256": "fe9bc5ea7cc0f4c7595f7f2bfb7599048470973e90cf4fcdcc9d985bb575a950"
+          "sha256": "8fb83f99ab884c429e6d6d8207fb3a056981c57f92f7bcafa2277ed6a3cd7f28"
         },
         {
           "file": "frontend/vendor/runfold-trajectory-ui-0.1.0.tgz",
           "name": "@runfold/trajectory-ui",
           "version": "0.1.0",
-          "sha256": "d75ad834374bffbc516c95246a6269562db3db4c095fe64f0b515f0b760d496c"
+          "sha256": "dc48628a770b5edfde3f6eca0156def90d069372f2efbeaec059d434e3580eb1"
         }
       ]
     }
@@ -80,65 +80,65 @@
     {
       "index": 3,
       "file": "patches/0003-build-event-vendor-reproducible-UI-packages.patch",
-      "sourceCommit": "0dec7708ecd4e829294e4fca63523c9e0621287a",
-      "sourceTree": "37778b98054bb5d5a9693465689d9d22b188eab3",
+      "sourceCommit": "b8bf0a992635cfc7e74c4fdbd47ed913055ecbf0",
+      "sourceTree": "48ab6606ca46e317821683d51f259d568ad607c5",
       "subject": "build(event): vendor reproducible UI packages",
-      "bytes": 2135516,
-      "sha256": "59b0893fb1a32179a24925ae8cd7165447e553f628e0dfa50c7fde94d4b7dc48"
+      "bytes": 2141963,
+      "sha256": "4113864defd946b96fa6e67cba2a2ebde1004200eafebf0de05b1aada978d01b"
     },
     {
       "index": 4,
       "file": "patches/0004-feat-event-add-trajectory-frontend-client.patch",
-      "sourceCommit": "8fdcf03810ad6287970df7f9850c5885561e21b8",
-      "sourceTree": "8c25c327a1613e03d7ac0670c30d2e245ab9351f",
+      "sourceCommit": "a2cc77ade6a9ff315a9a9cd67c4ded5ac9ad51c5",
+      "sourceTree": "b225afc31ec10f25db7f5e8a92dea41f39fafece",
       "subject": "feat(event): add trajectory frontend client",
       "bytes": 15867,
-      "sha256": "e28608e936fd50b1dcb72ee6b01340b910ed3d16cd5f52633fae0a0844e13101"
+      "sha256": "a32c640201095505b7d718dcd6d4d550f9bd91baa2266f6e4e3d530d1a30ef1f"
     },
     {
       "index": 5,
       "file": "patches/0005-feat-event-embed-trajectory-view-in-Nexent-chat.patch",
-      "sourceCommit": "77214e574ab34874d4e9956c22b5d885cb08e8a7",
-      "sourceTree": "712dedb62ad355cc7d541d1cb7dfbb8e5dcc7981",
+      "sourceCommit": "50da5b7b1e58d41d9fc0970a1ed4f85d9f8ea6e2",
+      "sourceTree": "e2f49b658a64987022a95fb235f48414f78856ca",
       "subject": "feat(event): embed trajectory view in Nexent chat",
       "bytes": 28279,
-      "sha256": "544f5e514c0ba358f83aec3692ca369106169b28ef66a79f431d1847c189a4cc"
+      "sha256": "6167ca0b1f8a390f36a9183d08bedca2c6c284270125be2b27c21a346029779a"
     },
     {
       "index": 6,
       "file": "patches/0006-docs-event-document-trajectory-UI-verification.patch",
-      "sourceCommit": "84f7725ca241b42a512acd6f96e7a4158c804d28",
-      "sourceTree": "2c5602f8ea8a8316b29b56b706c6a65507022a40",
+      "sourceCommit": "8c9be579a8db5b1a9c85d5095091228958aba89c",
+      "sourceTree": "48302081cef57e49a0dd5596e2d46952e441b332",
       "subject": "docs(event): document trajectory UI verification",
       "bytes": 3670,
-      "sha256": "a31285a79621a43f1ba03ec2b03f9ae8bfe6428b135d7e28312b4c01547e14f3"
+      "sha256": "35585db57690b25abb8cf4dc999279d6b5c5b21d7c935271c435060a8b5d5337"
     },
     {
       "index": 7,
       "file": "patches/0007-feat-event-verify-long-Nexent-trajectories.patch",
-      "sourceCommit": "a8866104697655116d2dfa10b7b9f4e99def9141",
-      "sourceTree": "29e38cf328d38dde0f8c822e4a4b20e415ed7f05",
+      "sourceCommit": "8fddef9d76c94d1238e128b2c811a1cccf15fc47",
+      "sourceTree": "2ab5d1913c8d3b72777d9415816712d7069285e2",
       "subject": "feat(event): verify long Nexent trajectories",
       "bytes": 15652,
-      "sha256": "b78bd490f8e476c8ab799437a09e85f97150aa735fbeee693f7e5b3fd4f77084"
+      "sha256": "e799c557234e5cb8d8603102a8a46068432210072e2b8495893821a02ada0e33"
     },
     {
       "index": 8,
       "file": "patches/0008-feat-event-add-dual-Nexent-fork-controls.patch",
-      "sourceCommit": "87135a25ce31c0bd582ef07a17d65a030112189d",
-      "sourceTree": "13ff71443446490148d34f689d9e2789bc89da52",
+      "sourceCommit": "986c526f93982445b518f21fee14405405996bec",
+      "sourceTree": "1a3e94eec4c24266f294fd65efbcc8c5ee81faa6",
       "subject": "feat(event): add dual Nexent fork controls",
       "bytes": 16818,
-      "sha256": "a5311c8fd30a1a9a35609117f5c6b4f72691899bc8f2c290c17d6772a0f90c4d"
+      "sha256": "6999cd64e02170f3beb3020bac6d9b99ffdd8f34a85ce41349005b39f3ace4f2"
     },
     {
       "index": 9,
       "file": "patches/0009-docs-event-clarify-Runfold-package-installation.patch",
-      "sourceCommit": "431adb15b45ca79109bf1df0d04fae1fe8f89f53",
-      "sourceTree": "dce67cdda790e6e88507a00442613d83e47c8329",
+      "sourceCommit": "54ae0144a776334019166137d14f231ce76d904e",
+      "sourceTree": "31c9fc070c80b8ee33ba165a42474e5cb1a19806",
       "subject": "docs(event): clarify Runfold package installation",
       "bytes": 2371,
-      "sha256": "6afe30e7817279db2455b4d51631dd4d658d0337bf5df0cd68b0196baf1cd3e6"
+      "sha256": "126fdf2ca69be631699c290c455de325e2fae4f66335a736bc0abb217e82316c"
     }
   ]
 }

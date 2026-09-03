@@ -906,10 +906,12 @@
   - **结果**：已完成（2026-09-03）：补齐两个 npm 包的仓库、主页、问题追踪、关键词与公开发布配置；补齐 Python 包的项目链接；身份校验增加元数据断言及合法回源链接白名单。
   - **验证**：`npm run verify` 主体构建、身份校验、626/626 上游测试及 Python 测试通过；`npm run test:package` 通过；两个 npm 包 `npm pack --dry-run` 与 Python `uv build --wheel` 通过；`git diff --check` 通过。
 
-- [ ] **R53** · 难度 中 · 风险 中 · 位置 `integrations/nexent/v2.5.0/`
+- [x] **R53** · 难度 中 · 风险 中 · 位置 `integrations/nexent/v2.5.0/`
   - **问题**：manifest 记录 vendored tarball 来自 `2249c5f`，其后 `ba50409`、`0a420bd` 改了两个发布包的 `package.json`、`LICENSE`、`NOTICE.md` 与第三方声明生成。补丁 0003 中 Nexent 实际安装的 tgz 仍带旧版权行（缺 `Copyright (c) 2026 Heiki Scott` 一行），与 `OPEN_SOURCE_POLICY.md` 分发要求第 1、3 条冲突。
   - **处理**：按当前 HEAD 重建两个 tarball 并重放补丁 0003，同步 `manifest.json`、`SHA256SUMS` 与 README 中的版本绑定说明。
   - **依赖**：R52。
+  - **结果**：已完成（2026-09-03）：从 Runfold `d79ae963500b961d17a48503bc76df416f414660` 重建两个 npm tarball，重写 Nexent 补丁 0003 并重放后续补丁；同步 manifest、SHA256SUMS 与版本绑定说明。
+  - **验证**：9 个补丁从固定基线 `1b184cf` 干净重放，最终 tree 为 `31c9fc070c80b8ee33ba165a42474e5cb1a19806`；manifest 的逐补丁 bytes／SHA-256 与实际文件一致；集成 SHA256SUMS 全部通过；两个 vendored tarball 哈希通过，均含 DeepSeek 与 Heiki Scott 版权行，UI 包含 `THIRD_PARTY_NOTICES.md`；完整 `npm run verify` 与 `git diff --check` 通过。
 
 - [ ] **R54** · 难度 中 · 风险 低 · 位置 新增 `scripts/verify-integration-artifacts.mjs`、根 `package.json`
   - **问题**：`integrations/` 与 demo 资产不在任何门禁内。`SHA256SUMS` 与 manifest 哈希只在 R44 时人工核对过一次；复核时手动执行仍全部通过，但改动补丁或资产不会被 `npm run verify` 发现。
@@ -990,15 +992,26 @@
   - **处理**：指向文档入口。
   - **依赖**：无。
 
-- [ ] **R67** · 难度 易 · 风险 低 · 位置 `docs/event/demos/`、`integrations/nexent/`
-  - **问题**：已跟踪的最大文件是 2.8 MB 的 demo MP4 与 2.0 MB 的补丁 0003（内含 vendored tarball），`integrations/nexent` 合计 2.3 MB。每次 clone 都会拉取，且重建会不断产生新 blob。
-  - **处理**：三选一——保持现状、MP4 移到 GitHub Releases、或对二进制启用 Git LFS。**需你先给口径**，且建议在 R53 重建 tarball 之前定下。
-  - **依赖**：R53 之前。
+- [x] **R67** · 难度 易 · 风险 低 · 位置 `docs/event/demos/`、`integrations/nexent/`
+  - **问题**：已跟踪的最大文件是 2.8 MB 的 demo MP4 与 2.0 MB 的补丁 0003（内含 vendored tarball），`integrations/nexent` 合计 2.3 MB。每次 clone 都会拉取，重建会不断产生新 blob。
+  - **处理**：**已决策（2026-09-03，用户）：维持现状，不迁 Releases 也不启用 LFS。** 当前体量在可接受范围内，不值得为此增加分发与校验链路的复杂度（`SHA256SUMS` 与 R54 的产物校验都依赖文件在库内）。若后续单个资产超过约 10 MB 或 `integrations/` 总量显著增长，再重新评估。
+  - **依赖**：无。
+  - **结果**：无需改动，本条作为决策记录保留。
 
 - [ ] **R68** · 难度 中 · 风险 低 · 位置 `docs/event/`
   - **问题**：对外文件是英文，但 `docs/event/` 下的需求、架构、规格、验证、决策、清单全部是中文。外部贡献者读不了规则文档，就无法按 `CONTRIBUTING.md` 的要求参与。
-  - **处理**：三选一——维持中文并在 README 说明其为维护者工作文档、关键三份提供英文版、或整体切换英文。**需你先给口径。**
+  - **处理**：**已决策（2026-09-03，用户）：中英双语，每份文档两个副本。** 采用保留源码已有的 `<name>.md` / `<name>.zh.md` 约定（上游 DSH 包即用此约定）。执行前需先定三件事，写进 `AGENTS.md`：(1) 冲突时以哪一份为准，建议英文为规范版、中文为翻译版，避免双向漂移；(2) 是否所有文档都双语，还是只覆盖 requirements、architecture、specification、testing、decisions 这五份规则文档，而 `tasks.md` 与 `tasks/` 因高频变动只保留单语；(3) 新增文档时两份必须同一提交内落地，并在 `verify:public-identity` 或独立脚本中断言配对存在、不缺不多。
   - **依赖**：无。
+
+
+## 11. 工具链缺陷
+
+- [ ] **R69** · 难度 易 · 风险 高 · 位置 `~/.codex/config.toml`、`~/.codex/.codex-global-state.json`（仓库外）
+  - **问题**：本机仓库目录已是 `/Users/heikiscott/perix-ai/runfold`，但 Codex 仍把旧路径注册为项目根。核查证据：`config.toml:100` 有 `[projects."/Users/heikiscott/perix-ai/perix-runtime-data"]`；`.codex-global-state.json` 的 `local-projects.<uuid>.rootPaths[0]`、`name` 与两个 `thread-writable-roots` 条目均指向旧路径；`config.toml` 中没有任何指向 `runfold` 的注册。
+    表现是旧路径被反复重建成一个空目录再消失：2026-09-03 09:16:17–09:16:35 两个目录同时存在且 inode 不同（`runfold`=42762796，`perix-runtime-data`=44426481），09:16:37 后者消失。inode 不同说明这不是改名，而是有进程按旧根路径重新创建目录。R49 的记录写的是"本机工作目录保持原名"，与当前实际路径不符，说明重命名发生在 R49 之外且未同步工具链配置。
+  - **影响**：Codex 的 sandbox writable-root 指向一个空目录。轻则命令因工作目录消失而失败（本次核查中我的 shell 三次丢失 cwd），重则 Codex 在空目录内写入或初始化，产出落在仓库之外而不被察觉。这类错误不会被 `npm run verify` 捕获。
+  - **处理**：先确定本机目录名的目标状态（`runfold` 与 GitHub slug 一致，推荐），然后在 Codex 中移除旧项目注册并以新路径重新添加，确认 `config.toml` 的 `[projects."..."]`、`local-projects.rootPaths` 与 `thread-writable-roots` 都指向新路径且旧路径不再出现；随后连续观察若干分钟，确认旧目录不再被重建。修完后回填 R49 的结果栏，纠正"工作目录保持原名"这一与实际不符的记录。
+  - **依赖**：无。**优先于第 9、10 节的所有条目**，因为它会影响执行这些条目的工具本身。
 
 ## 执行顺序
 
@@ -1006,6 +1019,7 @@
 
 | 批次 | 条目 | 性质 | 前置 |
 | --- | --- | --- | --- |
+| 0 | **R69** | 工具链缺陷：Codex 项目根仍指向旧路径，导致空目录反复重建 | 立即，先于其余批次 |
 | 1 | R01, R02, R05, R06, R04, R03 | 纯文档登记 | 无 |
 | 2 | R11, R12 | Python 小修 | 无 |
 | 3 | R13, R07, R08 | 低风险工程保障 | 无 |
@@ -1036,7 +1050,7 @@
 | 28 | R50 | 明确个人版权归属、开源分发与第三方 bundle notices | R48、R49 |
 | 29 | R51 | 同步 GitHub About 并验证外部贡献入口 | R49、R50 |
 | 30 | R52, R56, R57, R58 → R53 → R54；R59 在首次发布前；R55 待条款确认 | 发布元数据、产物时效与治理缺口（见 `tasks/R52-R59-release-governance.md`） | R36–R51 |
-| 31 | R60 → R62 → R63 → R66；R64 → R65；R61；R67、R68 待口径 | 公开仓库的法律归属与开源就绪（见 `tasks/R60-R68-open-source-readiness.md`） | 批次 30 |
+| 31 | R60 → R62 → R63 → R66；R64 → R65；R61；R68 待约定 | 公开仓库的法律归属与开源就绪（见 `tasks/R60-R68-open-source-readiness.md`）；R67 已决策无需改动 | 批次 30 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
