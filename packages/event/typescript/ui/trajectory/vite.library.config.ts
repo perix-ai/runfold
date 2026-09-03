@@ -1,7 +1,9 @@
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
+import { thirdPartyNotices } from './scripts/third-party-notices.mjs'
 
 export default defineConfig({
+  plugins: [thirdPartyNotices()],
   build: {
     outDir: 'lib',
     emptyOutDir: true,

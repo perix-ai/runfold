@@ -30,6 +30,20 @@ function run(command, args, cwd) {
   return result.stdout
 }
 
+function parsePackResult(output) {
+  const lines = output.split('\n')
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    if (!lines[index].trimStart().startsWith('[')) continue
+    try {
+      const result = JSON.parse(lines.slice(index).join('\n'))
+      if (Array.isArray(result) && result.length > 0) return result[0]
+    } catch {
+      // Lifecycle output can precede npm's final JSON; keep looking upward.
+    }
+  }
+  throw new Error(`npm pack did not return a trailing JSON result:\n${output}`)
+}
+
 async function assertExportFiles(packageDirectory) {
   const manifest = JSON.parse(await readFile(join(packageDirectory, 'package.json'), 'utf8'))
   for (const target of Object.values(manifest.exports)) {
@@ -58,8 +72,8 @@ try {
     mkdir(consumer, { recursive: true }),
   ])
 
-  const sdkPack = JSON.parse(run('npm', ['pack', '--json', '--pack-destination', artifacts], sdkDirectory))[0]
-  const uiPack = JSON.parse(run('npm', ['pack', '--json', '--pack-destination', artifacts], uiDirectory))[0]
+  const sdkPack = parsePackResult(run('npm', ['pack', '--json', '--pack-destination', artifacts], sdkDirectory))
+  const uiPack = parsePackResult(run('npm', ['pack', '--json', '--pack-destination', artifacts], uiDirectory))
   const sdkTarball = join(artifacts, sdkPack.filename)
   const uiTarball = join(artifacts, uiPack.filename)
 
@@ -147,11 +161,11 @@ await context.dispose()
     join(consumer, 'node_modules/@runfold/trajectory-ui/package.json'),
     'utf8',
   ))
-  const maintainer = ['Per', 'ix.ai'].join('')
+  const copyrightHolder = 'Heiki Scott'
   assert.equal(installedSdk.name, '@runfold/event')
   assert.equal(installedUi.name, '@runfold/trajectory-ui')
-  assert.equal(installedSdk.author, maintainer)
-  assert.equal(installedUi.author, maintainer)
+  assert.equal(installedSdk.author, copyrightHolder)
+  assert.equal(installedUi.author, copyrightHolder)
   for (const [label, manifest] of [['SDK', installedSdk], ['UI', installedUi]]) {
     for (const field of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
       for (const name of Object.keys(manifest[field] ?? {})) {
@@ -163,9 +177,14 @@ await context.dispose()
   const legacyPythonPackage = ['per', 'ix', '_event'].join('')
   const legacyDistribution = ['per', 'ix', '-event'].join('')
   for (const packageName of ['event', 'trajectory-ui']) {
-    for (const file of await publishedTextFiles(
-      join(consumer, `node_modules/@runfold/${packageName}`),
-    )) {
+    const installedPackage = join(consumer, `node_modules/@runfold/${packageName}`)
+    const license = await readFile(join(installedPackage, 'LICENSE'), 'utf8')
+    const notice = await readFile(join(installedPackage, 'NOTICE.md'), 'utf8')
+    assert.equal(license.includes(copyrightHolder), true)
+    assert.equal(license.includes('DeepSeek'), true)
+    assert.equal(notice.includes(copyrightHolder), true)
+    assert.equal(notice.includes('DeepSeek'), true)
+    for (const file of await publishedTextFiles(installedPackage)) {
       const content = await readFile(file, 'utf8')
       assert.equal(content.includes(legacyScope), false, `legacy npm scope leaked into ${file}`)
       assert.equal(content.includes(legacyPythonPackage), false, `legacy Python package leaked into ${file}`)
@@ -179,9 +198,34 @@ await context.dispose()
     join(consumer, 'node_modules/@runfold/trajectory-ui/index.d.ts'),
     'utf8',
   )
+  const bundledNotices = await readFile(
+    join(consumer, 'node_modules/@runfold/trajectory-ui/lib/THIRD_PARTY_NOTICES.md'),
+    'utf8',
+  )
   assert.equal(uiDeclaration.includes('@deepseek-ai'), false)
   assert.equal(uiDeclaration.includes('DshTrajectory'), false)
   assert.equal(uiDeclaration.includes('EventTrajectory'), true)
+  for (const packageName of [
+    '@shikijs/core',
+    '@shikijs/langs',
+    '@tanstack/react-virtual',
+    'clsx',
+    'diff',
+    'immer',
+    'katex',
+    'mdast-util-from-markdown',
+    'use-sync-external-store',
+    'zustand',
+  ]) {
+    assert.equal(
+      bundledNotices.includes(`\`${packageName}\``),
+      true,
+      `bundled third-party notices omit ${packageName}`,
+    )
+  }
+  assert.equal(bundledNotices.includes('MIT'), true)
+  assert.equal(bundledNotices.includes('BSD-3-Clause'), true)
+  assert.equal(bundledNotices.includes('Permission is hereby granted'), true)
 
   console.log('Runfold Event package consumer verification passed')
 } finally {

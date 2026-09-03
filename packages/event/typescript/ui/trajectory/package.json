@@ -1,7 +1,7 @@
 {
   "name": "@runfold/trajectory-ui",
   "version": "0.1.0",
-  "author": "Perix.ai",
+  "author": "Heiki Scott",
   "type": "module",
   "main": "./lib/index.js",
   "types": "./index.d.ts",
@@ -21,6 +21,7 @@
   ],
   "scripts": {
     "build": "tsc --noEmit && vite build --config vite.library.config.ts",
+    "prepack": "npm run build",
     "test": "vitest run --root ../../../../../ --config vitest.config.ts --environment jsdom packages/event/typescript/tests/ui"
   },
   "peerDependencies": {

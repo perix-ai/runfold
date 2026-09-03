@@ -2,8 +2,9 @@
 
 **The agent data plane for durable agent execution.**
 
-Runfold is an agent runtime data platform maintained by Perix.ai. Its first
-subsystem is **Event**: the append-only execution trajectory of an agent
+Runfold is an agent runtime data platform developed and maintained by Heiki
+Scott under the Perix.ai project name. Its first subsystem is **Event**: the
+append-only execution trajectory of an agent
 Session, its persistence, restore/resume/fork behavior, and the Trajectory UI
 that projects it. Event is cut directly from DeepSeek Harness rather than
 designed from scratch. This file is a map; scope, design, and rules live under
@@ -53,6 +54,9 @@ runfold/
 | How it is verified | [`docs/event/testing.md`](docs/event/testing.md) |
 | Why key choices were made | [`docs/event/decisions.md`](docs/event/decisions.md) |
 | Progress and open work | [`docs/event/tasks.md`](docs/event/tasks.md) |
+| Who owns which material | [`COPYRIGHT.md`](COPYRIGHT.md) and [`NOTICE.md`](NOTICE.md) |
+| How Runfold is distributed and released | [`OPEN_SOURCE_POLICY.md`](OPEN_SOURCE_POLICY.md) |
+| How contributions are licensed | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Watch the Nexent trajectory restore/fork UI demo | [`docs/event/demos/nexent/`](docs/event/demos/nexent/) |
 | Apply the validated Nexent product integration | [`integrations/nexent/`](integrations/nexent/) |
 
@@ -80,10 +84,13 @@ Those belong to separate runtime or application concerns.
 
 ## Licensing and attribution
 
-Original Runfold code and modifications are copyright Perix.ai. The Event
-subsystem also contains code derived from DeepSeek Harness under the MIT
-License; its copyright, pinned source, and unmodified audit snapshot are
-preserved. See [`NOTICE.md`](NOTICE.md), [`LICENSE`](LICENSE), and
+Original Runfold code and modifications are copyright © 2026 Heiki Scott.
+Perix.ai is the project and maintainer name, not a separate legal copyright
+owner. The Event subsystem also contains code derived from DeepSeek Harness;
+its original copyright, MIT license, pinned source, and unmodified audit
+snapshot are preserved. See [`COPYRIGHT.md`](COPYRIGHT.md),
+[`OPEN_SOURCE_POLICY.md`](OPEN_SOURCE_POLICY.md), [`NOTICE.md`](NOTICE.md),
+[`LICENSE`](LICENSE), and
 [`third_party/deepseek-harness/`](third_party/deepseek-harness/).
 
 ## Maintenance

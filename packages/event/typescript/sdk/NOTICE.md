@@ -1,7 +1,8 @@
 # Runfold Event notices
 
-This package is maintained by Perix.ai. Original Runfold additions and
-modifications are copyright (c) 2026 Perix.ai.
+This package is developed and maintained by Heiki Scott under the Perix.ai
+project name. Original Runfold additions and modifications are copyright (c)
+2026 Heiki Scott.
 
 This package redistributes the Event and persistence implementation extracted
 from DeepSeek Harness `0.1.2-alpha.3`

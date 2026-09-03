@@ -1,7 +1,8 @@
 # Runfold Event Python notices
 
-This package is maintained by Perix.ai. Its native Python implementation and
-other original Runfold code are copyright (c) 2026 Perix.ai.
+This package is developed and maintained by Heiki Scott under the Perix.ai
+project name. Its native Python implementation and other original Runfold code
+are copyright (c) 2026 Heiki Scott.
 
 The implementation follows Event behavior extracted from DeepSeek Harness
 `0.1.2-alpha.3`, revision

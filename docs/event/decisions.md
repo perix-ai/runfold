@@ -76,15 +76,16 @@
   消费者安装测试。
 - 相关：tasks.md 3.2 节、R36。
 
-## D06 · 项目身份使用 Runfold，维护与原创权利归属 Perix.ai
+## D06 · 技术身份使用 Runfold，维护身份与法定版权人分离
 
 - 日期：2026-09-03
 - 背景：项目将作为独立的 agent runtime data platform 供其他团队集成。把维护
   组织名称写进包、import、Schema 和下游 UI，会无必要地进入使用方代码；完全
   隐去维护者与原创权利归属又会损失清晰的版权边界。
 - 决定：独立项目名为 Runfold；TypeScript、Python、Schema 与 UI 的公共技术
-  身份统一使用 Runfold。Perix.ai 只作为维护者及原创 Runfold 代码与修改的权利
-  归属出现。DeepSeek Harness 的固定来源、原版权和 MIT 许可继续完整保留。
+  身份统一使用 Runfold。Perix.ai 是项目与维护者名称；按 R50 的用户确认，当前
+  原创 Runfold 代码、修改和可受保护编排声明的版权人为自然人 Heiki Scott。
+  DeepSeek Harness 的固定来源、原版权和 MIT 许可继续完整保留。
 - 后果：0.1.0 尚未对外发布，因此执行干净迁移，不提供旧包名兼容别名。迁移前
   的任务与验收记录保留原名作为历史事实，但不构成当前 API 文档。
-- 相关：tasks.md R45–R49。
+- 相关：tasks.md R45–R50。

@@ -1,7 +1,9 @@
 # Runfold notices
 
-Runfold is maintained by Perix.ai. Original Runfold code and modifications are
-copyright (c) 2026 Perix.ai.
+Runfold is developed and maintained by Heiki Scott under the Perix.ai project
+name. Original Runfold code and modifications are copyright (c) 2026 Heiki
+Scott. See `COPYRIGHT.md` for the precise ownership boundary and
+`OPEN_SOURCE_POLICY.md` for distribution requirements.
 
 The Event subsystem contains code extracted or derived from DeepSeek Harness
 `0.1.2-alpha.3`, revision

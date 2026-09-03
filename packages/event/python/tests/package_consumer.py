@@ -56,6 +56,10 @@ def main() -> None:
         wheel = wheels[0]
         with ZipFile(wheel) as archive:
             members = set(archive.namelist())
+            metadata_member = next(
+                member for member in members if member.endswith(".dist-info/METADATA")
+            )
+            metadata = archive.read(metadata_member).decode("utf-8")
         required_members = {
             "runfold/event/__init__.py",
             "runfold/event/py.typed",
@@ -72,6 +76,8 @@ def main() -> None:
             )
             if not packaged:
                 raise RuntimeError(f"wheel is missing packaged legal notice: {notice}")
+        if "Author: Heiki Scott" not in metadata:
+            raise RuntimeError("wheel metadata does not identify Heiki Scott as author")
         legacy_members = sorted(
             member for member in members if member.startswith("perix_event/")
         )

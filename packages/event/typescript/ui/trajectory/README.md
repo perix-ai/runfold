@@ -60,3 +60,13 @@ selected UI-primitives add 182 upstream cases and 48 DOM compatibility fixtures.
 Source provenance and the exact extraction boundary are documented in
 `packages/event/typescript/README.md`. The untouched upstream reference
 is stored separately under `third_party/deepseek-harness/upstream/`.
+
+## Distribution notices
+
+`npm pack` rebuilds the package before packing it. The library build derives
+`lib/THIRD_PARTY_NOTICES.md` from the actual third-party modules present in the
+emitted Rollup chunks and copies each package's complete license and notice
+files into that generated document. The build fails instead of producing a
+package when a bundled dependency lacks license metadata or a distributable
+legal file. React peer dependencies and build-only tools are not bundled, so
+their notices remain with their separately installed packages.

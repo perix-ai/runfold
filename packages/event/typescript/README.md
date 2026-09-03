@@ -133,6 +133,13 @@ package manifests, lockfiles, installed dependencies, or published artifacts.
   receives from the complete DSH shell. Its manifest directly declares the
   third-party packages used by the retained closure; it has no DSH package
   dependency, and the repository no longer needs npm `overrides` for DSH.
+- `ui/trajectory/scripts/third-party-notices.mjs` is local release tooling. It
+  inspects the modules present in the emitted Rollup chunks and generates a
+  package-version inventory plus complete upstream legal texts at
+  `lib/THIRD_PARTY_NOTICES.md`; the build fails if a bundled dependency lacks
+  license metadata or a distributable legal file. The generated file is packed
+  with the UI library, while React peers and build-only tools are excluded
+  because they are not part of the bundle.
 - `runtime/` is Runfold-authored code that replaces the DSH utility packages the
   retained sources import: `brand.ts` (`@deepseek-ai/dsh-brand`), `values.ts`
   (`@deepseek-ai/dsh-util-values`), `timeout.ts` (`@deepseek-ai/dsh-timeout`),
@@ -188,7 +195,8 @@ Trajectory; both execute the
   persistence, restart, and UI rendering;
 - `tests/package`: packs both libraries, installs them into a
   blank project, type-checks the public API strictly, and runs the installed
-  SDK.
+  SDK. It also requires the UI tarball's generated third-party notice inventory
+  and checks representative MIT and BSD-3-Clause bundled dependencies.
 - `../python/tests`: native Python core, persistence, conformance, large
   history, and blank-environment package tests.
 - `test-support/`: test-only Cordis and dsh-scope shims used to run the

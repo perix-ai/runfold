@@ -17,7 +17,9 @@
 > 最终移除了保留测试中的 DSH
 > module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
 >
-> 后续状态（2026-09-03）：独立项目 **Runfold** 的 R45–R49 身份迁移全部完成。
+> 后续状态（2026-09-03）：独立项目 **Runfold** 的 R45–R50 身份、仓库和
+> 版权政策迁移全部完成。当前原创部分声明的版权人为 Heiki Scott；Perix.ai 是
+> 项目/维护者名称而不是独立权利主体。
 > 迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
 > 不改变 Event 数据模型、restore/resume/fork 行为、Trajectory 交互或 DSH 快照。
 > R01–R44 中出现的旧项目名、旧包名和本地 `perix-ai/...` 路径是迁移前的历史
@@ -812,8 +814,10 @@
   - **依赖**：R45–R47。
   - **结果**：已完成（2026-09-03）：根项目、当前 Event 文档、包说明和集成索引
     统一使用 Runfold；新增 D06 明确项目技术身份与维护/权利归属是两个维度。
-    根仓库及三个发布包均携带 MIT LICENSE/NOTICE：原创 Runfold 代码与修改归
-    Perix.ai，DeepSeek Harness 原版权、固定来源和许可继续保留，未修改固定快照。
+    根仓库及三个发布包均携带 MIT LICENSE/NOTICE；本条实施时使用 Perix.ai
+    记录原创归属，R50 随后按已确认的真实法律主体将版权人校正为 Heiki Scott，
+    Perix.ai 仅保留为项目/维护名称。DeepSeek Harness 原版权、固定来源和许可
+    始终继续保留，未修改固定快照。
     同时清除了根 Vitest 配置中 10 条已失效的旧 package alias。历史任务记录、
     Nexent 本地来源路径和负向包测试保留原事实，并与当前 API 明确区分。
   - **验证**：新增公共身份门禁扫描 351 个受控文本文件，只允许 24 行逐文件限定的
@@ -837,6 +841,34 @@
   - **验证**：GitHub API 返回 `nameWithOwner: perix-ai/runfold`、默认分支 `main`；
     新 origin fetch 成功，`HEAD` 与 `origin/main` 在 R48 提交 `ba50409` 上一致；
     本条完成记录通过新 origin 推送，验证写权限与 main 跟踪链路。
+
+- [x] **R50** · 难度 易 · 风险 中 · 位置根 `COPYRIGHT.md`、
+  `OPEN_SOURCE_POLICY.md`、`CONTRIBUTING.md`、`README.md`、LICENSE/NOTICE、
+  发布包元数据/NOTICE 与身份门禁
+  - **问题**：现有 LICENSE/NOTICE 已记录 Perix.ai 与 DeepSeek 的归属，但没有一份
+    集中、面向使用方的版权边界和开源分发政策，容易把“项目由谁维护”“原创部分
+    归谁”“第三方源码归谁”与“MIT 允许怎样使用”混为一谈。
+  - **处理**：按用户确认，将当前原创 Runfold 代码、修改及可受保护的项目编排的
+    版权人明确为自然人 `Heiki Scott`；Perix.ai 只作为项目/维护者名称，Runfold
+    作为产品名，不把尚未确定的公司或未注册品牌写成法定权利人。DeepSeek Harness
+    与其他第三方材料继续归各自权利人，不作不真实的整体权利主张。明确 MIT 分发、
+    NOTICE/许可证保留、第三方来源审计、贡献授权和发布要求；外部贡献者除非另有
+    书面转让仍保留其版权。同步 README、包内元数据/NOTICE 和自动身份门禁，不改变
+    Event 行为、公共名称或 DSH 固定快照。
+  - **依赖**：R48、R49。
+  - **结果**：已完成（2026-09-03）：新增集中版权边界、开源分发政策和贡献说明；
+    根仓库、npm 包和 Python wheel 均把原创代码作者/版权人统一为 Heiki Scott，
+    Perix.ai 仅作为项目/维护者名称，Runfold 继续作为公共技术与产品名。DSH 的
+    DeepSeek 原版权和固定来源不变，外部贡献者在没有书面转让时保留版权。轨迹 UI
+    发布构建新增实际 bundle 模块扫描：从输出 chunk 自动生成
+    `lib/THIRD_PARTY_NOTICES.md`，本次覆盖 72 个 MIT/BSD-3-Clause 包及其完整法律
+    文本；缺少许可证元数据或可分发法律文件会直接中止构建，`npm pack` 会先重建。
+  - **验证**：完整 `npm run verify` 通过：204 个保留文件、10 个必要差异、139 个
+    声明映射、三个构建、1005 个行为测试及 TypeScript/Python 两个隔离包消费者；
+    TypeScript 消费者确认 tarball 携带第三方 notices 和代表性 MIT/BSD-3-Clause
+    依赖，Python 消费者确认 wheel 作者元数据与 LICENSE/NOTICE；公共身份门禁扫描
+    355 个受控文本文件，仅保留 16 行明确归属、来源或负向测试引用；
+    `git diff --check` 通过。
 
 ## 执行顺序
 
@@ -871,6 +903,7 @@
 | 25 | R47 | Schema、Demo 与 Nexent 集成清除旧技术命名空间 | R45、R46 |
 | 26 | R48 | 文档、归属边界与公共产物名称门禁 | R45–R47 |
 | 27 | R49 | 全量验证后重命名 GitHub 仓库和本地远端 | R48 |
+| 28 | R50 | 明确个人版权归属、开源分发与第三方 bundle notices | R48、R49 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 

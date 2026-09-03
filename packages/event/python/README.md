@@ -49,9 +49,10 @@ The implementation preserves DSH format v0 field names and behavior while using
 Runfold package names. Shared cross-language fixtures live under
 `conformance/event/v0/`.
 
-The package is maintained by Perix.ai and distributed under the MIT License.
-DeepSeek Harness provenance and the distinction between retained behavior and
-the native Python implementation are recorded in [`NOTICE.md`](NOTICE.md).
+The package is developed and maintained by Heiki Scott under the Perix.ai
+project name and distributed under the MIT License. DeepSeek Harness provenance
+and the distinction between retained behavior and the native Python
+implementation are recorded in [`NOTICE.md`](NOTICE.md).
 
 Run the Python suite from the repository root:
 
