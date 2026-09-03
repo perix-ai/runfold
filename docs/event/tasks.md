@@ -4,9 +4,9 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R41 与第 7 节总验收全部完成。R41 已将 Demo
-> 改为自然普通话神经网络人声，并以快速移入、按下态、点击音、局部放大和双脉冲
-> 增强关键点击；R40 的双 Fork 入口与自动 Resume 语义保持不变。
+> 总体状态（2026-09-02）：R01–R41 与第 7 节总验收全部完成；R42 正在删除
+> Demo 标题中的制作质量自述，只保留“轨迹恢复与 Fork”这一功能主题。R41 的
+> 旁白、点击反馈以及 R40 的双 Fork 入口与自动 Resume 语义保持不变。
 > `npm run verify`
 > 全绿，SDK、UI、保留测试和构建配置均不依赖任何 DSH 包名解析。R33 已在与官方 tag
 > 逐文件一致的 Nexent v2.5.0 本地快照上完成真实进程、wheel 和轨迹 UI 验收；
@@ -652,6 +652,13 @@
     `-16.4 dB`、峰值 `-1.4 dB`，无两秒以上静音；视频与封面哈希及完整证据见
     R41 任务书。Nexent、DSH `EventTrajectory` 与 Event 实现无改动。
 
+- [ ] **R42** · 难度 低 · 风险 低 · 位置 `docs/event/demos/nexent/`
+  - **问题**：封面和开场用“自然人声”“清晰点击”等制作质量作为标题，属于应由
+    成片自行体现的冗余说明。
+  - **处理**：按 [`R42 任务书`](tasks/R42-demo-title-copy.md) 将主标题精简为
+    “轨迹恢复与 Fork”，其他画面、旁白和交互保持不变。
+  - **依赖**：R41；只重制标题画面与媒体哈希，不修改功能实现。
+
 ## 7. 总体验收
 
 - [x] **R33** · 难度 中 · 风险 中 · 位置 Nexent 使用方仓库、
@@ -709,6 +716,7 @@
 | 17 | R39 | Nexent 长轨迹、冷恢复、详情按钮与 fork 可播放 Demo（见 `tasks/R39-nexent-trajectory-demo.md`） | R38 |
 | 18 | R40 | Nexent 有声交互 Demo 与 DSH Fork/Resume 控件一致性（见 `tasks/R40-nexent-narrated-interaction-demo.md`） | R39、用户决策 |
 | 19 | R41 | Nexent Demo 自然人声与清晰点击动作（见 `tasks/R41-demo-natural-voice-clicks.md`） | R40、用户反馈 |
+| 20 | R42 | 精简 Nexent Event Demo 标题（见 `tasks/R42-demo-title-copy.md`） | R41、用户反馈 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
