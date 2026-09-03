@@ -4,9 +4,9 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R40 与第 7 节总验收全部完成。R40 同时提供
-> DSH 消息级快捷 Fork 与 Nexent 轨迹稳定边界精细 Fork，并提交有声交互 Demo；
-> Resume 保持自动宿主语义。
+> 总体状态（2026-09-02）：R01–R40 与第 7 节总验收全部完成；R41 正在按用户
+> 反馈把 Demo 改为自然普通话神经网络人声，并增强关键点击的速度和可见反馈。
+> R40 的双 Fork 入口与自动 Resume 语义保持不变。
 > `npm run verify`
 > 全绿，SDK、UI、保留测试和构建配置均不依赖任何 DSH 包名解析。R33 已在与官方 tag
 > 逐文件一致的 Nexent v2.5.0 本地快照上完成真实进程、wheel 和轨迹 UI 验收；
@@ -637,6 +637,15 @@
     同时验证 10→21 Turn 冷恢复和右侧 Schema。视频完整解码，AAC 峰值
     `-1.4 dB`，九个关键状态帧通过视觉复核；哈希与完整证据见 R40 任务书。
 
+- [ ] **R41** · 难度 低 · 风险 低 · 位置 `docs/event/demos/nexent/`
+  - **问题**：R40 的系统普通话音色机器感明显，鼠标点击节奏偏慢且按下瞬间不够
+    清晰，影响演示可读性。
+  - **处理**：按
+    [`R41 任务书`](tasks/R41-demo-natural-voice-clicks.md) 更换自然神经网络人声，
+    缩短节奏，并用目标停留、按下态和双脉冲明确表达刷新、聊天 Fork、分叉点选择
+    与轨迹 Fork。
+  - **依赖**：R40；只重制媒体与说明，不修改功能实现。
+
 ## 7. 总体验收
 
 - [x] **R33** · 难度 中 · 风险 中 · 位置 Nexent 使用方仓库、
@@ -693,6 +702,7 @@
 | 16 | R38 | Nexent 20 Turn 长轨迹冷恢复、fork 与详情面板全景验收（见 `tasks/R38-nexent-long-trajectory.md`） | R37 |
 | 17 | R39 | Nexent 长轨迹、冷恢复、详情按钮与 fork 可播放 Demo（见 `tasks/R39-nexent-trajectory-demo.md`） | R38 |
 | 18 | R40 | Nexent 有声交互 Demo 与 DSH Fork/Resume 控件一致性（见 `tasks/R40-nexent-narrated-interaction-demo.md`） | R39、用户决策 |
+| 19 | R41 | Nexent Demo 自然人声与清晰点击动作（见 `tasks/R41-demo-natural-voice-clicks.md`） | R40、用户反馈 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
