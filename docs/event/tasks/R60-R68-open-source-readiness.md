@@ -1,6 +1,7 @@
 # 任务：公开仓库的法律归属与开源就绪缺口
 
 > 对应清单：[`../tasks.md`](../tasks.md) 第 10 节 R60–R68。
+> 工具链缺陷 R69 在第 11 节，优先级高于本文全部条目。
 > 来源：2026-09-03 对"仓库已公开"状态的复核。执行者：Codex。状态：待执行。
 >
 > 背景：`github.com/perix-ai/runfold` 已是 public 仓库（MIT，11 个 topics）。
@@ -145,7 +146,7 @@ Covenant 2.1 并填写联系方式。两者都从 `CONTRIBUTING.md` 链接。
 R51 已设置 description 与 topics，homepage 字段仍为空。指向文档入口或未来的
 文档站。**依赖**：无。
 
-## R67 · 大文件留在 git 中【需你决策】
+## R67 · 大文件留在 git 中【已决策，无需改动】
 
 **证据**
 
@@ -153,32 +154,37 @@ R51 已设置 description 与 topics，homepage 字段仍为空。指向文档�
 约 2.8 MB，`integrations/nexent/v2.5.0/patches/0003-*.patch` 约 2.0 MB（内含
 vendored tarball），`integrations/nexent` 合计 2.3 MB。
 
-**影响**
+**决策（2026-09-03，用户）**
 
-每次 clone 都会拉取这些二进制，且它们会随每次重建产生新的 blob，历史只增不减。
-不影响功能，属于长期维护成本。
+维持现状，不迁 GitHub Releases 也不启用 Git LFS。当前体量可接受，而
+`SHA256SUMS` 与 R54 的产物校验都依赖文件在库内，外置会让校验链路变复杂。
+若后续单个资产超过约 10 MB 或 `integrations/` 总量显著增长，再重新评估。
 
-**处理（需先决策）**
-
-三种口径：保持现状；把 MP4 移到 GitHub Releases 并在文档中引用；或对二进制启用
-Git LFS。R53 会重建补丁 0003 的 tarball，届时会再产生一份新 blob，建议在
-R53 之前定下口径。
-
-**依赖**：R53 之前。
-
-## R68 · 文档语言策略【需你决策】
+## R68 · 文档语言：中英双语【已决策口径，待执行】
 
 `README.md`、`CONTRIBUTING.md`、`NOTICE.md`、`LICENSE` 等对外文件是英文，而
-`docs/event/` 下的需求、架构、规格、验证、决策、清单全部是中文。对外部贡献者
-而言，规则文档不可读等于无法按 `CONTRIBUTING.md` 的要求参与。
+`docs/event/` 下的需求、架构、规格、验证、决策、清单全部是中文。外部贡献者
+读不了规则文档，就无法按 `CONTRIBUTING.md` 的要求参与。
 
-**处理（需先决策）**
+**决策（2026-09-03，用户）**
 
-三种口径：维持中文并在 README 说明这是维护者工作文档；关键文档
-（requirements、architecture、specification）提供英文版；或整体切换英文。
-不建议机器翻译后无人校对。
+中英双语，每份文档两个副本，采用 `<name>.md` / `<name>.zh.md` 约定——这正是
+保留的上游 DSH 包已在用的写法（`README.md` / `README.zh.md`）。
 
-**依赖**：无。
+**执行前需先定三件事，并写进 `AGENTS.md`**
+
+1. **哪一份为准。** 建议英文为规范版、中文为翻译版。双语最常见的失败模式是
+   两份各自演进，最后谁也不敢信；必须有一份是唯一事实来源。
+2. **覆盖范围。** 建议只覆盖五份规则文档：`requirements`、`architecture`、
+   `specification`、`testing`、`decisions`。`tasks.md` 与 `tasks/` 下的任务书
+   改动极频繁，双语会让每次记录成本翻倍，建议保持单语并在 README 说明。
+3. **配对不失效。** 新增或修改文档时两份必须在同一提交内落地；在
+   `verify:public-identity` 或独立脚本中断言配对存在、无孤儿、无多余。
+
+**实施顺序**
+
+先改 `AGENTS.md` 固定上述三条规则，再逐份翻译并配对提交，最后接入校验。
+不要机器翻译后无人校对——规则文档翻译错会直接导致实现走偏。
 
 ## 验收
 
@@ -187,13 +193,14 @@ npm run verify
 ```
 
 R60、R64、R65 完成后 `verify:public-identity` 应覆盖新断言；R61 完成后同一
-命令应在 GitHub Actions 上通过；R67、R68 需你先给出口径。
+命令应在 GitHub Actions 上通过；R68 完成后应能断言双语配对完整。R67 已决策
+无需改动。
 
 ## 执行顺序
 
 1. R60 → R62 → R63 → R66：法律与社区健康文件，互不依赖。
 2. R64 → R65：发布元数据与脚本一致性，依赖 R52。
 3. R61：CI 与模板，改动面独立但需要在 GitHub 上观察首次运行。
-4. R67、R68：等你给口径。
+4. R68：先在 `AGENTS.md` 固定三条规则，再翻译、配对、接校验。R67 无需改动。
 
 每步独立绿色、独立提交、立即推送（`AGENTS.md`）。
