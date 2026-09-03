@@ -2,6 +2,24 @@
   "name": "@runfold/trajectory-ui",
   "version": "0.1.0",
   "author": "Heiki Scott",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/perix-ai/runfold.git",
+    "directory": "packages/event/typescript/ui/trajectory"
+  },
+  "homepage": "https://github.com/perix-ai/runfold#readme",
+  "bugs": {
+    "url": "https://github.com/perix-ai/runfold/issues"
+  },
+  "keywords": [
+    "agent",
+    "trajectory",
+    "trajectory-ui",
+    "react"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./lib/index.js",
   "types": "./index.d.ts",

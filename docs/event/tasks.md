@@ -899,10 +899,12 @@
 维护"的缺口，逐条证据见
 [`tasks/R52-R59-release-governance.md`](tasks/R52-R59-release-governance.md)。
 
-- [ ] **R52** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/{sdk,ui/trajectory}/package.json`、`packages/event/python/pyproject.toml`、`scripts/verify-public-identity.mjs`
+ - [x] **R52** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/{sdk,ui/trajectory}/package.json`、`packages/event/python/pyproject.toml`、`scripts/verify-public-identity.mjs`
   - **问题**：两个 npm 包缺 `repository`、`homepage`、`bugs`、`keywords`、`publishConfig`；Python 缺 `[project.urls]`。scoped 包无 `publishConfig.access: "public"` 时 `npm publish` 会失败；无回源链接与 `OPEN_SOURCE_POLICY.md` 的可追溯要求不一致。
   - **处理**：补齐三个 manifest 的元数据，并在身份校验脚本中加断言防回退。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-03）：补齐两个 npm 包的仓库、主页、问题追踪、关键词与公开发布配置；补齐 Python 包的项目链接；身份校验增加元数据断言及合法回源链接白名单。
+  - **验证**：`npm run verify` 主体构建、身份校验、626/626 上游测试及 Python 测试通过；`npm run test:package` 通过；两个 npm 包 `npm pack --dry-run` 与 Python `uv build --wheel` 通过；`git diff --check` 通过。
 
 - [ ] **R53** · 难度 中 · 风险 中 · 位置 `integrations/nexent/v2.5.0/`
   - **问题**：manifest 记录 vendored tarball 来自 `2249c5f`，其后 `ba50409`、`0a420bd` 改了两个发布包的 `package.json`、`LICENSE`、`NOTICE.md` 与第三方声明生成。补丁 0003 中 Nexent 实际安装的 tgz 仍带旧版权行（缺 `Copyright (c) 2026 Heiki Scott` 一行），与 `OPEN_SOURCE_POLICY.md` 分发要求第 1、3 条冲突。

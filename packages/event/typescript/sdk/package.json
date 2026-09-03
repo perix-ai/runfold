@@ -3,6 +3,24 @@
   "version": "0.1.0",
   "description": "Runfold TypeScript Event SDK extracted from DeepSeek Harness",
   "author": "Heiki Scott",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/perix-ai/runfold.git",
+    "directory": "packages/event/typescript/sdk"
+  },
+  "homepage": "https://github.com/perix-ai/runfold#readme",
+  "bugs": {
+    "url": "https://github.com/perix-ai/runfold/issues"
+  },
+  "keywords": [
+    "agent",
+    "durable-execution",
+    "event-sourcing",
+    "trajectory"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./lib/index.js",
   "types": "./lib/types/sdk/src/index.d.ts",

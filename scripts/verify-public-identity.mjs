@@ -11,6 +11,9 @@ const legacyWord = ['per', 'ix'].join('')
 const legacyLower = legacyWord.toLowerCase()
 const projectMaintainer = `${legacyWord[0].toUpperCase()}${legacyWord.slice(1)}.ai`
 const copyrightHolder = 'Heiki Scott'
+const publicRepository = 'https://github.com/' + legacyLower + '-ai/runfold'
+const publicHomepage = publicRepository + '#readme'
+const publicIssues = publicRepository + '/issues'
 const legacyTechnicalTokens = [
   `@${legacyLower}/`,
   `${legacyLower}_event`,
@@ -25,6 +28,11 @@ const plainIdentityDocuments = new Set([
   'README.md',
   'docs/event/decisions.md',
   'packages/event/python/README.md',
+])
+const publicMetadataDocuments = new Set([
+  'packages/event/python/pyproject.toml',
+  'packages/event/typescript/sdk/package.json',
+  'packages/event/typescript/ui/trajectory/package.json',
 ])
 const textExtensions = new Set([
   '.css', '.html', '.js', '.jsx', '.json', '.lock', '.md', '.mjs', '.patch',
@@ -68,6 +76,13 @@ function isAllowedReference(path, line) {
   const value = line.toLowerCase()
   if (isLegalNotice(path)) return true
   if (plainIdentityDocuments.has(path)) return true
+  if (publicMetadataDocuments.has(path) && value.includes('github.com/perix-ai/runfold')) {
+    return true
+  }
+  if (path === 'scripts/verify-public-identity.mjs'
+    && value.includes('github.com/perix-ai/runfold')) {
+    return true
+  }
   if (path === 'tests/event/cross-language/fixtures/nexent-r33/README.md') {
     return value.includes(`${legacyLower}-ai/open-source/agent_platform/nexent`)
   }
@@ -116,12 +131,40 @@ assert.equal(readJson('package.json').author, copyrightHolder)
 const eventManifest = readJson('packages/event/typescript/sdk/package.json')
 assert.equal(eventManifest.name, '@runfold/event')
 assert.equal(eventManifest.author, copyrightHolder)
+assert.deepEqual(eventManifest.repository, {
+  type: 'git',
+  url: 'https://github.com/perix-ai/runfold.git',
+  directory: 'packages/event/typescript/sdk',
+})
+assert.equal(eventManifest.homepage, publicHomepage)
+assert.equal(eventManifest.bugs.url, publicIssues)
+assert.deepEqual(eventManifest.keywords, [
+  'agent',
+  'durable-execution',
+  'event-sourcing',
+  'trajectory',
+])
+assert.deepEqual(eventManifest.publishConfig, { access: 'public' })
 const trajectoryManifest = readJson('packages/event/typescript/ui/trajectory/package.json')
 assert.equal(
   trajectoryManifest.name,
   '@runfold/trajectory-ui',
 )
 assert.equal(trajectoryManifest.author, copyrightHolder)
+assert.deepEqual(trajectoryManifest.repository, {
+  type: 'git',
+  url: 'https://github.com/perix-ai/runfold.git',
+  directory: 'packages/event/typescript/ui/trajectory',
+})
+assert.equal(trajectoryManifest.homepage, publicHomepage)
+assert.equal(trajectoryManifest.bugs.url, publicIssues)
+assert.deepEqual(trajectoryManifest.keywords, [
+  'agent',
+  'trajectory',
+  'trajectory-ui',
+  'react',
+])
+assert.deepEqual(trajectoryManifest.publishConfig, { access: 'public' })
 assert.equal(
   readJson('apps/event/typescript/trajectory-demo/package.json').name,
   '@runfold/trajectory-demo',
@@ -141,6 +184,10 @@ const pythonManifest = readFileSync(
 )
 assert.match(pythonManifest, /^name = "runfold-event"$/m)
 assert.match(pythonManifest, /^authors = \[{ name = "Heiki Scott" }]$/m)
+assert.match(pythonManifest, /^\[project\.urls\]$/m)
+assert.match(pythonManifest, new RegExp('^Homepage = "' + publicHomepage + '"$', 'm'))
+assert.match(pythonManifest, new RegExp('^Repository = "' + publicRepository + '"$', 'm'))
+assert.match(pythonManifest, new RegExp('^Issues = "' + publicIssues + '"$', 'm'))
 assert.ok(existsSync(resolve(repository, 'packages/event/python/src/runfold/event/__init__.py')))
 assert.ok(!existsSync(resolve(
   repository,
