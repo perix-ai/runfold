@@ -12,6 +12,7 @@
 | [`decisions.md`](decisions.md) | 决策记录 | 关键取舍的背景、决定与后果 |
 | [`tasks.md`](tasks.md) | 计划与进度 | 做到哪了，还剩什么，按什么顺序做 |
 | [`tasks/`](tasks/) | 任务书 | 交给他人或工具执行的自包含任务，文件名对应清单编号 |
+| [`demos/nexent/`](demos/nexent/) | 可播放验收 | Nexent 完整轨迹、冷恢复与 Fork 的 65 秒 UI Demo |
 
 建议阅读顺序：`requirements.md` → `architecture.md` → `specification.md` →
 `tasks.md`。
