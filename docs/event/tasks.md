@@ -934,6 +934,10 @@
   - **处理**：补一行注释说明原因。
   - **依赖**：无。
 
+- [ ] **R59** · 难度 易 · 风险 中 · 位置 npm `@runfold` scope、PyPI `runfold-event`
+  - **问题**：2026-09-03 实测，`@runfold/event`、`@runfold/trajectory-ui`、npm `runfold` 组织、PyPI `runfold-event` 与 `runfold` 全部未被占用。仓库已按这些名字准备发布元数据（R52），但名字本身尚未注册，首次发布前存在被抢注的风险。GitHub 组织 `runfold` 同样空闲，`perix-ai` 已存在。
+  - **处理**：在首次发布前注册 npm `@runfold` scope 与 PyPI `runfold-event`（可一并占位 `runfold`）。是否另建 GitHub 组织 `runfold` 属于身份决策，需你确认后再执行。注册结果记入本条结果栏。
+  - **依赖**：R52。
 
 ## 执行顺序
 
@@ -955,7 +959,6 @@
 | 12 | R35 | 显式构建并从独立 wheel 安装 Python 空白消费者 | R34 |
 | 13 | R33 | Nexent 真实消费者接入与需求 A5 验收 | R25–R32、R34–R35 |
 | 14 | R36 | 上游测试文件的 DSH import 改写与别名清零（见 `tasks/R36-test-imports.md`） | 批次 9 |
-| 15 | R52, R56, R57, R58 → R53 → R54；R55 待条款确认 | 发布元数据、产物时效与治理缺口（见 `tasks/R52-R58-release-governance.md`） | R36–R51 |
 | 15 | R37 | Nexent 聊天页嵌入独立 Trajectory UI，并接通读取、resume、fork（见 `tasks/R37-nexent-trajectory-ui.md`） | R33 |
 | 16 | R38 | Nexent 20 Turn 长轨迹冷恢复、fork 与详情面板全景验收（见 `tasks/R38-nexent-long-trajectory.md`） | R37 |
 | 17 | R39 | Nexent 长轨迹、冷恢复、详情按钮与 fork 可播放 Demo（见 `tasks/R39-nexent-trajectory-demo.md`） | R38 |
@@ -971,6 +974,7 @@
 | 27 | R49 | 全量验证后重命名 GitHub 仓库和本地远端 | R48 |
 | 28 | R50 | 明确个人版权归属、开源分发与第三方 bundle notices | R48、R49 |
 | 29 | R51 | 同步 GitHub About 并验证外部贡献入口 | R49、R50 |
+| 30 | R52, R56, R57, R58 → R53 → R54；R59 在首次发布前；R55 待条款确认 | 发布元数据、产物时效与治理缺口（见 `tasks/R52-R58-release-governance.md`） | R36–R51 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
