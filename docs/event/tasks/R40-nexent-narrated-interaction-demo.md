@@ -1,7 +1,7 @@
 # 任务：Nexent 有声交互 Demo 与 DSH 控件一致性
 
 > 对应清单：[`../tasks.md`](../tasks.md) R40。
-> 执行者：Codex。状态：进行中（2026-09-02，本地实验）。
+> 执行者：Codex。状态：已完成（2026-09-02，本地实验）。
 
 ## 背景
 
@@ -67,4 +67,45 @@ DSH `EventTrajectory` 源码、布局和内部交互均不得修改；Nexent 外
 
 ## 完成记录
 
-方案已确认，等待实现与验证。
+### Nexent 本地实现
+
+- 在聊天助手消息的 DSH 对应位置增加快捷 Fork 图标。点击时读取完整 Event
+  轨迹，以该消息对应的完成 Turn 解析稳定 `turn/end` seq，再调用既有 Fork API。
+- 在轨迹宿主栏增加完成 Turn / Event 下拉框；默认选择最新边界，也可精确选择
+  任一完成 Turn。选择器和 Fork 按钮均位于 `EventTrajectory` 外部。
+- 新增稳定边界枚举与按 Turn 查询函数，以及完成/中断 Turn 的单元测试和中英文
+  文案。DSH `EventTrajectory` 源码、样式和内部交互没有修改。
+- 以上改动保存在 Nexent 本地实验分支 `codex/event-trajectory-v2.5.0` 的 commit
+  `f10c9b5`（`feat(event): add dual Nexent fork controls`）；该仓库没有配置 remote，
+  未推送。
+
+### 真实 UI 操作验证
+
+在 1440×900 Nexent 产品页、真实 Event fixture 与确定性 HTTP 验收桩上完成：
+
+1. 聊天页 `chat-fork-turn-20` 可见且可用；实际点击后从父 conversation `3901`
+   进入子 conversation `3902`，子会话显示 `fork-21` 独立续写。
+2. 轨迹页下拉框实际选择“第 20 轮 · Event 188”，再点击“分叉”；同样进入子
+   conversation `3902`，轨迹页显示 `parentSession=nexent-r39-parent`、继承事件
+   `189` 和 `fork-21`。验收桩会拒绝任何不等于 `188` 的 Fork boundary，因此
+   两次成功导航同时验证了入口到 Event 边界的映射。
+3. 把父轨迹切回进程 A 的 10 Turn 状态，再切换为进程 B 的恢复结果并点击页面
+   “刷新”；同一 `nexent-r39-parent` 显示 21 Turn 与 `restored-21`。恢复发生在
+   后端 SessionStore，页面按钮只重新读取 Event。
+4. 实际点击 `add` 子工具 Event 后，右侧 DSH 详情面板打开，概述、参数、结果、
+   Schema 与计时页签均保留；Schema 内容可见。
+
+### 代码与媒体门禁
+
+- Nexent：`pnpm test` 27/27；`pnpm exec tsc --noEmit --incremental false`；
+  `pnpm build`；修改文件 Prettier；`git diff --check`，全部通过。
+- 新 Demo：普通话旁白、同步字幕、移动鼠标、选择变化、点击波纹、导航前后状态
+  和 DSH Schema 面板均可见。指示层为后期动画，真实按钮点击另由上述浏览器
+  验证锁定，README 已明确说明二者边界。
+- 媒体完整解码通过；H.264 High / yuv420p、1440×900、15 fps，AAC-LC 48 kHz
+  单声道，时长 `00:01:40.63`；平均音量 `-15.8 dB`、峰值 `-1.4 dB`，无削波。
+  六个章节和九个关键状态帧完成视觉复核。
+- 视频 SHA-256：
+  `a1340fb17b620f451e126e3246ee9f9fb75864bee1a70af161131490eeb98c6c`；
+  封面 SHA-256：
+  `046a6bded8dcdeb5147635c93358662c15387fd843189aacc5377c02d96c09c6`。

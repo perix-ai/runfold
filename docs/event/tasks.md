@@ -4,9 +4,9 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R39 与第 7 节总验收全部完成；R40 已确认同时
-> 提供 DSH 消息级快捷 Fork 与 Nexent 轨迹稳定边界精细 Fork，正在实现有声交互
-> Demo；Resume 保持自动宿主语义。
+> 总体状态（2026-09-02）：R01–R40 与第 7 节总验收全部完成。R40 同时提供
+> DSH 消息级快捷 Fork 与 Nexent 轨迹稳定边界精细 Fork，并提交有声交互 Demo；
+> Resume 保持自动宿主语义。
 > `npm run verify`
 > 全绿，SDK、UI、保留测试和构建配置均不依赖任何 DSH 包名解析。R33 已在与官方 tag
 > 逐文件一致的 Nexent v2.5.0 本地快照上完成真实进程、wheel 和轨迹 UI 验收；
@@ -618,7 +618,7 @@
     本地链接、`git diff --check`、204/10/139 上游身份门禁均通过。R39 未修改
     Event、DSH UI 或 Nexent 实现。
 
-- [ ] **R40** · 难度 中 · 风险 中 · 位置 Nexent 本地实验分支、
+- [x] **R40** · 难度 中 · 风险 中 · 位置 Nexent 本地实验分支、
   `docs/event/demos/nexent/`
   - **问题**：R39 无声音，关键动作以操作后的状态帧表达；同时 Nexent 顶部
     “刷新 / 分叉”属于宿主扩展，而 DSH 的 Fork 位于聊天消息旁、Resume 是自动
@@ -628,6 +628,14 @@
     采用 DSH 原行为还是 Nexent 显式控制，再录制带中文旁白、连续选中/点击动作
     和真实 restore/resume/fork 结果的新版 Demo。
   - **依赖**：R39；控件语义已于 2026-09-02 确认。
+  - **结果**：已完成（2026-09-02）。Nexent 本地 commit `f10c9b5` 增加聊天消息
+    快捷 Fork 和轨迹 Turn/Event 精确 Fork；DSH `EventTrajectory` 内部未改。
+    新版 101 秒 Demo 加入普通话旁白、同步字幕、选择/指向/点击动画，并显示两条
+    真实 UI 路径的子会话结果。Nexent 无 remote，未推送。
+  - **验证**：Nexent 27/27、TypeScript、production build 与格式门禁通过；真实
+    浏览器分别从聊天第 20 轮和轨迹 `Event 188` 点击进入子 conversation `3902`，
+    同时验证 10→21 Turn 冷恢复和右侧 Schema。视频完整解码，AAC 峰值
+    `-1.4 dB`，九个关键状态帧通过视觉复核；哈希与完整证据见 R40 任务书。
 
 ## 7. 总体验收
 
