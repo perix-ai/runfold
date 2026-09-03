@@ -1,18 +1,18 @@
-# Perix Runtime Data
+# Runfold
 
 **The agent data plane for durable agent execution.**
 
-`perix-runtime-data` holds the durable runtime-data facilities for Perix
-agents. The first and currently only facility is **Event**: the append-only
-execution trajectory of an agent Session, its persistence, restore/resume/fork
-behavior, and the Trajectory UI that projects it. It is cut directly from
-DeepSeek Harness rather than designed from scratch. This file is a map;
-scope, design, and rules live under `docs/event/`.
+Runfold is an agent runtime data platform maintained by Perix.ai. Its first
+subsystem is **Event**: the append-only execution trajectory of an agent
+Session, its persistence, restore/resume/fork behavior, and the Trajectory UI
+that projects it. Event is cut directly from DeepSeek Harness rather than
+designed from scratch. This file is a map; scope, design, and rules live under
+`docs/event/`.
 
 ## Repository layout
 
 ```text
-perix-runtime-data/
+runfold/
 ├── apps/
 │   └── event/
 │       └── typescript/
@@ -21,12 +21,12 @@ perix-runtime-data/
 │   └── event/
 │       ├── typescript/
 │       │   ├── packages/           # DSH source retained in upstream layout
-│       │   ├── sdk/                # Publishable @perix/event-sdk boundary
-│       │   ├── ui/trajectory/      # Publishable @perix/event-ui boundary
+│       │   ├── sdk/                # Publishable @runfold/event boundary
+│       │   ├── ui/trajectory/      # Publishable @runfold/trajectory-ui boundary
 │       │   └── tests/              # TypeScript Event tests
 │       └── python/
-│           ├── src/perix_event/    # Native implementation and public API
-│           ├── pyproject.toml      # perix-event-sdk distribution
+│           ├── src/runfold/event/  # Native implementation and public API
+│           ├── pyproject.toml      # runfold-event distribution
 │           └── tests/              # Python core/persistence/package tests
 ├── tests/
 │   └── event/cross-language/       # Bidirectional implementation tests
@@ -76,7 +76,15 @@ This repository does **not** own:
 - product agent UI or control plane (the repository includes only a standalone
   host for DSH Trajectory)
 
-Those belong to separate Perix planes.
+Those belong to separate runtime or application concerns.
+
+## Licensing and attribution
+
+Original Runfold code and modifications are copyright Perix.ai. The Event
+subsystem also contains code derived from DeepSeek Harness under the MIT
+License; its copyright, pinned source, and unmodified audit snapshot are
+preserved. See [`NOTICE.md`](NOTICE.md), [`LICENSE`](LICENSE), and
+[`third_party/deepseek-harness/`](third_party/deepseek-harness/).
 
 ## Maintenance
 
@@ -86,11 +94,12 @@ after each verified commit instead of being accumulated into one large batch.
 
 ## Status
 
-The Event trajectory facility has completed its production acceptance and all
-recorded tasks through R44. The current full gate verifies 204 retained upstream
-files through 139 declared specifier mappings, runs 1005 behavior tests, and
-installs both language packages into blank consumers. R33 also proves the Python
-package in Nexent v2.5.0's real process and passes the resulting parent/fork
+The Event trajectory subsystem has completed its production acceptance and all
+recorded behavioral tasks through R44. The current full gate verifies 204
+retained upstream files through 139 declared specifier mappings, runs 1005
+behavior tests, and installs both language packages into blank consumers.
+R33 also proves the Python package in Nexent v2.5.0's real process and passes
+the resulting parent/fork
 trajectory through the TypeScript public restore API and retained UI. The
 Nexent product integration now additionally passes a 21-Turn cross-process
 restore/fork test and renders the retained DSH detail panel, including the real

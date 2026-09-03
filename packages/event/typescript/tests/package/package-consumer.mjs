@@ -41,13 +41,13 @@ async function assertExportFiles(packageDirectory) {
   }
 }
 
-async function generatedTextFiles(directory) {
+async function publishedTextFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true })
   const files = []
   for (const entry of entries) {
     const path = join(directory, entry.name)
-    if (entry.isDirectory()) files.push(...await generatedTextFiles(path))
-    else if (entry.name.endsWith('.js') || entry.name.endsWith('.d.ts')) files.push(path)
+    if (entry.isDirectory()) files.push(...await publishedTextFiles(path))
+    else if (/\.(?:css|d\.ts|js|json|md)$/.test(entry.name) || entry.name === 'LICENSE') files.push(path)
   }
   return files
 }
@@ -147,6 +147,11 @@ await context.dispose()
     join(consumer, 'node_modules/@runfold/trajectory-ui/package.json'),
     'utf8',
   ))
+  const maintainer = ['Per', 'ix.ai'].join('')
+  assert.equal(installedSdk.name, '@runfold/event')
+  assert.equal(installedUi.name, '@runfold/trajectory-ui')
+  assert.equal(installedSdk.author, maintainer)
+  assert.equal(installedUi.author, maintainer)
   for (const [label, manifest] of [['SDK', installedSdk], ['UI', installedUi]]) {
     for (const field of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
       for (const name of Object.keys(manifest[field] ?? {})) {
@@ -154,12 +159,20 @@ await context.dispose()
       }
     }
   }
+  const legacyScope = ['@', 'per', 'ix', '/'].join('')
+  const legacyPythonPackage = ['per', 'ix', '_event'].join('')
+  const legacyDistribution = ['per', 'ix', '-event'].join('')
   for (const packageName of ['event', 'trajectory-ui']) {
-    for (const file of await generatedTextFiles(
-      join(consumer, `node_modules/@runfold/${packageName}/lib`),
+    for (const file of await publishedTextFiles(
+      join(consumer, `node_modules/@runfold/${packageName}`),
     )) {
       const content = await readFile(file, 'utf8')
-      assert.equal(content.includes('@deepseek-ai'), false, `DSH namespace leaked into ${file}`)
+      assert.equal(content.includes(legacyScope), false, `legacy npm scope leaked into ${file}`)
+      assert.equal(content.includes(legacyPythonPackage), false, `legacy Python package leaked into ${file}`)
+      assert.equal(content.includes(legacyDistribution), false, `legacy distribution leaked into ${file}`)
+      if (file.endsWith('.js') || file.endsWith('.d.ts')) {
+        assert.equal(content.includes('@deepseek-ai'), false, `DSH namespace leaked into ${file}`)
+      }
     }
   }
   const uiDeclaration = await readFile(

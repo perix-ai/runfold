@@ -51,7 +51,7 @@ section 3) replaces with local code:
 Consulted while localizing the Trajectory UI's host-facing types and Event-map
 augmentations. The required contracts are now defined by local source or
 mapped to the retained directories above; none of these packages is installed
-from the npm registry or bundled into `@perix/event-ui`:
+from the npm registry or bundled into `@runfold/trajectory-ui`:
 
 | Upstream directory | Package |
 | --- | --- |

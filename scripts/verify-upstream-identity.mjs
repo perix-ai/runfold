@@ -316,7 +316,7 @@ const SPECIFIER_MAPPINGS = new Map([
  * changes"). Adding an entry here without that record is a review failure.
  */
 const ALLOWED_DIFFERENCES = new Set([
-  // Perix host seams: Cordis Service/Context, scope carrier, Typert lookup, and
+  // Runfold host seams: Cordis Service/Context, scope carrier, Typert lookup, and
   // Schemastery config replaced by EventHost (docs/event/tasks.md R17-R19)
   'core/session/src/index.ts',
   'core/session/src/types.ts',

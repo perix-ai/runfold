@@ -15,15 +15,15 @@
           │                                │
   TypeScript 实现                     Python 实现
   packages/event/typescript/          packages/event/python/
-  ├─ packages/   DSH 保留源码          src/perix_event/
+  ├─ packages/   DSH 保留源码          src/runfold/event/
   │   core/session                     ├─ session.py / surface.py / repair.py
   │   session/session-persistence      ├─ persistence_jsonl.py / format.py
   │   session/session-persistence-jsonl├─ chunk_rows.py / messages.py
   │   client/*   Trajectory UI 闭包     └─ ...
-  ├─ runtime/    Perix 自有宿主与工具
+  ├─ runtime/    Runfold 自有宿主与工具
   │   host.ts (EventHost) / create.ts / messages.ts / values.ts / brand.ts
-  ├─ sdk/        @perix/event-sdk 发布边界
-  └─ ui/trajectory/  @perix/event-ui 发布边界
+  ├─ sdk/        @runfold/event 发布边界
+  └─ ui/trajectory/  @runfold/trajectory-ui 发布边界
           │                                │
           └──────── tests/event/cross-language ────────┘
 ```
@@ -62,7 +62,7 @@
 | --- | --- | --- |
 | `third_party/deepseek-harness/upstream/` | 固定版本的 DSH 原始审计快照 | 不允许；保持上游原样 |
 | `packages/event/typescript/packages/` | 从 DSH 裁剪出的源码，保持上游相对路径 | 只允许独立化所需的宿主接缝改动，且由 `scripts/verify-upstream-identity.mjs` 逐文件登记 |
-| `packages/event/typescript/{runtime,sdk,ui,test-support}/` | Perix 自有代码 | 自由，但每个文件说明替代了什么、为什么 |
+| `packages/event/typescript/{runtime,sdk,ui,test-support}/` | Runfold 自有代码 | 自由，但每个文件说明替代了什么、为什么 |
 | `packages/event/python/` | 原生 Python 实现 | 按共享契约实现，不翻译 UI |
 | `tests/event/` | 跨语言集成与互操作测试 | 不归属于任一单语言实现 |
 | `schemas/`、`conformance/` | 跨语言、与实现无关的数据结构与行为夹具 | 版本化演进 |
@@ -70,7 +70,7 @@
 `upstream/` 是为这次抽离保留的范围化快照，不是 DSH 整仓镜像；纳入快照的
 每个上游文件都必须与固定 commit 逐字节一致。若后续发现依赖闭包缺少上游
 文件，应从同一固定版本补入，而不是在 `third_party` 中改写。Python 使用
-标准 `pyproject.toml` + `src/perix_event/` 布局，不增加没有独立职责的目录。
+标准 `pyproject.toml` + `src/runfold/event/` 布局，不增加没有独立职责的目录。
 
 ### 3.3 DSH 依赖处理规则
 

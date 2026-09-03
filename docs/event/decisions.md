@@ -45,7 +45,7 @@
 ## D04 · Trajectory UI 的依赖闭包先原样从注册表打包（已被 D05 取代）
 
 - 日期：2026-09-01
-- 背景：`@perix/event-ui` 运行时真正用到的 DSH 包只有 `dsh-client-store` 和
+- 背景：`@runfold/trajectory-ui` 运行时真正用到的 DSH 包只有 `dsh-client-store` 和
   `dsh-client-ui-primitives` 的一个子集，其余二十余个包只提供类型；构建时
   它们被打进 bundle，消费者不安装任何 DSH 包。
 - 决定：R24 评估阶段维持"原样打包"，不裁 shiki 语法；仓库开发时用根
@@ -65,7 +65,7 @@
   去掉。
 - 决定：立项 R25–R29，任务书 [`tasks/R25-R29-dsh-free.md`](tasks/R25-R29-dsh-free.md)。
   关键设计是把一致性脚本改为"对上游内容应用显式映射表后再逐字节比对"，
-  使 import 改写后上游一致性仍可机器验证；`@perix/event-sdk/runtime` 自引用
+  使 import 改写后上游一致性仍可机器验证；`@runfold/event/runtime` 自引用
   保留，因为 `declare module` 用相对 `.ts` 路径无法进入发布的 d.ts。
 - 后果：R25–R29 完成后，生产实现 import、参与安装的 manifests、lockfile、
   `npm ls --all` 和 SDK/UI 发布产物均无 DSH registry namespace；R36 又把保留
@@ -75,3 +75,16 @@
   139 个声明映射；完整验证共通过 1005 个行为测试及 TypeScript/Python 空白
   消费者安装测试。
 - 相关：tasks.md 3.2 节、R36。
+
+## D06 · 项目身份使用 Runfold，维护与原创权利归属 Perix.ai
+
+- 日期：2026-09-03
+- 背景：项目将作为独立的 agent runtime data platform 供其他团队集成。把维护
+  组织名称写进包、import、Schema 和下游 UI，会无必要地进入使用方代码；完全
+  隐去维护者与原创权利归属又会损失清晰的版权边界。
+- 决定：独立项目名为 Runfold；TypeScript、Python、Schema 与 UI 的公共技术
+  身份统一使用 Runfold。Perix.ai 只作为维护者及原创 Runfold 代码与修改的权利
+  归属出现。DeepSeek Harness 的固定来源、原版权和 MIT 许可继续完整保留。
+- 后果：0.1.0 尚未对外发布，因此执行干净迁移，不提供旧包名兼容别名。迁移前
+  的任务与验收记录保留原名作为历史事实，但不构成当前 API 文档。
+- 相关：tasks.md R45–R49。

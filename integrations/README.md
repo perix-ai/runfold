@@ -1,7 +1,7 @@
 # Integrations
 
 This directory contains versioned downstream integrations that show how an
-external product consumes Perix runtime-data facilities.
+external product consumes Runfold runtime-data facilities.
 
 An integration is neither the reusable implementation under `packages/` nor an
 unmodified upstream snapshot under `third_party/`. Each integration must name

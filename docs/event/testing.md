@@ -15,6 +15,7 @@
 | 层次 | 证明什么 | 位置 |
 | --- | --- | --- |
 | 上游一致性 | 保留源码除登记的宿主接缝外与固定 commit 逐字节一致 | `scripts/verify-upstream-identity.mjs`，`npm run verify` 首步 |
+| 公共项目身份 | 当前源码、配置、文档和 Nexent 补丁不重新引入旧技术命名；维护权利、历史来源和负向测试仅按文件白名单保留 | `scripts/verify-public-identity.mjs` |
 | 上游行为基线 | DSH 的 Event、持久化、Trajectory 回归测试在裁剪版上原样通过 | `packages/event/typescript/packages/**/tests`，经 `test-support/` 垫片运行 |
 | 宿主生命周期 | `EventHost` 对保留代码使用的 Cordis 生命周期子集等价，覆盖事件、effect、scope、释放和服务绑定 | `packages/event/typescript/tests/runtime/` |
 | 单语言实现 | TypeScript 与 Python 各自的单元、集成、持久化、异常输入测试 | `packages/event/<language>/tests/` |
@@ -43,7 +44,8 @@ Event 组件不具备的 shell 机制。
 当前完整门禁校验 204 个保留文件、10 个必要差异和 139 个声明映射，并运行
 1005 个行为测试（626 Event、182 UI runtime、94 Trajectory、11 EventHost、
 15 SDK、33 UI、36 Python、1 系统、7 跨语言），随后安装 TypeScript 与 Python
-空白消费者。
+空白消费者。构建后还会扫描 Runfold 公共身份，并由两个空白消费者检查发布包
+名称、内容及随包许可证。
 
 ```bash
 npm run verify

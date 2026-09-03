@@ -2,6 +2,8 @@
   "name": "runfold",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": "Perix.ai",
   "type": "module",
   "workspaces": [
     "apps/event/typescript/trajectory-demo",
@@ -11,6 +13,7 @@
   "scripts": {
     "build": "npm run build --workspace @runfold/event && npm run build --workspace @runfold/trajectory-ui && npm run build --workspace @runfold/trajectory-demo",
     "verify:upstream-identity": "node scripts/verify-upstream-identity.mjs",
+    "verify:public-identity": "node scripts/verify-public-identity.mjs",
     "test": "npm run test:upstream && npm run test:types && npm run test:runtime && npm run test:sdk && npm run test:ui && npm run test:python && npm run test:system && npm run test:conformance",
     "test:upstream": "npm run test:upstream:event && npm run test:upstream:ui-runtime && npm run test:upstream:trajectory",
     "test:upstream:event": "vitest run --config vitest.config.ts packages/event/typescript/packages/core/session/tests packages/event/typescript/packages/session/session-persistence/tests packages/event/typescript/packages/session/session-persistence-jsonl/tests",
@@ -25,7 +28,7 @@
     "test:package": "node packages/event/typescript/tests/package/package-consumer.mjs",
     "test:python": "python3 -m unittest discover -s packages/event/python/tests -t packages/event/python -v",
     "test:python:package": "python3 packages/event/python/tests/package_consumer.py",
-    "verify": "npm run verify:upstream-identity && npm run build && npm test && npm run test:package && npm run test:python:package",
+    "verify": "npm run verify:upstream-identity && npm run build && npm run verify:public-identity && npm test && npm run test:package && npm run test:python:package",
     "dev:event-ui": "npm run dev --workspace @runfold/trajectory-demo"
   },
   "engines": {

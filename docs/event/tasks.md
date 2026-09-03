@@ -17,9 +17,11 @@
 > 最终移除了保留测试中的 DSH
 > module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
 >
-> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**；R45–R47 已完成，
-> R48–R49 待执行。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
+> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**；R45–R48 已完成，
+> R49 待执行。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
 > 不改变 Event 数据模型、restore/resume/fork 行为、Trajectory 交互或 DSH 快照。
+> R01–R44 中出现的旧项目名、旧包名和本地 `perix-ai/...` 路径是迁移前的历史
+> 验收证据，不代表当前公共技术命名；当前名称以 R45 及后续条目为准。
 
 ## 任务生命周期
 
@@ -798,8 +800,8 @@
     `21e1d5a`/`f42f984`，重制前后音轨 PCM MD5 均为 `5a2108a`；跨语言 7/7、JSON
     解析和 diff 检查通过。
 
-- [ ] **R48** · 难度 中 · 风险 低 · 位置根 `README.md`、`docs/event/`、
-  `packages/event/**/README*`、LICENSE/NOTICE 与仓库维护脚本
+- [x] **R48** · 难度 中 · 风险 低 · 位置根 `README.md`、`docs/event/`、
+  `packages/event/**/README*`、LICENSE/NOTICE、根测试配置与仓库维护脚本
   - **问题**：文档仍把项目描述为 Perix Runtime Data，并在技术概念和历史记录中
     混用项目品牌、维护组织与上游来源。
   - **处理**：统一项目名为 Runfold，定位为 agent runtime data platform，Event
@@ -808,6 +810,17 @@
     历史任务结果允许保留当时事实，但必须与当前名称清楚区分。增加可执行扫描，防止
     公共产物和 Nexent 功能代码重新出现 `perix` 命名空间。
   - **依赖**：R45–R47。
+  - **结果**：已完成（2026-09-03）：根项目、当前 Event 文档、包说明和集成索引
+    统一使用 Runfold；新增 D06 明确项目技术身份与维护/权利归属是两个维度。
+    根仓库及三个发布包均携带 MIT LICENSE/NOTICE：原创 Runfold 代码与修改归
+    Perix.ai，DeepSeek Harness 原版权、固定来源和许可继续保留，未修改固定快照。
+    同时清除了根 Vitest 配置中 10 条已失效的旧 package alias。历史任务记录、
+    Nexent 本地来源路径和负向包测试保留原事实，并与当前 API 明确区分。
+  - **验证**：新增公共身份门禁扫描 351 个受控文本文件，只允许 24 行逐文件限定的
+    维护权利、来源或负向测试引用；TS 空白消费者扫描全部发布文本并验证包名、作者
+    与旧技术名零泄漏，Python wheel 验证同时携带 LICENSE/NOTICE。完整
+    `npm run verify` 通过 204 个保留文件、10 个必要差异、139 个映射、三个构建、
+    1005 个行为测试及两个隔离包消费者；`git diff --check` 通过。
 
 - [ ] **R49** · 难度 易 · 风险 中 · 位置 GitHub `perix-ai/perix-runtime-data`、
   本地 `origin`

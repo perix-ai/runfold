@@ -1,6 +1,6 @@
 # Nexent integrations
 
-These directories preserve Perix Event integration changes for exact Nexent
+These directories preserve Runfold Event integration changes for exact Nexent
 versions. They contain only downstream changes, not a copy or fork of Nexent.
 
 | Nexent baseline | Status | Integration |

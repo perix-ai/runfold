@@ -11,8 +11,8 @@
 
 DeepSeek Harness（DSH）内部有一套经过验证的基于 Event 的 agent 轨迹设施：
 append-only 的 Session 事件日志、JSONL 持久化、中断修复、restore/fork 语义
-和 Trajectory 可视化界面。Perix 需要同样的能力，但 Perix 的 agent 运行在
-自己的运行时里，主要使用方 Nexent 是 Python 进程。
+和 Trajectory 可视化界面。Runfold 要把同样的能力独立出来，供不同的 agent
+runtime 使用；首个真实使用方 Nexent 是 Python 进程。
 
 因此本项目的任务不是"参考 DSH 重新设计一套"，而是把 DSH 的 Event 设施
 原样裁剪出来，去掉它对 Harness 宿主的耦合，做成可独立发布、跨语言等价的
@@ -66,7 +66,7 @@ append-only 的 Session 事件日志、JSONL 持久化、中断修复、restore/
 - 基于 State 的另一套轨迹方案；
 - Python 版本的前端 UI；
 - 长期记忆、知识库、模型路由、技能与 MCP 注册、产品级控制面（属于其他
-  Perix plane）。
+  runtime 或应用层职责）。
 
 ## 5. 干系人与使用场景
 
@@ -81,9 +81,9 @@ schema 和 conformance 契约，因此其轨迹也能由现有 Trajectory UI 读
 
 ### 5.2 TypeScript 使用方
 
-通过 `@perix/event-sdk` 在进程内创建、追加、持久化、恢复和 fork Session；
-通过 `@perix/event-ui` 在任意 React 页面中渲染一段 Event 历史。两者都只依赖
-`@perix/*` 包与公开的第三方库。
+通过 `@runfold/event` 在进程内创建、追加、持久化、恢复和 fork Session；
+通过 `@runfold/trajectory-ui` 在任意 React 页面中渲染一段 Event 历史。UI
+只依赖 `@runfold/event` 与公开的第三方库。
 
 ## 6. 质量要求
 

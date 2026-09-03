@@ -65,6 +65,13 @@ def main() -> None:
                 f"wheel is missing Runfold namespace files: "
                 f"{sorted(required_members - members)!r}"
             )
+        for notice in ("LICENSE", "NOTICE.md"):
+            packaged = any(
+                member.endswith(f".dist-info/licenses/{notice}")
+                for member in members
+            )
+            if not packaged:
+                raise RuntimeError(f"wheel is missing packaged legal notice: {notice}")
         legacy_members = sorted(
             member for member in members if member.startswith("perix_event/")
         )

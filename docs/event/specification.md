@@ -98,7 +98,7 @@ TypeScript 通过 `createEventRuntime({ persistence })` 组合一个 `EventHost`
   Python 的每 Session `RLock` 各自负责。
 
 Python 3.14 使用标准库 `compression.zstd`；Python 3.10–3.13 通过
-`perix-event-sdk[zstd]` 使用 `zstandard`。两条路径写出同一种 checksummed
+`runfold-event[zstd]` 使用 `zstandard`。两条路径写出同一种 checksummed
 frame，不把压缩实现暴露进逻辑 API。
 
 ## Python 必要实现映射
@@ -108,7 +108,7 @@ Python 不是对 TypeScript 源码逐行翻译，也不是远程 SDK；它按相
 
 | DSH 行为来源 | Python 位置 | 必要理由 | 回归证据 |
 | --- | --- | --- | --- |
-| `core/session` | `perix_event/session.py`、`surface.py`、`repair.py`、`request_header.py` | 去除 Cordis、brand 和完整 LLM runtime，只保留 Event 行为 | Python core tests、共享 validation/repair cases |
+| `core/session` | `runfold/event/session.py`、`surface.py`、`repair.py`、`request_header.py` | 去除 Cordis、brand 和完整 LLM runtime，只保留 Event 行为 | Python core tests、共享 validation/repair cases |
 | `core/session/chunk-rows`、`seq-ranges` | `chunk_rows.py` | 保持同一 storage codec，供两种语言直接交换文件 | packed fixture 与双向 JSONL tests |
 | `session-persistence-jsonl` | `format.py`、`persistence_jsonl.py`、`_zstd.py` | Python 进程内原生 persistence；不引入 Node server | plain/Zstd/torn-tail/restart/package tests |
 | DSH JSON snapshot 与 message 小工具 | `_json.py`、`messages.py`、`types.py` | Event 只需要最小 JSON/message 形状，不能依赖整个 DSH runtime | invalid-input、message 与安装测试 |

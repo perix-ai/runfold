@@ -2,6 +2,7 @@
   "name": "@runfold/event",
   "version": "0.1.0",
   "description": "Runfold TypeScript Event SDK extracted from DeepSeek Harness",
+  "author": "Perix.ai",
   "type": "module",
   "main": "./lib/index.js",
   "types": "./lib/types/sdk/src/index.d.ts",
