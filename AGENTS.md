@@ -11,6 +11,14 @@ These rules apply to every automated change in this repository.
   tests under `tests/<domain>/`.
 - Keep language-neutral wire contracts under `schemas/<domain>/` and shared
   behavioral fixtures under `conformance/<domain>/`.
+- Put reusable repository verification scripts under `scripts/`; keep demo
+  synthesis sources under `scripts/event/demos/` alongside their reproducible
+  inputs and commands.
+- Put versioned downstream integration artifacts under `integrations/<name>/<version>/`,
+  including manifests, checksums, and ordered patch series; do not edit vendored
+  upstream snapshots to make an integration pass.
+- Put publishable demo outputs under `docs/<domain>/demos/` and acceptance
+  screenshots or other review evidence under `docs/<domain>/evidence/`.
 - Keep unmodified upstream source snapshots under `third_party/`. Never edit a
   pinned snapshot to make a local build pass.
 - Preserve the retained DSH directory layout inside

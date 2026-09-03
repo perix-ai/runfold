@@ -928,10 +928,12 @@
   - **结果**：已完成（2026-09-03）：根 Vitest 配置统一设置 20 秒测试超时，并在 TESTING.md 记录其针对持久化 fixture 与协调器用例的用途。
   - **验证**：`npm run test:upstream:event` 通过（17 个测试文件、626 个测试）；`git diff --check` 通过。
 
-- [ ] **R57** · 难度 易 · 风险 低 · 位置 `docs/event/README.md`、`AGENTS.md`
+- [x] **R57** · 难度 易 · 风险 低 · 位置 `docs/event/README.md`、`AGENTS.md`
   - **问题**：`docs/event/evidence/`（7 张验收截图）不在文档地图中；`AGENTS.md` 的布局规则未涵盖 `scripts/`、`integrations/`、`docs/<domain>/demos/`、`docs/<domain>/evidence/`；`scripts/` 同时放校验脚本与 demo 合成源码，职责不单一。
   - **处理**：补全地图与布局规则，并决定 demo 合成源码的归属目录。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-03）：文档地图登记 `evidence/`；布局规则覆盖验证脚本、下游集成产物、Demo 输出、验收证据，并固定 Demo 合成源码留在 `scripts/event/demos/`。
+  - **验证**：文档内部链接与目录存在性检查通过；`git diff --check` 通过。
 
 - [ ] **R58** · 难度 易 · 风险 低 · 位置 `scripts/verify-public-identity.mjs:10`
   - **问题**：`['per', 'ix'].join('')` 的拆写是必要的（脚本扫描包括自身在内的全部文本文件），但没有注释，读者易误判为混淆或笔误。
