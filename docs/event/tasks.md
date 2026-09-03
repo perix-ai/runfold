@@ -948,6 +948,58 @@
   - **处理**：在首次发布前注册 npm `@runfold` scope 与 PyPI `runfold-event`（可一并占位 PyPI `runfold`）。GitHub 组织按决策 D07 保持 `perix-ai`，不迁移也不新建。注册涉及账号凭据，由维护者本人执行；Codex 只准备发布清单与命令。
   - **依赖**：R52。
 
+## 10. 公开仓库的法律归属与开源就绪
+
+复核范围是"仓库已公开"这一新状态。已确认无问题：无密钥、凭据、`.env` 或
+个人绝对路径；`LICENSE`、`NOTICE.md`、`COPYRIGHT.md`、`CONTRIBUTING.md`、
+`OPEN_SOURCE_POLICY.md` 齐备，DeepSeek Harness 归属完整。下列缺口逐条证据见
+[`tasks/R60-R68-open-source-readiness.md`](tasks/R60-R68-open-source-readiness.md)。
+
+- [ ] **R60** · 难度 易 · 风险 高 · 位置 `NOTICE.md`、`integrations/nexent/`、`scripts/verify-public-identity.mjs`
+  - **问题**：`integrations/nexent/v2.5.0/patches/` 的 0001、0002、0005 三个补丁各含 600–1700 行 Nexent 源码的上下文与修改行。Nexent 是 MIT，版权为 `(c) 2025 Huawei Technologies Co., Ltd.`。`NOTICE.md`、`LICENSE`、`COPYRIGHT.md`、`OPEN_SOURCE_POLICY.md` 检索 `nexent`/`huawei` 均无结果。公开再分发 MIT 代码的实质片段却未携带其版权与许可声明。
+  - **处理**：`NOTICE.md` 增加 Nexent/Huawei 归属与"未提交上游、未获背书"的免责；`integrations/nexent/` 放置 Nexent MIT 许可证副本；身份校验增加与 DeepSeek 同级的断言。
+  - **依赖**：无；可与 R55 合并为一次 NOTICE 修订。
+
+- [ ] **R61** · 难度 中 · 风险 中 · 位置 新增 `.github/`
+  - **问题**：仓库已公开且 `CONTRIBUTING.md` 欢迎 PR，但无 `.github/` 目录：无 CI workflow、无 issue/PR 模板、无 CODEOWNERS。`npm run verify` 只在维护者本机跑过。R56 把测试超时提到 20 秒的理由是"共享 CI runner"，而 CI 并不存在。
+  - **处理**：新增 `verify.yml`（push/PR 上跑 `npm ci && npm run verify`，Node 22 + Python 3.11）、issue/PR 模板（要求填写对应 tasks.md 条目）、CODEOWNERS（覆盖 `third_party/`、`scripts/`、保留源码树）。
+  - **依赖**：无。
+
+- [ ] **R62** · 难度 易 · 风险 中 · 位置 新增 `SECURITY.md`、`CODE_OF_CONDUCT.md`
+  - **问题**：无私下安全披露渠道，安全问题只能公开提 issue；无行为准则。GitHub 社区标准清单两项均缺。
+  - **处理**：`SECURITY.md` 写明支持版本、私下报告方式与响应预期；`CODE_OF_CONDUCT.md` 采用 Contributor Covenant 2.1；两者从 `CONTRIBUTING.md` 链接。
+  - **依赖**：无。
+
+- [ ] **R63** · 难度 易 · 风险 低 · 位置 新增 `CHANGELOG.md`
+  - **问题**：即将发布 0.1.0 但无变更记录，使用方无法判断版本差异。
+  - **处理**：Keep a Changelog 格式，首条为 0.1.0，概括 Event 能力边界与已知限制。
+  - **依赖**：R59。
+
+- [ ] **R64** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/package.json`
+  - **问题**：`@runfold/event` 与 `runfold-event` 都有 `description`，只有 `@runfold/trajectory-ui` 没有；npm 包页面与搜索结果会留空。
+  - **处理**：补描述，并在身份校验中断言其存在且非空。
+  - **依赖**：R52。
+
+- [ ] **R65** · 难度 易 · 风险 低 · 位置 `scripts/verify-public-identity.mjs`
+  - **问题**：文件顶部用 `['per', 'ix'].join('')` 构造旧名以避免自检命中（R58 已注释说明），但第 80、84、137、157 行直接写了 `github.com/perix-ai/runfold` 字面量，并为脚本自身加了白名单分支。同一文件既隐藏又拼写同一个词，白名单豁免面也被扩大。
+  - **处理**：四处改用已有的 `publicRepository` 常量，随后删除脚本自身的白名单分支。
+  - **依赖**：R52、R58。
+
+- [ ] **R66** · 难度 易 · 风险 低 · 位置 GitHub About
+  - **问题**：R51 已设 description 与 topics，homepage 字段仍为空。
+  - **处理**：指向文档入口。
+  - **依赖**：无。
+
+- [ ] **R67** · 难度 易 · 风险 低 · 位置 `docs/event/demos/`、`integrations/nexent/`
+  - **问题**：已跟踪的最大文件是 2.8 MB 的 demo MP4 与 2.0 MB 的补丁 0003（内含 vendored tarball），`integrations/nexent` 合计 2.3 MB。每次 clone 都会拉取，且重建会不断产生新 blob。
+  - **处理**：三选一——保持现状、MP4 移到 GitHub Releases、或对二进制启用 Git LFS。**需你先给口径**，且建议在 R53 重建 tarball 之前定下。
+  - **依赖**：R53 之前。
+
+- [ ] **R68** · 难度 中 · 风险 低 · 位置 `docs/event/`
+  - **问题**：对外文件是英文，但 `docs/event/` 下的需求、架构、规格、验证、决策、清单全部是中文。外部贡献者读不了规则文档，就无法按 `CONTRIBUTING.md` 的要求参与。
+  - **处理**：三选一——维持中文并在 README 说明其为维护者工作文档、关键三份提供英文版、或整体切换英文。**需你先给口径。**
+  - **依赖**：无。
+
 ## 执行顺序
 
 按"容易改、风险小"优先，跨章节排列。
@@ -984,6 +1036,7 @@
 | 28 | R50 | 明确个人版权归属、开源分发与第三方 bundle notices | R48、R49 |
 | 29 | R51 | 同步 GitHub About 并验证外部贡献入口 | R49、R50 |
 | 30 | R52, R56, R57, R58 → R53 → R54；R59 在首次发布前；R55 待条款确认 | 发布元数据、产物时效与治理缺口（见 `tasks/R52-R59-release-governance.md`） | R36–R51 |
+| 31 | R60 → R62 → R63 → R66；R64 → R65；R61；R67、R68 待口径 | 公开仓库的法律归属与开源就绪（见 `tasks/R60-R68-open-source-readiness.md`） | 批次 30 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
