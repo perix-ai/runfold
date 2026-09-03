@@ -4,7 +4,8 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R43 与第 7 节总验收全部完成。R43 已将 Nexent
+> 总体状态（2026-09-02）：R01–R43 与第 7 节总验收全部完成；R44 正在把 Nexent
+> v2.5.0 本地实验分支纳管为可重放、可校验的下游集成补丁。R43 已将 Nexent
 > Demo 的合成脚本、真实截图和旁白源文件纳入 `scripts/event/demos/nexent/`；
 > 发布成品继续位于 `docs/event/demos/nexent/`，并可从仓库素材离线精确重制。
 > `npm run verify`
@@ -677,6 +678,15 @@
     均通过；重制 MP4、封面和旁白 PCM 分别与发布成品逐字节或逐样本相同。完整
     命令、哈希和环境边界见 R43 任务书。
 
+- [ ] **R44** · 难度 中 · 风险 中 · 位置 `integrations/nexent/v2.5.0/`
+  - **问题**：Nexent 的 Event 记录、restore/resume/fork、后端接口和 UI 接入只
+    存在于无 remote 的本地实验分支，当前仓库不能独立重放这些产品改动。
+  - **处理**：按
+    [`R44 任务书`](tasks/R44-nexent-integration-patches.md) 将 8 个原始提交导出
+    为版本化 Git patch series，并纳管基线 manifest、顺序、哈希和应用说明；在
+    干净 v2.5.0 基线上重放并验证结果 tree 与实验分支完全一致。
+  - **依赖**：R33、R37、R38、R40；不复制 Nexent 完整源码，不推送 Nexent。
+
 ## 7. 总体验收
 
 - [x] **R33** · 难度 中 · 风险 中 · 位置 Nexent 使用方仓库、
@@ -736,6 +746,7 @@
 | 19 | R41 | Nexent Demo 自然人声与清晰点击动作（见 `tasks/R41-demo-natural-voice-clicks.md`） | R40、用户反馈 |
 | 20 | R42 | 精简 Nexent Event Demo 标题（见 `tasks/R42-demo-title-copy.md`） | R41、用户反馈 |
 | 21 | R43 | 纳管 Nexent Event Demo 可复现源码（见 `tasks/R43-demo-reproduction-source.md`） | R42、用户确认 |
+| 22 | R44 | 纳管 Nexent v2.5.0 Event 下游集成补丁（见 `tasks/R44-nexent-integration-patches.md`） | R33、R37、R38、R40 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
