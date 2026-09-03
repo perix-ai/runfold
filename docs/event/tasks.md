@@ -4,8 +4,8 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R39 与第 7 节总验收全部完成；R39 已把
-> Nexent 长轨迹、冷恢复、详情按钮和 fork 验收整理为仓库内可播放 Demo。
+> 总体状态（2026-09-02）：R01–R39 与第 7 节总验收全部完成；R40 正在规划
+> Nexent 有声交互 Demo，并等待 DSH Fork/Resume 控件一致性决策。
 > `npm run verify`
 > 全绿，SDK、UI、保留测试和构建配置均不依赖任何 DSH 包名解析。R33 已在与官方 tag
 > 逐文件一致的 Nexent v2.5.0 本地快照上完成真实进程、wheel 和轨迹 UI 验收；
@@ -617,6 +617,17 @@
     本地链接、`git diff --check`、204/10/139 上游身份门禁均通过。R39 未修改
     Event、DSH UI 或 Nexent 实现。
 
+- [ ] **R40** · 难度 中 · 风险 中 · 位置 Nexent 本地实验分支、
+  `docs/event/demos/nexent/`
+  - **问题**：R39 无声音，关键动作以操作后的状态帧表达；同时 Nexent 顶部
+    “刷新 / 分叉”属于宿主扩展，而 DSH 的 Fork 位于聊天消息旁、Resume 是自动
+    宿主行为，不存在可直接照搬的轨迹 Resume 按钮。
+  - **处理**：按
+    [`R40 任务书`](tasks/R40-nexent-narrated-interaction-demo.md) 先由用户决定
+    采用 DSH 原行为还是 Nexent 显式控制，再录制带中文旁白、连续选中/点击动作
+    和真实 restore/resume/fork 结果的新版 Demo。
+  - **依赖**：R39；用户控件语义决策。
+
 ## 7. 总体验收
 
 - [x] **R33** · 难度 中 · 风险 中 · 位置 Nexent 使用方仓库、
@@ -672,6 +683,7 @@
 | 15 | R37 | Nexent 聊天页嵌入独立 Trajectory UI，并接通读取、resume、fork（见 `tasks/R37-nexent-trajectory-ui.md`） | R33 |
 | 16 | R38 | Nexent 20 Turn 长轨迹冷恢复、fork 与详情面板全景验收（见 `tasks/R38-nexent-long-trajectory.md`） | R37 |
 | 17 | R39 | Nexent 长轨迹、冷恢复、详情按钮与 fork 可播放 Demo（见 `tasks/R39-nexent-trajectory-demo.md`） | R38 |
+| 18 | R40 | Nexent 有声交互 Demo 与 DSH Fork/Resume 控件一致性（见 `tasks/R40-nexent-narrated-interaction-demo.md`） | R39、用户决策 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
