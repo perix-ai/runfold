@@ -897,7 +897,7 @@
 校验 204/10/139 与文档一致，`third_party` 快照与固定 commit 逐字节一致，
 许可证中的 DeepSeek 版权行与上游完全相同。下列条目补的是"可发布、可长期
 维护"的缺口，逐条证据见
-[`tasks/R52-R58-release-governance.md`](tasks/R52-R58-release-governance.md)。
+[`tasks/R52-R59-release-governance.md`](tasks/R52-R59-release-governance.md)。
 
 - [ ] **R52** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/{sdk,ui/trajectory}/package.json`、`packages/event/python/pyproject.toml`、`scripts/verify-public-identity.mjs`
   - **问题**：两个 npm 包缺 `repository`、`homepage`、`bugs`、`keywords`、`publishConfig`；Python 缺 `[project.urls]`。scoped 包无 `publishConfig.access: "public"` 时 `npm publish` 会失败；无回源链接与 `OPEN_SOURCE_POLICY.md` 的可追溯要求不一致。
@@ -936,7 +936,7 @@
 
 - [ ] **R59** · 难度 易 · 风险 中 · 位置 npm `@runfold` scope、PyPI `runfold-event`
   - **问题**：2026-09-03 实测，`@runfold/event`、`@runfold/trajectory-ui`、npm `runfold` 组织、PyPI `runfold-event` 与 `runfold` 全部未被占用。仓库已按这些名字准备发布元数据（R52），但名字本身尚未注册，首次发布前存在被抢注的风险。GitHub 组织 `runfold` 同样空闲，`perix-ai` 已存在。
-  - **处理**：在首次发布前注册 npm `@runfold` scope 与 PyPI `runfold-event`（可一并占位 `runfold`）。是否另建 GitHub 组织 `runfold` 属于身份决策，需你确认后再执行。注册结果记入本条结果栏。
+  - **处理**：在首次发布前注册 npm `@runfold` scope 与 PyPI `runfold-event`（可一并占位 PyPI `runfold`）。GitHub 组织按决策 D07 保持 `perix-ai`，不迁移也不新建。注册涉及账号凭据，由维护者本人执行；Codex 只准备发布清单与命令。
   - **依赖**：R52。
 
 ## 执行顺序
@@ -974,7 +974,7 @@
 | 27 | R49 | 全量验证后重命名 GitHub 仓库和本地远端 | R48 |
 | 28 | R50 | 明确个人版权归属、开源分发与第三方 bundle notices | R48、R49 |
 | 29 | R51 | 同步 GitHub About 并验证外部贡献入口 | R49、R50 |
-| 30 | R52, R56, R57, R58 → R53 → R54；R59 在首次发布前；R55 待条款确认 | 发布元数据、产物时效与治理缺口（见 `tasks/R52-R58-release-governance.md`） | R36–R51 |
+| 30 | R52, R56, R57, R58 → R53 → R54；R59 在首次发布前；R55 待条款确认 | 发布元数据、产物时效与治理缺口（见 `tasks/R52-R59-release-governance.md`） | R36–R51 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 

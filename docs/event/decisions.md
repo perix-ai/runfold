@@ -89,3 +89,23 @@
 - 后果：0.1.0 尚未对外发布，因此执行干净迁移，不提供旧包名兼容别名。迁移前
   的任务与验收记录保留原名作为历史事实，但不构成当前 API 文档。
 - 相关：tasks.md R45–R50。
+
+## D07 · GitHub 组织保持 perix-ai，发布命名空间注册 Runfold
+
+- 日期：2026-09-03
+- 背景：D06 之后出现名称层级不一致的疑问：包与 import 用 Runfold，代码托管在
+  `github.com/perix-ai/runfold`。2026-09-03 实测四处命名空间的占用情况：npm
+  `@runfold` scope、`@runfold/event`、`@runfold/trajectory-ui`、PyPI
+  `runfold-event` 与 `runfold`、GitHub 组织 `runfold` 全部空闲，`perix-ai`
+  已存在。
+- 决定：GitHub 组织保持 `perix-ai` 不迁移。理由有三：组织名代表维护方、仓库名
+  代表产品，`perix-ai/runfold` 符合这一约定，`runfold/runfold` 冗余；迁移会
+  抹掉 D06 刻意建立的"产品名与维护者名分离"；使用方只输入
+  `npm i @runfold/event` 与 `pip install runfold-event`，组织名仅出现在仓库
+  URL 中。同时在首次发布前注册 npm `@runfold` scope 与 PyPI `runfold-event`，
+  避免 R52 写入发布元数据的名字被抢注。
+- 后果：`repository` 等元数据指向 `github.com/perix-ai/runfold`。若将来
+  Runfold 需要独立于维护方（`COPYRIGHT.md` 已预留版权转让路径），再新建
+  `runfold` 组织并转移仓库；GitHub 对重命名与转移保留永久重定向，届时成本
+  仍然可控。
+- 相关：tasks.md R52、R59；任务书 `tasks/R52-R59-release-governance.md`。

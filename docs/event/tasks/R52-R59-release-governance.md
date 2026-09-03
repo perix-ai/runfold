@@ -1,7 +1,7 @@
 # 任务：发布元数据、产物时效与治理缺口
 
-> 对应清单：[`../tasks.md`](../tasks.md) 第 8 节 R52–R58。
-> 来源：2026-09-03 对 R36–R51 的独立复核。状态：待执行。
+> 对应清单：[`../tasks.md`](../tasks.md) 第 9 节 R52–R59。
+> 来源：2026-09-03 对 R36–R51 的独立复核。执行者：Codex。状态：待执行。
 >
 > 复核结论：R36–R51 的行为、依赖与身份工作已达标。完整 `npm run verify`
 > 串行通过；代码级 `@deepseek-ai/` 引用与旧命名残留均为空；`npm ls` 无 DSH
@@ -31,6 +31,10 @@ packages/event/python/pyproject.toml  缺: [project.urls]
 两个 npm 包补 `repository`（含 `directory`）、`homepage`、`bugs`、`keywords`
 与 `publishConfig.access`；`pyproject.toml` 补 `[project.urls]`。在
 `scripts/verify-public-identity.mjs` 增加断言，使其不可回退。
+
+仓库地址按决策 D07 使用 `https://github.com/perix-ai/runfold`，组织名不迁移。
+`@runfold` 是包命名空间，`perix-ai` 是托管组织，两者不需要一致；这是 D06 建立
+的"产品名与维护者名分离"的直接结果，不要在本任务里顺手改动。
 
 ## R53 · Nexent 补丁中的 vendored tarball 已过期
 
@@ -153,6 +157,32 @@ const legacyWord = ['per', 'ix'].join('')
 
 加一行注释说明拆写原因。
 
+## R59 · 发布命名空间尚未注册
+
+**证据（2026-09-03 实测）**
+
+| 名字 | 状态 |
+| --- | --- |
+| npm `@runfold` scope、`@runfold/event`、`@runfold/trajectory-ui` | 未占用 |
+| PyPI `runfold-event`、`runfold` | 未占用 |
+| GitHub 组织 `runfold` | 不存在 |
+| GitHub 组织 `perix-ai` | 已存在 |
+
+**影响**
+
+R52 会把这些名字写进发布元数据。名字一旦被他人抢注，要么改名重做一遍 R45–R48
+的迁移，要么在受污染的命名空间下发布。
+
+**处理**
+
+首次发布前注册 npm `@runfold` scope 与 PyPI `runfold-event`，可一并占位 PyPI
+`runfold`。GitHub 组织按决策 D07 不迁移，也不需要新建；若将来 Runfold 要独立
+于维护方，再按 D07 的后果一节处理。
+
+注册涉及账号与凭据，Codex 不执行注册本身：准备好 `npm publish --dry-run` 与
+`python -m build` 的产物清单，把待注册名字、执行命令和前置账号要求写进本条
+结果栏，由维护者本人完成注册后回填日期。
+
 ## 验收
 
 ```bash
@@ -167,6 +197,20 @@ node -e "const m=require('./packages/event/typescript/sdk/package.json');['repos
 cd integrations/nexent/v2.5.0 && shasum -a 256 -c SHA256SUMS
 ```
 
+```bash
+npm publish --dry-run --workspace @runfold/event
+```
+
 R52、R54、R56、R57、R58 完成后，`npm run verify` 应同时覆盖发布元数据、
-集成产物哈希与文档地图；R53 完成后 vendored tarball 与 HEAD 一致；R55 需要
-你先给出条款口径。
+集成产物哈希与文档地图；R53 完成后 vendored tarball 与 HEAD 一致；R59 只做
+发布前准备，注册动作由维护者执行；R55 需要维护者先给出条款口径。
+
+## 执行顺序
+
+1. R52 → R56 → R57 → R58：互不依赖的低风险项，各自独立提交。
+2. R53：依赖 R52 定稿的 manifest，重建 tarball 并重放补丁 0003。
+3. R54：依赖 R53 的新哈希，再把校验脚本接进 `npm run verify`。
+4. R59：R52 完成后准备发布清单，交维护者注册。
+5. R55：等待维护者给出条款口径后再动。
+
+每步独立绿色、独立提交、立即推送（`AGENTS.md`）。
