@@ -1,7 +1,7 @@
 # 任务：纳管 Nexent Event Demo 可复现源码
 
 > 对应清单：[`../tasks.md`](../tasks.md) R43。
-> 执行者：Codex。状态：进行中（2026-09-02）。
+> 执行者：Codex。状态：已完成（2026-09-02）。
 
 ## 背景
 
@@ -31,4 +31,18 @@
 
 ## 完成记录
 
-等待实现与验证。
+- 新增 `scripts/event/demos/nexent/`，共 22 个文件、约 1.3 MiB：合成脚本、
+  旁白生成脚本与文本、九张真实浏览器截图、六段已验收 MP3、依赖文件、制作说明
+  和 `SHA256SUMS`。
+- `compose.py` 不再引用临时素材目录或本机私有 ffmpeg 路径；默认输出到 Git 忽略的
+  `build/event-demo/nexent/`，通过 PATH、`--ffmpeg` 或 `PERIX_DEMO_FFMPEG`
+  解析 ffmpeg，只有显式 `--install` 才安装发布成品。
+- 默认合成读取仓库内已验收音频，完全离线；`generate_narration.py` 单独提供可选的
+  在线神经语音重生成，默认同样只写 `build/`。
+- 15 个输入文件通过 `shasum -a 256 -c SHA256SUMS`；清单 SHA-256 为
+  `a5fc89acf1439808b8adb9c0319c3c78869e008f36011e903aa6f182794ab363`。
+- 从仓库素材重新生成的 83.07 秒 MP4 完整解码，参数为 1440×900、24 fps、
+  H.264 High 与 AAC-LC；视频和封面与当前发布成品逐字节一致，旁白 PCM MD5 同为
+  `5a2108a0458412f1a66e9e4bc4759163`。
+- 两个 Python 脚本编译及 `--help` 入口、旁白 JSON、文档本地链接和临时路径扫描
+  均通过；Nexent、DSH `EventTrajectory` 与 Event 实现没有改动。

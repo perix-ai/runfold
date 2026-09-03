@@ -72,6 +72,14 @@ Nexent 页面外围的 user、agent 和 conversation HTTP 数据来自确定性�
 桩数据。Nexent 修改只保存在无 remote 的本地实验分支，没有推送或部署到官方
 项目。
 
+## 制作源码
+
+可离线重制的合成脚本、九张真实浏览器截图、六段已验收旁白、旁白文本和输入
+哈希均保存在
+[`scripts/event/demos/nexent/`](../../../../scripts/event/demos/nexent/)。默认输出
+到 Git 忽略的 `build/event-demo/nexent/`，只有显式使用 `--install` 才会覆盖本
+目录的发布成品。当前源码重制出的 MP4 与封面均和下列发布文件逐字节一致。
+
 ## 审计证据
 
 | 对象 | SHA-256 |
@@ -109,4 +117,5 @@ shasum -a 256 trajectory-restore-fork-demo.mp4 cover.jpg
 [`R40 任务书`](../../tasks/R40-nexent-narrated-interaction-demo.md)；自然人声与
 点击反馈重制记录见
 [`R41 任务书`](../../tasks/R41-demo-natural-voice-clicks.md)，标题精简记录见
-[`R42 任务书`](../../tasks/R42-demo-title-copy.md)。
+[`R42 任务书`](../../tasks/R42-demo-title-copy.md)，可复现源码纳管记录见
+[`R43 任务书`](../../tasks/R43-demo-reproduction-source.md)。
