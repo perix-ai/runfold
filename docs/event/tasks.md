@@ -17,7 +17,7 @@
 > 最终移除了保留测试中的 DSH
 > module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
 >
-> 后续状态（2026-09-03）：独立项目 **Runfold** 的 R45–R50 身份、仓库和
+> 后续状态（2026-09-03）：独立项目 **Runfold** 的 R45–R51 身份、仓库和
 > 版权政策迁移全部完成。当前原创部分声明的版权人为 Heiki Scott；Perix.ai 是
 > 项目/维护者名称而不是独立权利主体。
 > 迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
@@ -870,6 +870,26 @@
     355 个受控文本文件，仅保留 16 行明确归属、来源或负向测试引用；
     `git diff --check` 通过。
 
+- [x] **R51** · 难度 易 · 风险 低 · 位置 GitHub `perix-ai/runfold` About
+  元数据
+  - **问题**：仓库已迁移为 Runfold，但 GitHub About description 仍为旧文案
+    `Perix runtime data`，且没有 topics；README 与仓库列表页对项目的描述不一致。
+  - **处理**：把 description 更新为 README 的 Runfold 定位，并增加与 agent runtime
+    data、Event 轨迹、持久恢复、TypeScript/Python 有关的检索 topics。未确认可公开访问
+    的官网前保持 website 为空；不改变仓库可见性、权限或合并设置。同时验证公开仓库、
+    fork、Issues、MIT License 与根 `CONTRIBUTING.md` 已构成外部贡献入口。
+  - **依赖**：R49、R50。
+  - **结果**：已完成（2026-09-03）：About description 与 README 统一为
+    `The agent data plane for durable agent execution.`；增加 `agent`、
+    `agent-data`、`agent-runtime`、`durable-execution`、`event-sourcing`、`fork`、
+    `python`、`restore`、`resume`、`trajectory`、`typescript` 共 11 个 topics。
+    website 按计划保持为空，仓库权限和合并设置未改动。
+  - **验证**：GitHub 返回仓库 visibility `public`、`allow_forking: true`、
+    `has_issues: true`、license `MIT`；Community Profile 已识别根 README、LICENSE
+    与 CONTRIBUTING，外部用户可通过 fork 和 Pull Request 贡献，直接 push 仍由
+    仓库协作者权限控制。更新后的 description、空 homepage 与 11 个 topics 已由
+    GitHub API 回读确认；`git diff --check` 通过。
+
 ## 执行顺序
 
 按"容易改、风险小"优先，跨章节排列。
@@ -904,6 +924,7 @@
 | 26 | R48 | 文档、归属边界与公共产物名称门禁 | R45–R47 |
 | 27 | R49 | 全量验证后重命名 GitHub 仓库和本地远端 | R48 |
 | 28 | R50 | 明确个人版权归属、开源分发与第三方 bundle notices | R48、R49 |
+| 29 | R51 | 同步 GitHub About 并验证外部贡献入口 | R49、R50 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
