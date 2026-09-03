@@ -1,0 +1,723 @@
+From e3a25a25201a8eedab6d82ce5cbede5d51f6d125 Mon Sep 17 00:00:00 2001
+From: Heiki Scott <heikiscott@gmail.com>
+Date: Wed, 2 Sep 2026 07:15:15 -0700
+Subject: [PATCH 5/8] feat(event): embed trajectory view in Nexent chat
+
+---
+ .../conversation-trajectory-panel.tsx         | 341 ++++++++++++++++++
+ .../[locale]/newchat/assistant-ui/thread.tsx  | 185 +++++++---
+ frontend/lib/conversationTrajectory.ts        |  20 +
+ frontend/public/locales/en/common.json        |  15 +-
+ frontend/public/locales/zh/common.json        |  15 +-
+ frontend/tests/conversationTrajectory.test.ts |  25 ++
+ 6 files changed, 549 insertions(+), 52 deletions(-)
+ create mode 100644 frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx
+
+diff --git a/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx b/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..aad4267498e9c0154858cb799cf526886aa553e1
+--- /dev/null
++++ b/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx
+@@ -0,0 +1,341 @@
++"use client";
++
++import dynamic from "next/dynamic";
++import { useEffect, useMemo, useState, type ComponentType } from "react";
++import { useTranslation } from "react-i18next";
++import { useTheme } from "next-themes";
++import { AlertCircleIcon, GitForkIcon, RefreshCwIcon } from "lucide-react";
++import type {
++  SessionEvent,
++  SessionHeader,
++} from "@perix/event-sdk/session/types";
++import type { EventTrajectoryProps } from "@perix/event-ui";
++import "@perix/event-ui/style.css";
++
++import { Button } from "@/components/ui/button";
++import {
++  conversationUrlForFork,
++  latestStableForkBoundary,
++  loadConversationTrajectory,
++  mergeConversationTrajectory,
++  trajectoryFailureStatus,
++  writeConversationView,
++} from "@/lib/conversationTrajectory";
++import { cn } from "@/lib/utils";
++import { ApiError } from "@/services/api";
++import { conversationService } from "@/services/conversationService";
++
++const EventTrajectory = dynamic<EventTrajectoryProps>(
++  () =>
++    import("@perix/event-ui").then(
++      (module) => module.EventTrajectory as ComponentType<EventTrajectoryProps>
++    ),
++  { ssr: false }
++);
++
++type LoadStatus =
++  "loading" | "ready" | "empty" | "missing" | "unavailable" | "error";
++
++interface TrajectoryState {
++  status: LoadStatus;
++  session?: SessionHeader;
++  events: SessionEvent[];
++  error?: string;
++}
++
++const initialState: TrajectoryState = {
++  status: "loading",
++  events: [],
++};
++
++const isAbortError = (error: unknown): boolean =>
++  error instanceof Error && error.name === "AbortError";
++
++const errorStatus = (error: unknown): LoadStatus => {
++  const code = error instanceof ApiError ? error.code : undefined;
++  return trajectoryFailureStatus(code);
++};
++
++const errorMessage = (error: unknown): string =>
++  error instanceof Error ? error.message : "Unknown trajectory error";
++
++const displaySessionId = (value: string): string =>
++  value.length > 28 ? `${value.slice(0, 16)}…${value.slice(-8)}` : value;
++
++export function ConversationTrajectoryPanel({
++  conversationId,
++  isRunning,
++}: {
++  conversationId: number;
++  isRunning: boolean;
++}) {
++  const { t, i18n } = useTranslation();
++  const { resolvedTheme } = useTheme();
++  const [reloadKey, setReloadKey] = useState(0);
++  const [state, setState] = useState<TrajectoryState>(initialState);
++  const [isForking, setIsForking] = useState(false);
++  const [forkError, setForkError] = useState<string>();
++
++  useEffect(() => {
++    const body = document.body;
++    const previous = body.getAttribute("data-ds-dark-theme");
++    if (resolvedTheme === "dark") body.setAttribute("data-ds-dark-theme", "");
++    else body.removeAttribute("data-ds-dark-theme");
++    return () => {
++      if (previous === null) body.removeAttribute("data-ds-dark-theme");
++      else body.setAttribute("data-ds-dark-theme", previous);
++    };
++  }, [resolvedTheme]);
++
++  useEffect(() => {
++    let stopped = false;
++    let timer: ReturnType<typeof setTimeout> | undefined;
++    const controller = new AbortController();
++    let currentEvents: SessionEvent[] = [];
++    let currentSession: SessionHeader | undefined;
++    let nextSeq = 0;
++    let firstRequest = true;
++
++    const refresh = async () => {
++      if (firstRequest) setState(initialState);
++      try {
++        const update = await loadConversationTrajectory(
++          (fromSeq, limit) =>
++            conversationService.getTrajectory(conversationId, {
++              fromSeq,
++              limit,
++              signal: controller.signal,
++            }),
++          nextSeq
++        );
++        if (stopped) return;
++        if (currentSession && currentSession.id !== update.session.id) {
++          throw new Error("Trajectory Session changed while polling");
++        }
++        currentEvents =
++          nextSeq === 0
++            ? update.events
++            : mergeConversationTrajectory(currentEvents, update);
++        currentSession = update.session;
++        nextSeq = update.nextSeq;
++        setState({
++          status: currentEvents.length > 0 ? "ready" : "empty",
++          session: currentSession,
++          events: currentEvents,
++        });
++      } catch (error) {
++        if (stopped || isAbortError(error)) return;
++        if (currentSession) {
++          setState({
++            status: currentEvents.length > 0 ? "ready" : "empty",
++            session: currentSession,
++            events: currentEvents,
++            error: errorMessage(error),
++          });
++        } else {
++          setState({
++            status: errorStatus(error),
++            events: [],
++            error: errorMessage(error),
++          });
++        }
++      } finally {
++        firstRequest = false;
++        if (!stopped && isRunning) timer = setTimeout(refresh, 1000);
++      }
++    };
++
++    void refresh();
++    return () => {
++      stopped = true;
++      controller.abort();
++      if (timer) clearTimeout(timer);
++    };
++  }, [conversationId, isRunning, reloadKey]);
++
++  const stableBoundary = useMemo(
++    () => latestStableForkBoundary(state.events),
++    [state.events]
++  );
++
++  const forkTrajectory = async () => {
++    if (stableBoundary === undefined || isRunning || isForking) return;
++    setIsForking(true);
++    setForkError(undefined);
++    try {
++      const result = await conversationService.forkTrajectory(conversationId, {
++        boundary: stableBoundary,
++      });
++      const childId = Number(result.conversation.conversation_id);
++      if (!Number.isSafeInteger(childId) || childId <= 0) {
++        throw new Error("Fork response has no valid child conversation id");
++      }
++      try {
++        writeConversationView(window.localStorage, childId, "trajectory");
++      } catch {
++        // Navigation must still succeed when browser storage is unavailable.
++      }
++      window.location.assign(
++        conversationUrlForFork(window.location.href, childId)
++      );
++    } catch (error) {
++      setForkError(errorMessage(error));
++      setIsForking(false);
++    }
++  };
++
++  const locale = i18n.language.toLowerCase().startsWith("zh") ? "zh" : "en";
++  const session = state.session;
++
++  return (
++    <section
++      className="flex min-h-0 flex-1 flex-col bg-background"
++      aria-label={t("chatInterface.trajectory", "轨迹")}
++      data-testid="conversation-trajectory-panel"
++    >
++      <div className="flex min-h-10 items-center gap-3 border-b bg-muted/20 px-3 py-1.5 text-xs">
++        <div className="min-w-0 flex-1">
++          {session ? (
++            <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground">
++              <span className="min-w-0">
++                <span className="font-medium text-foreground">Session</span>{" "}
++                <span className="font-mono" title={String(session.id)}>
++                  {displaySessionId(String(session.id))}
++                </span>
++              </span>
++              {session.parentSession && (
++                <span>
++                  <span className="font-medium text-foreground">
++                    {t("chatInterface.trajectoryParent", "父 Session")}
++                  </span>{" "}
++                  <span
++                    className="font-mono"
++                    title={String(session.parentSession)}
++                  >
++                    {displaySessionId(String(session.parentSession))}
++                  </span>
++                </span>
++              )}
++              {session.seedLength !== undefined && (
++                <span>
++                  {t("chatInterface.trajectorySeedLength", "继承事件")}:{" "}
++                  {session.seedLength}
++                </span>
++              )}
++            </div>
++          ) : (
++            <span className="text-muted-foreground">
++              {t(
++                "chatInterface.trajectorySessionPending",
++                "正在读取 Event Session"
++              )}
++            </span>
++          )}
++        </div>
++        <Button
++          type="button"
++          variant="ghost"
++          size="sm"
++          className="h-7 gap-1.5 px-2"
++          onClick={() => setReloadKey((value) => value + 1)}
++          aria-label={t("common.refresh", "刷新")}
++        >
++          <RefreshCwIcon className="size-3.5" />
++          {t("common.refresh", "刷新")}
++        </Button>
++        <Button
++          type="button"
++          variant="outline"
++          size="sm"
++          className="h-7 gap-1.5 px-2"
++          disabled={stableBoundary === undefined || isRunning || isForking}
++          onClick={() => void forkTrajectory()}
++          title={
++            isRunning
++              ? t("chatInterface.trajectoryForkRunning", "运行结束后才能分叉")
++              : stableBoundary === undefined
++                ? t(
++                    "chatInterface.trajectoryForkUnavailable",
++                    "尚无已完成的 Turn 可供分叉"
++                  )
++                : `Event seq ${stableBoundary}`
++          }
++          data-testid="trajectory-fork"
++        >
++          <GitForkIcon className="size-3.5" />
++          {isForking
++            ? t("chatInterface.trajectoryForking", "分叉中…")
++            : t("chatInterface.trajectoryFork", "分叉")}
++        </Button>
++      </div>
++
++      {(state.error || forkError) &&
++        (state.status === "ready" || state.status === "empty") && (
++          <div className="flex items-center gap-2 border-b border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
++            <AlertCircleIcon className="size-3.5" />
++            {forkError || state.error}
++          </div>
++        )}
++
++      <div className="relative min-h-0 flex-1">
++        {state.status === "ready" && (
++          <EventTrajectory events={state.events} locale={locale} />
++        )}
++        {state.status !== "ready" && (
++          <div
++            className={cn(
++              "absolute inset-0 flex items-center justify-center px-6 text-center text-sm",
++              state.status === "error" || state.status === "unavailable"
++                ? "text-destructive"
++                : "text-muted-foreground"
++            )}
++            data-testid={`trajectory-state-${state.status}`}
++          >
++            <div className="max-w-lg space-y-2">
++              {state.status === "loading" && (
++                <p>{t("common.loading", "加载中…")}</p>
++              )}
++              {state.status === "empty" && (
++                <p>
++                  {t("chatInterface.trajectoryEmpty", "Event Session 暂无事件")}
++                </p>
++              )}
++              {state.status === "missing" && (
++                <p>
++                  {t(
++                    "chatInterface.trajectoryMissing",
++                    "该会话尚未生成 Event 轨迹"
++                  )}
++                </p>
++              )}
++              {state.status === "unavailable" && (
++                <p>
++                  {t(
++                    "chatInterface.trajectoryUnavailable",
++                    "Event 轨迹功能当前不可用"
++                  )}
++                </p>
++              )}
++              {state.status === "error" && (
++                <p>{t("chatInterface.trajectoryLoadFailed", "轨迹加载失败")}</p>
++              )}
++              {state.error && state.status !== "missing" && (
++                <p className="font-mono text-xs opacity-80">{state.error}</p>
++              )}
++              {(state.status === "error" || state.status === "unavailable") && (
++                <Button
++                  type="button"
++                  variant="outline"
++                  size="sm"
++                  onClick={() => setReloadKey((value) => value + 1)}
++                >
++                  {t("common.retry", "重试")}
++                </Button>
++              )}
++            </div>
++          </div>
++        )}
++      </div>
++    </section>
++  );
++}
+diff --git a/frontend/app/[locale]/newchat/assistant-ui/thread.tsx b/frontend/app/[locale]/newchat/assistant-ui/thread.tsx
+index 65f1bb03f9cda8f594ab163c1f92132ebc50e5a6..5017274bfbecbd79db269cddd2fa9c61b05256a3 100644
+--- a/frontend/app/[locale]/newchat/assistant-ui/thread.tsx
++++ b/frontend/app/[locale]/newchat/assistant-ui/thread.tsx
+@@ -112,6 +112,12 @@ import type {
+ } from "@/types/knowledgeScope";
+ import { SkillFileCard } from "../ui/skill-file-card";
+ import type { SkillFileContent } from "@/types/skill";
++import { ConversationTrajectoryPanel } from "./conversation-trajectory-panel";
++import {
++  readConversationView,
++  writeConversationView,
++  type ConversationView,
++} from "@/lib/conversationTrajectory";
+ 
+ export interface ThreadProps {
+   agent: Agent | PublishedAgent;
+@@ -584,6 +590,39 @@ const ThreadView: FC<ThreadViewProps> = ({
+   showComposer,
+ }) => {
+   const { t } = useTranslation();
++  const [activeView, setActiveView] =
++    useState<ConversationView>("conversation");
++
++  useEffect(() => {
++    if (!conversationId) {
++      setActiveView("conversation");
++      return;
++    }
++    try {
++      setActiveView(readConversationView(window.localStorage, conversationId));
++    } catch {
++      setActiveView("conversation");
++    }
++  }, [conversationId]);
++
++  const selectView = useCallback(
++    (view: ConversationView) => {
++      setActiveView(view);
++      if (view === "trajectory") onPanelClose();
++      if (!conversationId) return;
++      try {
++        writeConversationView(window.localStorage, conversationId, view);
++      } catch {
++        // Storage can be unavailable in privacy-restricted browser contexts.
++      }
++    },
++    [conversationId, onPanelClose]
++  );
++
++  const canShowTrajectory =
++    hasMessages && Boolean(conversationId) && variant !== "embedded";
++  const showTrajectory =
++    canShowTrajectory && activeView === "trajectory" && !isShareMode;
+ 
+   return (
+     <ThreadPrimitive.Root
+@@ -623,11 +662,48 @@ const ThreadView: FC<ThreadViewProps> = ({
+                   </span>
+                   {hasMessages && variant !== "embedded" && (
+                     <span className="text-xs text-muted-foreground">
+-                      {t("chat.thread.conversation")}
++                      {showTrajectory
++                        ? t("chatInterface.trajectory", "轨迹")
++                        : t("chat.thread.conversation")}
+                     </span>
+                   )}
+                 </div>
+-                {hasMessages && conversationId && (
++                {canShowTrajectory && (
++                  <div
++                    className="flex items-center rounded-md bg-muted p-0.5"
++                    role="tablist"
++                    aria-label={t(
++                      "chatInterface.conversationViews",
++                      "会话视图"
++                    )}
++                  >
++                    <Button
++                      type="button"
++                      variant={showTrajectory ? "ghost" : "secondary"}
++                      size="sm"
++                      className="h-7 px-2.5"
++                      role="tab"
++                      aria-selected={!showTrajectory}
++                      onClick={() => selectView("conversation")}
++                      data-testid="conversation-view-tab"
++                    >
++                      {t("chat.thread.conversation", "对话")}
++                    </Button>
++                    <Button
++                      type="button"
++                      variant={showTrajectory ? "secondary" : "ghost"}
++                      size="sm"
++                      className="h-7 px-2.5"
++                      role="tab"
++                      aria-selected={showTrajectory}
++                      onClick={() => selectView("trajectory")}
++                      data-testid="trajectory-view-tab"
++                    >
++                      {t("chatInterface.trajectory", "轨迹")}
++                    </Button>
++                  </div>
++                )}
++                {hasMessages && conversationId && !showTrajectory && (
+                   <Button
+                     variant="ghost"
+                     size="icon"
+@@ -688,56 +764,65 @@ const ThreadView: FC<ThreadViewProps> = ({
+           </div>
+         )}
+ 
+-        <ThreadPrimitive.Viewport
+-          className={cn(
+-            "mx-auto flex min-h-0 min-w-0 w-full max-w-4xl flex-1 flex-col overflow-x-hidden overflow-y-auto",
+-            variant === "embedded" ? "px-4 py-4" : "px-8 py-6"
+-          )}
+-        >
+-          {hasMessages ? (
+-            <ThreadMessages
+-              agent={agent}
+-              readOnly={readOnly}
+-              enableSkillDirectives={Boolean(skillFiles)}
+-              onSkillFileSelect={onSkillFileSelect}
+-              shareMode={isShareMode}
+-              selectedShareMessageIds={selectedShareMessageIds}
+-              backendMessageIdsByAuiId={backendMessageIdsByAuiId}
+-              onToggleShareMessage={onToggleShareMessage}
+-            />
+-          ) : (
+-            <ThreadWelcomeContent agent={agent} title={welcomeTitle} />
+-          )}
+-        </ThreadPrimitive.Viewport>
++        {showTrajectory && conversationId ? (
++          <ConversationTrajectoryPanel
++            conversationId={conversationId}
++            isRunning={isRunning}
++          />
++        ) : (
++          <>
++            <ThreadPrimitive.Viewport
++              className={cn(
++                "mx-auto flex min-h-0 min-w-0 w-full max-w-4xl flex-1 flex-col overflow-x-hidden overflow-y-auto",
++                variant === "embedded" ? "px-4 py-4" : "px-8 py-6"
++              )}
++            >
++              {hasMessages ? (
++                <ThreadMessages
++                  agent={agent}
++                  readOnly={readOnly}
++                  enableSkillDirectives={Boolean(skillFiles)}
++                  onSkillFileSelect={onSkillFileSelect}
++                  shareMode={isShareMode}
++                  selectedShareMessageIds={selectedShareMessageIds}
++                  backendMessageIdsByAuiId={backendMessageIdsByAuiId}
++                  onToggleShareMessage={onToggleShareMessage}
++                />
++              ) : (
++                <ThreadWelcomeContent agent={agent} title={welcomeTitle} />
++              )}
++            </ThreadPrimitive.Viewport>
+ 
+-        {showComposer && (
+-          <ThreadPrimitive.ViewportFooter
+-            className={cn(
+-              "sticky bottom-0 mx-auto flex w-full max-w-4xl flex-col",
+-              variant === "embedded" ? "gap-2 px-4 pb-4" : "gap-4 px-8 pb-8"
++            {showComposer && (
++              <ThreadPrimitive.ViewportFooter
++                className={cn(
++                  "sticky bottom-0 mx-auto flex w-full max-w-4xl flex-col",
++                  variant === "embedded" ? "gap-2 px-4 pb-4" : "gap-4 px-8 pb-8"
++                )}
++              >
++                <ThreadScrollToBottom />
++                <Composer
++                  models={models}
++                  selectedModelId={selectedModelId}
++                  onModelChange={onModelChange}
++                  chatMode={chatMode}
++                  onChatModeChange={onChatModeChange}
++                  showModelSelector={showModelSelector}
++                  isDictationConfigured={isDictationConfigured}
++                  knowledgeScope={knowledgeScope}
++                  knowledgePreview={knowledgePreview}
++                  knowledgeCapabilities={knowledgeCapabilities}
++                  onKnowledgeScopeChange={onKnowledgeScopeChange}
++                  compact={variant === "embedded"}
++                  skillFiles={skillFiles}
++                  runtimeMetadata={runtimeMetadata}
++                  onRuntimeMetadataChange={onRuntimeMetadataChange}
++                  allowRuntimeMetadata={agent.allow_chat_metadata === true}
++                  disabled={readOnly}
++                />
++              </ThreadPrimitive.ViewportFooter>
+             )}
+-          >
+-            <ThreadScrollToBottom />
+-            <Composer
+-              models={models}
+-              selectedModelId={selectedModelId}
+-              onModelChange={onModelChange}
+-              chatMode={chatMode}
+-              onChatModeChange={onChatModeChange}
+-              showModelSelector={showModelSelector}
+-              isDictationConfigured={isDictationConfigured}
+-              knowledgeScope={knowledgeScope}
+-              knowledgePreview={knowledgePreview}
+-              knowledgeCapabilities={knowledgeCapabilities}
+-              onKnowledgeScopeChange={onKnowledgeScopeChange}
+-              compact={variant === "embedded"}
+-              skillFiles={skillFiles}
+-              runtimeMetadata={runtimeMetadata}
+-              onRuntimeMetadataChange={onRuntimeMetadataChange}
+-              allowRuntimeMetadata={agent.allow_chat_metadata === true}
+-              disabled={readOnly}
+-            />
+-          </ThreadPrimitive.ViewportFooter>
++          </>
+         )}
+       </div>
+ 
+diff --git a/frontend/lib/conversationTrajectory.ts b/frontend/lib/conversationTrajectory.ts
+index 6f188fd27c90f51a0c71b5418680af8026f0a6a3..cc2c137e895747d4a59ed192cd153755f996223c 100644
+--- a/frontend/lib/conversationTrajectory.ts
++++ b/frontend/lib/conversationTrajectory.ts
+@@ -9,6 +9,7 @@ export const TRAJECTORY_PAGE_SIZE = 5000;
+ export const TRAJECTORY_MAX_EVENTS = 1_000_000;
+ 
+ export type ConversationView = "conversation" | "trajectory";
++export type TrajectoryFailureStatus = "missing" | "unavailable" | "error";
+ 
+ export interface KeyValueStorage {
+   getItem(key: string): string | null;
+@@ -145,6 +146,25 @@ export function mergeConversationTrajectory(
+   return [...current, ...update.events];
+ }
+ 
++export function latestStableForkBoundary(
++  events: readonly SessionEvent[]
++): number | undefined {
++  for (let index = events.length - 1; index >= 0; index -= 1) {
++    const event = events[index];
++    if (event?.type === "turn/end") return event.seq;
++  }
++  return undefined;
++}
++
++export function trajectoryFailureStatus(
++  code: string | number | undefined
++): TrajectoryFailureStatus {
++  const numericCode = Number(code);
++  if (numericCode === 404) return "missing";
++  if (numericCode === 503) return "unavailable";
++  return "error";
++}
++
+ const conversationViewStorageKey = (conversationId: number): string =>
+   `nexent:conversation:${conversationId}:view`;
+ 
+diff --git a/frontend/public/locales/en/common.json b/frontend/public/locales/en/common.json
+index b6d6b5ebdea7ff44d4643095af156fd394e21be7..4af2cbb96b9bea9677dac6a2a29aa89069807a11 100644
+--- a/frontend/public/locales/en/common.json
++++ b/frontend/public/locales/en/common.json
+@@ -4867,5 +4867,18 @@
+   "a2a.server.sameUrl": "Same URL",
+   "toolConfig.placeholder.useDefaultModel": "Use the default model when none is selected",
+   "toolConfig.placeholder.noAvailableModels": "No models available",
+-  "common.retry": "Retry"
++  "common.retry": "Retry",
++  "chatInterface.conversationViews": "Conversation views",
++  "chatInterface.trajectory": "Trajectory",
++  "chatInterface.trajectoryParent": "Parent Session",
++  "chatInterface.trajectorySeedLength": "Inherited events",
++  "chatInterface.trajectorySessionPending": "Reading Event Session",
++  "chatInterface.trajectoryForkRunning": "Wait for the run to finish before forking",
++  "chatInterface.trajectoryForkUnavailable": "No completed Turn is available to fork",
++  "chatInterface.trajectoryForking": "Forking…",
++  "chatInterface.trajectoryFork": "Fork",
++  "chatInterface.trajectoryEmpty": "The Event Session has no events",
++  "chatInterface.trajectoryMissing": "This conversation has no Event trajectory yet",
++  "chatInterface.trajectoryUnavailable": "Event trajectory is currently unavailable",
++  "chatInterface.trajectoryLoadFailed": "Failed to load trajectory"
+ }
+diff --git a/frontend/public/locales/zh/common.json b/frontend/public/locales/zh/common.json
+index 94f953ece3221e515d4af9e55fa72b8734533e10..31f7b6b1f0f10c28586609b1e0a867bbca024547 100644
+--- a/frontend/public/locales/zh/common.json
++++ b/frontend/public/locales/zh/common.json
+@@ -4881,5 +4881,18 @@
+   "a2a.server.sameUrl": "相同 URL",
+   "toolConfig.placeholder.useDefaultModel": "未选择时使用默认模型",
+   "toolConfig.placeholder.noAvailableModels": "暂无可选模型",
+-  "common.retry": "重试"
++  "common.retry": "重试",
++  "chatInterface.conversationViews": "会话视图",
++  "chatInterface.trajectory": "轨迹",
++  "chatInterface.trajectoryParent": "父 Session",
++  "chatInterface.trajectorySeedLength": "继承事件",
++  "chatInterface.trajectorySessionPending": "正在读取 Event Session",
++  "chatInterface.trajectoryForkRunning": "运行结束后才能分叉",
++  "chatInterface.trajectoryForkUnavailable": "尚无已完成的 Turn 可供分叉",
++  "chatInterface.trajectoryForking": "分叉中…",
++  "chatInterface.trajectoryFork": "分叉",
++  "chatInterface.trajectoryEmpty": "Event Session 暂无事件",
++  "chatInterface.trajectoryMissing": "该会话尚未生成 Event 轨迹",
++  "chatInterface.trajectoryUnavailable": "Event 轨迹功能当前不可用",
++  "chatInterface.trajectoryLoadFailed": "轨迹加载失败"
+ }
+diff --git a/frontend/tests/conversationTrajectory.test.ts b/frontend/tests/conversationTrajectory.test.ts
+index b036f30022dea9a451c42a5d98572eb2546dc783..6b3ce1687743886b7e216c60380a1049cf0bb811 100644
+--- a/frontend/tests/conversationTrajectory.test.ts
++++ b/frontend/tests/conversationTrajectory.test.ts
+@@ -9,9 +9,11 @@ import type {
+ import {
+   ConversationTrajectoryProtocolError,
+   conversationUrlForFork,
++  latestStableForkBoundary,
+   loadConversationTrajectory,
+   mergeConversationTrajectory,
+   readConversationView,
++  trajectoryFailureStatus,
+   writeConversationView,
+   // @ts-expect-error -- Node's built-in TypeScript runner needs the extension.
+ } from "../lib/conversationTrajectory.ts";
+@@ -138,6 +140,22 @@ test("merges only an exact live continuation", () => {
+   );
+ });
+ 
++test("selects the latest completed turn as a stable fork boundary", () => {
++  const events = [
++    event(0),
++    {
++      type: "turn/end",
++      seq: 1,
++      time: 2,
++      data: { turn: 1, reason: { kind: "completed" } },
++    },
++    { ...event(2), data: { turn: 2 } },
++  ] as SessionEvent[];
++
++  assert.equal(latestStableForkBoundary(events), 1);
++  assert.equal(latestStableForkBoundary([event(0)]), undefined);
++});
++
+ test("persists the selected view per conversation", () => {
+   const values = new Map<string, string>();
+   const storage = {
+@@ -151,6 +169,13 @@ test("persists the selected view per conversation", () => {
+   assert.equal(readConversationView(storage, 8), "conversation");
+ });
+ 
++test("maps missing and disabled trajectories to distinct UI states", () => {
++  assert.equal(trajectoryFailureStatus(404), "missing");
++  assert.equal(trajectoryFailureStatus("503"), "unavailable");
++  assert.equal(trajectoryFailureStatus(500), "error");
++  assert.equal(trajectoryFailureStatus(undefined), "error");
++});
++
+ test("builds a fork URL without losing locale or unrelated query state", () => {
+   assert.equal(
+     conversationUrlForFork(

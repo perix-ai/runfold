@@ -1,0 +1,504 @@
+From 88a4621f260502e859da63e07510fb7bfe26d96d Mon Sep 17 00:00:00 2001
+From: Heiki Scott <heikiscott@gmail.com>
+Date: Wed, 2 Sep 2026 06:45:36 -0700
+Subject: [PATCH 4/8] feat(event): add trajectory frontend client
+
+---
+ frontend/lib/conversationTrajectory.ts        | 177 ++++++++++++++++++
+ frontend/services/api.ts                      |   3 +
+ frontend/services/conversationService.ts      |  53 ++++++
+ frontend/tests/conversationTrajectory.test.ts | 162 ++++++++++++++++
+ frontend/types/conversation.ts                |  34 +++-
+ 5 files changed, 427 insertions(+), 2 deletions(-)
+ create mode 100644 frontend/lib/conversationTrajectory.ts
+ create mode 100644 frontend/tests/conversationTrajectory.test.ts
+
+diff --git a/frontend/lib/conversationTrajectory.ts b/frontend/lib/conversationTrajectory.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..6f188fd27c90f51a0c71b5418680af8026f0a6a3
+--- /dev/null
++++ b/frontend/lib/conversationTrajectory.ts
+@@ -0,0 +1,177 @@
++import type {
++  SessionEvent,
++  SessionHeader,
++} from "@perix/event-sdk/session/types";
++
++import type { ConversationTrajectoryPage } from "../types/conversation";
++
++export const TRAJECTORY_PAGE_SIZE = 5000;
++export const TRAJECTORY_MAX_EVENTS = 1_000_000;
++
++export type ConversationView = "conversation" | "trajectory";
++
++export interface KeyValueStorage {
++  getItem(key: string): string | null;
++  setItem(key: string, value: string): void;
++}
++
++export interface LoadedConversationTrajectory {
++  session: SessionHeader;
++  events: SessionEvent[];
++  nextSeq: number;
++  totalEvents: number;
++}
++
++export type ConversationTrajectoryPageFetcher = (
++  fromSeq: number,
++  limit: number
++) => Promise<ConversationTrajectoryPage>;
++
++export class ConversationTrajectoryProtocolError extends Error {
++  constructor(message: string) {
++    super(message);
++    this.name = "ConversationTrajectoryProtocolError";
++  }
++}
++
++const assertSafeInteger = (value: number, name: string): void => {
++  if (!Number.isSafeInteger(value) || value < 0) {
++    throw new ConversationTrajectoryProtocolError(
++      `${name} must be a non-negative safe integer`
++    );
++  }
++};
++
++const validatePage = (
++  page: ConversationTrajectoryPage,
++  expectedFromSeq: number,
++  expectedSessionId?: string
++): void => {
++  assertSafeInteger(page.from_seq, "from_seq");
++  assertSafeInteger(page.next_seq, "next_seq");
++  assertSafeInteger(page.total_events, "total_events");
++
++  if (page.from_seq !== expectedFromSeq) {
++    throw new ConversationTrajectoryProtocolError(
++      `trajectory page started at ${page.from_seq}, expected ${expectedFromSeq}`
++    );
++  }
++  if (page.next_seq !== page.from_seq + page.events.length) {
++    throw new ConversationTrajectoryProtocolError(
++      "trajectory next_seq does not match the returned event count"
++    );
++  }
++  if (page.total_events < page.next_seq) {
++    throw new ConversationTrajectoryProtocolError(
++      "trajectory total_events is smaller than next_seq"
++    );
++  }
++  if (page.has_more && page.events.length === 0) {
++    throw new ConversationTrajectoryProtocolError(
++      "trajectory pagination made no progress"
++    );
++  }
++  if (!page.has_more && page.next_seq !== page.total_events) {
++    throw new ConversationTrajectoryProtocolError(
++      "final trajectory page does not end at total_events"
++    );
++  }
++  if (!page.session || typeof page.session.id !== "string") {
++    throw new ConversationTrajectoryProtocolError(
++      "trajectory page has no valid Session header"
++    );
++  }
++  if (expectedSessionId && page.session.id !== expectedSessionId) {
++    throw new ConversationTrajectoryProtocolError(
++      "trajectory Session changed between pages"
++    );
++  }
++
++  page.events.forEach((event, index) => {
++    const expectedSeq = page.from_seq + index;
++    if (event.seq !== expectedSeq) {
++      throw new ConversationTrajectoryProtocolError(
++        `trajectory event seq ${event.seq} does not match ${expectedSeq}`
++      );
++    }
++  });
++};
++
++export async function loadConversationTrajectory(
++  fetchPage: ConversationTrajectoryPageFetcher,
++  fromSeq = 0
++): Promise<LoadedConversationTrajectory> {
++  assertSafeInteger(fromSeq, "fromSeq");
++
++  let cursor = fromSeq;
++  let session: SessionHeader | undefined;
++  let totalEvents = fromSeq;
++  const events: SessionEvent[] = [];
++
++  while (true) {
++    const page = await fetchPage(cursor, TRAJECTORY_PAGE_SIZE);
++    validatePage(page, cursor, session?.id);
++    session ??= page.session;
++    events.push(...page.events);
++    cursor = page.next_seq;
++    totalEvents = page.total_events;
++
++    if (cursor > TRAJECTORY_MAX_EVENTS) {
++      throw new ConversationTrajectoryProtocolError(
++        `trajectory exceeds ${TRAJECTORY_MAX_EVENTS} events`
++      );
++    }
++    if (!page.has_more) break;
++  }
++
++  if (!session) {
++    throw new ConversationTrajectoryProtocolError(
++      "trajectory request returned no Session header"
++    );
++  }
++  return { session, events, nextSeq: cursor, totalEvents };
++}
++
++export function mergeConversationTrajectory(
++  current: readonly SessionEvent[],
++  update: LoadedConversationTrajectory
++): SessionEvent[] {
++  if (update.events.length === 0) return [...current];
++  if (update.events[0]?.seq !== current.length) {
++    throw new ConversationTrajectoryProtocolError(
++      "trajectory update does not continue the current event sequence"
++    );
++  }
++  return [...current, ...update.events];
++}
++
++const conversationViewStorageKey = (conversationId: number): string =>
++  `nexent:conversation:${conversationId}:view`;
++
++export function readConversationView(
++  storage: KeyValueStorage,
++  conversationId: number
++): ConversationView {
++  return storage.getItem(conversationViewStorageKey(conversationId)) ===
++    "trajectory"
++    ? "trajectory"
++    : "conversation";
++}
++
++export function writeConversationView(
++  storage: KeyValueStorage,
++  conversationId: number,
++  view: ConversationView
++): void {
++  storage.setItem(conversationViewStorageKey(conversationId), view);
++}
++
++export function conversationUrlForFork(
++  currentHref: string,
++  conversationId: number
++): string {
++  const url = new URL(currentHref);
++  url.searchParams.delete("thread_id");
++  url.searchParams.set("conversation_id", String(conversationId));
++  return url.toString();
++}
+diff --git a/frontend/services/api.ts b/frontend/services/api.ts
+index 423d28d30849eddc2021f9464c0e3ddf8bd1dd29..5ce26aeb6d1a1a42fe841fcc942fa4d3b47f9b3d 100644
+--- a/frontend/services/api.ts
++++ b/frontend/services/api.ts
+@@ -53,6 +53,9 @@ export const API_ENDPOINTS = {
+     save: `${API_BASE_URL}/conversation/save`,
+     rename: `${API_BASE_URL}/conversation/rename`,
+     detail: (id: number) => `${API_BASE_URL}/conversation/${id}`,
++    trajectory: (id: number) => `${API_BASE_URL}/conversation/${id}/trajectory`,
++    trajectoryFork: (id: number) =>
++      `${API_BASE_URL}/conversation/${id}/trajectory/fork`,
+     knowledgeScope: (id: number) =>
+       `${API_BASE_URL}/conversation/${id}/knowledge-scope`,
+     delete: (id: number) => `${API_BASE_URL}/conversation/${id}`,
+diff --git a/frontend/services/conversationService.ts b/frontend/services/conversationService.ts
+index e4b940d659c3eee186ea68b6d6f2a1a47669c2ea..9d5797b4cdf4c5ada69c3cbae5f94b3d285a7720 100644
+--- a/frontend/services/conversationService.ts
++++ b/frontend/services/conversationService.ts
+@@ -7,6 +7,9 @@ import type {
+   ConversationListParams,
+   ApiConversationDetail,
+   ApiConversationResponse,
++  ConversationTrajectoryForkResult,
++  ConversationTrajectoryPage,
++  ConversationTrajectoryResponse,
+ } from "@/types/conversation";
+ import { getAuthHeaders, fetchWithAuth } from "@/lib/auth";
+ import log from "@/lib/logger";
+@@ -207,6 +210,56 @@ export const conversationService = {
+     }
+   },
+ 
++  async getTrajectory(
++    conversationId: number,
++    options: {
++      fromSeq?: number;
++      limit?: number;
++      signal?: AbortSignal;
++    } = {}
++  ): Promise<ConversationTrajectoryPage> {
++    const query = new URLSearchParams({
++      from_seq: String(options.fromSeq ?? 0),
++      limit: String(options.limit ?? 5000),
++    });
++    const response = await fetch(
++      `${API_ENDPOINTS.conversation.trajectory(conversationId)}?${query.toString()}`,
++      {
++        method: "GET",
++        headers: getAuthHeaders(),
++        signal: options.signal,
++      }
++    );
++    const result =
++      (await response.json()) as ConversationTrajectoryResponse<ConversationTrajectoryPage>;
++    if (result.code !== 0 || !result.data) {
++      throw new ApiError(result.code, result.message);
++    }
++    return result.data;
++  },
++
++  async forkTrajectory(
++    conversationId: number,
++    params: { boundary?: number; title?: string } = {},
++    signal?: AbortSignal
++  ): Promise<ConversationTrajectoryForkResult> {
++    const response = await fetch(
++      API_ENDPOINTS.conversation.trajectoryFork(conversationId),
++      {
++        method: "POST",
++        headers: getAuthHeaders(),
++        body: JSON.stringify(params),
++        signal,
++      }
++    );
++    const result =
++      (await response.json()) as ConversationTrajectoryResponse<ConversationTrajectoryForkResult>;
++    if (result.code !== 0 || !result.data) {
++      throw new ApiError(result.code, result.message);
++    }
++    return result.data;
++  },
++
+   async createShare(params: {
+     conversationId: number;
+     mode: "all" | "selected";
+diff --git a/frontend/tests/conversationTrajectory.test.ts b/frontend/tests/conversationTrajectory.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..b036f30022dea9a451c42a5d98572eb2546dc783
+--- /dev/null
++++ b/frontend/tests/conversationTrajectory.test.ts
+@@ -0,0 +1,162 @@
++import assert from "node:assert/strict";
++import test from "node:test";
++
++import type {
++  SessionEvent,
++  SessionHeader,
++} from "@perix/event-sdk/session/types";
++
++import {
++  ConversationTrajectoryProtocolError,
++  conversationUrlForFork,
++  loadConversationTrajectory,
++  mergeConversationTrajectory,
++  readConversationView,
++  writeConversationView,
++  // @ts-expect-error -- Node's built-in TypeScript runner needs the extension.
++} from "../lib/conversationTrajectory.ts";
++
++const header = (id = "session-1") =>
++  ({ version: 0, id, createdAt: 1 }) as SessionHeader;
++
++const event = (seq: number): SessionEvent =>
++  ({
++    type: "turn/start",
++    seq,
++    time: seq + 1,
++    data: { turn: seq + 1 },
++  }) as SessionEvent;
++
++test("loads a long trajectory through strict contiguous pages", async () => {
++  const events = Array.from({ length: 10_001 }, (_, seq) => event(seq));
++  const calls: Array<[number, number]> = [];
++  const result = await loadConversationTrajectory(async (fromSeq, limit) => {
++    calls.push([fromSeq, limit]);
++    const pageEvents = events.slice(fromSeq, fromSeq + limit);
++    const nextSeq = fromSeq + pageEvents.length;
++    return {
++      session: header(),
++      events: pageEvents,
++      from_seq: fromSeq,
++      next_seq: nextSeq,
++      has_more: nextSeq < events.length,
++      total_events: events.length,
++    };
++  });
++
++  assert.deepEqual(calls, [
++    [0, 5000],
++    [5000, 5000],
++    [10_000, 5000],
++  ]);
++  assert.equal(result.events.length, 10_001);
++  assert.equal(result.nextSeq, 10_001);
++  assert.equal(result.session.id, "session-1");
++});
++
++test("loads an empty but valid trajectory", async () => {
++  const result = await loadConversationTrajectory(async () => ({
++    session: header(),
++    events: [],
++    from_seq: 0,
++    next_seq: 0,
++    has_more: false,
++    total_events: 0,
++  }));
++
++  assert.deepEqual(result.events, []);
++  assert.equal(result.totalEvents, 0);
++});
++
++test("rejects malformed, stalled, or cross-Session pagination", async (t) => {
++  await t.test("wrong event sequence", async () => {
++    await assert.rejects(
++      loadConversationTrajectory(async () => ({
++        session: header(),
++        events: [event(2)],
++        from_seq: 0,
++        next_seq: 1,
++        has_more: false,
++        total_events: 1,
++      })),
++      ConversationTrajectoryProtocolError
++    );
++  });
++
++  await t.test("no pagination progress", async () => {
++    await assert.rejects(
++      loadConversationTrajectory(async () => ({
++        session: header(),
++        events: [],
++        from_seq: 0,
++        next_seq: 0,
++        has_more: true,
++        total_events: 1,
++      })),
++      /made no progress/
++    );
++  });
++
++  await t.test("Session changes", async () => {
++    let page = 0;
++    await assert.rejects(
++      loadConversationTrajectory(async (fromSeq) => {
++        page += 1;
++        return {
++          session: header(page === 1 ? "parent" : "other"),
++          events: [event(fromSeq)],
++          from_seq: fromSeq,
++          next_seq: fromSeq + 1,
++          has_more: page === 1,
++          total_events: 2,
++        };
++      }),
++      /Session changed/
++    );
++  });
++});
++
++test("merges only an exact live continuation", () => {
++  const current = [event(0), event(1)];
++  const update = {
++    session: header(),
++    events: [event(2), event(3)],
++    nextSeq: 4,
++    totalEvents: 4,
++  };
++  assert.deepEqual(
++    mergeConversationTrajectory(current, update).map((item) => item.seq),
++    [0, 1, 2, 3]
++  );
++  assert.throws(
++    () =>
++      mergeConversationTrajectory(current, {
++        ...update,
++        events: [event(3)],
++      }),
++    /does not continue/
++  );
++});
++
++test("persists the selected view per conversation", () => {
++  const values = new Map<string, string>();
++  const storage = {
++    getItem: (key: string) => values.get(key) ?? null,
++    setItem: (key: string, value: string) => values.set(key, value),
++  };
++
++  assert.equal(readConversationView(storage, 7), "conversation");
++  writeConversationView(storage, 7, "trajectory");
++  assert.equal(readConversationView(storage, 7), "trajectory");
++  assert.equal(readConversationView(storage, 8), "conversation");
++});
++
++test("builds a fork URL without losing locale or unrelated query state", () => {
++  assert.equal(
++    conversationUrlForFork(
++      "https://example.test/base/zh/newchat?thread_id=4&panel=open",
++      19
++    ),
++    "https://example.test/base/zh/newchat?panel=open&conversation_id=19"
++  );
++});
+diff --git a/frontend/types/conversation.ts b/frontend/types/conversation.ts
+index 336a94c1c029707b94de6452feeb169aa41ab9f2..b267bf657e83eb5d7b07b35970cbad455a2dff67 100644
+--- a/frontend/types/conversation.ts
++++ b/frontend/types/conversation.ts
+@@ -1,3 +1,8 @@
++import type {
++  SessionEvent,
++  SessionHeader,
++} from "@perix/event-sdk/session/types";
++
+ export interface ConversationListItem {
+   conversation_id: number;
+   conversation_title: string;
+@@ -89,8 +94,7 @@ export interface ApiConversationDetail {
+   agent_id?: number | null;
+   chat_mode?: "planning" | "execution";
+   knowledge_scope?:
+-    | import("./knowledgeScope").ConversationKnowledgeScope
+-    | null;
++    import("./knowledgeScope").ConversationKnowledgeScope | null;
+   runtime_metadata?: Record<string, unknown>;
+   runtime_metadata_version?: number;
+   message: ApiMessage[];
+@@ -102,3 +106,29 @@ export interface ApiConversationResponse {
+   data: ApiConversationDetail[];
+   message: string;
+ }
++
++export interface ConversationTrajectoryPage {
++  session: SessionHeader;
++  events: SessionEvent[];
++  from_seq: number;
++  next_seq: number;
++  has_more: boolean;
++  total_events: number;
++}
++
++export interface ConversationTrajectoryForkResult {
++  parent_conversation_id: number;
++  conversation: {
++    conversation_id: number;
++    conversation_title?: string;
++  } & Record<string, unknown>;
++  boundary: number | null;
++  completed_turns: number;
++  session: SessionHeader;
++}
++
++export interface ConversationTrajectoryResponse<T> {
++  code: number;
++  data: T;
++  message: string;
++}

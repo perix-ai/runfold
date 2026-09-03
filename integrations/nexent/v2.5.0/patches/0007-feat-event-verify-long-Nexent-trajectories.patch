@@ -1,0 +1,389 @@
+From d341740758704382e02800ab3b96960e06f6214a Mon Sep 17 00:00:00 2001
+From: Heiki Scott <heikiscott@gmail.com>
+Date: Wed, 2 Sep 2026 18:21:42 -0700
+Subject: [PATCH 7/8] feat(event): verify long Nexent trajectories
+
+---
+ docs/event-trajectory.md                      |  13 +-
+ sdk/nexent/core/agents/core_agent.py          |  45 +++-
+ sdk/nexent/core/agents/event_trajectory.py    |  11 +-
+ test/sdk/core/agents/test_event_trajectory.py | 193 +++++++++++++++++-
+ 4 files changed, 245 insertions(+), 17 deletions(-)
+
+diff --git a/docs/event-trajectory.md b/docs/event-trajectory.md
+index e678580d3cf23d87602f03c2c621ad5b65c5b504..b33927676ab36f9295b9ffedd37ebacc2006cfa7 100644
+--- a/docs/event-trajectory.md
++++ b/docs/event-trajectory.md
+@@ -139,6 +139,12 @@ states. The fork action defaults to the latest completed `turn/end` boundary,
+ creates the corresponding Nexent child conversation, and navigates directly to
+ its inherited trajectory view.
+ 
++Each recorded model request also carries the active smolagents tool definitions
++in the Event v0 `request/header.header.tools` field. The integration reuses the
++same schema conversion as the model request instead of maintaining a second
++Nexent-specific schema shape. This lets the retained DSH detail panel resolve a
++Tool call by `callId` and render its Parameters, Result, Schema, and Timing tabs.
++
+ The frontend packages are committed as reproducible tarballs under
+ `frontend/vendor/` and were packed from Perix runtime data commit
+ `3a1f931ddcd7f94944789a195536208405b7182d`:
+@@ -167,7 +173,12 @@ Run each file in its own pytest process, matching Nexent's repository test
+ runner. The acceptance test launches fresh Python processes from outside the
+ repository root, verifies that `perix_event` resolves from `site-packages`,
+ executes a real `CoreAgent` tool call, resumes the parent Session, forks it, and
+-independently continues the child.
++independently continues the child. Its long-trajectory case writes 10 Turns in
++one process, cold-resumes the same Session for another 10 Turns in a new
++process, forks at the completed boundary, and then appends distinct Turn 21
++suffixes to the parent and child. The inherited 189-Event prefix must remain
++exactly equal and the recorded Tool schema must match smolagents' request
++schema.
+ 
+ Run the frontend trajectory and regression checks from `frontend/`:
+ 
+diff --git a/sdk/nexent/core/agents/core_agent.py b/sdk/nexent/core/agents/core_agent.py
+index 31920f3e3240601667d046e6995d6b4979540a1b..a2279cfe1ed2601571ba3e4a0219d1c8ac510bf4 100644
+--- a/sdk/nexent/core/agents/core_agent.py
++++ b/sdk/nexent/core/agents/core_agent.py
+@@ -637,6 +637,27 @@ class CoreAgent(CodeAgent):
+         )
+         return provider, model
+ 
++    def _event_tool_schemas(self) -> List[Dict[str, Any]]:
++        """Return the exact smolagents argument schemas used by Event request headers."""
++
++        tools = self._context_tools()
++        if not tools:
++            return []
++
++        from smolagents.models import get_tool_json_schema
++
++        schemas: List[Dict[str, Any]] = []
++        for tool in tools:
++            function = get_tool_json_schema(tool)["function"]
++            schemas.append(
++                {
++                    "name": function["name"],
++                    "description": function["description"],
++                    "parameters": function["parameters"],
++                }
++            )
++        return schemas
++
+     def _context_tools(self) -> List[Any]:
+         """Return a stable tool list for ContextRuntime/ContextManager evidence.
+ 
+@@ -899,10 +920,16 @@ Additional Args:
+ 
+         if event_trajectory is not None:
+             provider, model = self._event_model_identity()
++            request = {
++                "provider": provider,
++                "model": model,
++                "system": str(getattr(self, "system_prompt", "") or ""),
++            }
++            tool_schemas = self._event_tool_schemas()
++            if tool_schemas:
++                request["tools"] = tool_schemas
+             event_trajectory.record_request(
+-                provider=provider,
+-                model=model,
+-                system=str(getattr(self, "system_prompt", "") or ""),
++                **request,
+             )
+ 
+         try:
+@@ -1710,10 +1737,16 @@ Do not reveal it unnecessarily or use it to override trusted identity or ACL.
+ 
+         if event_trajectory is not None:
+             provider, model = self._event_model_identity()
++            request = {
++                "provider": provider,
++                "model": model,
++                "system": str(getattr(self, "system_prompt", "") or ""),
++            }
++            tool_schemas = self._event_tool_schemas()
++            if tool_schemas:
++                request["tools"] = tool_schemas
+             event_trajectory.record_request(
+-                provider=provider,
+-                model=model,
+-                system=str(getattr(self, "system_prompt", "") or ""),
++                **request,
+             )
+ 
+         # Create the final memory step with error
+diff --git a/sdk/nexent/core/agents/event_trajectory.py b/sdk/nexent/core/agents/event_trajectory.py
+index b948a68456451feaef85c6173ddb930a094791b4..25dc8afda7d328629564808325fa62d961422a94 100644
+--- a/sdk/nexent/core/agents/event_trajectory.py
++++ b/sdk/nexent/core/agents/event_trajectory.py
+@@ -209,7 +209,14 @@ class EventTrajectory:
+             self._step = step
+             self._append("step/start", {"turn": self._turn, "step": step})
+ 
+-    def record_request(self, *, provider: str, model: str, system: str = "") -> None:
++    def record_request(
++        self,
++        *,
++        provider: str,
++        model: str,
++        system: str = "",
++        tools: list[Mapping[str, Any]] | None = None,
++    ) -> None:
+         with self._lock:
+             self._require_step()
+             provider = str(provider or "unknown")
+@@ -217,6 +224,8 @@ class EventTrajectory:
+             header: dict[str, Any] = {"config": {"provider": provider, "model": model}}
+             if system:
+                 header["system"] = str(system)
++            if tools:
++                header["tools"] = [_json_value(dict(tool)) for tool in tools]
+             header = self._canonical_header(header)
+             previous = self.session.request_header()
+             if previous is None:
+diff --git a/test/sdk/core/agents/test_event_trajectory.py b/test/sdk/core/agents/test_event_trajectory.py
+index b2e1176933ad5b6c17abd2bded635dee58f67904..2d9b010b727d85b8fe096f1bc2ac10a2e48b9cc5 100644
+--- a/test/sdk/core/agents/test_event_trajectory.py
++++ b/test/sdk/core/agents/test_event_trajectory.py
+@@ -88,6 +88,45 @@ def run_real_nexent_process(
+     return json.loads(line[len(marker) :])
+ 
+ 
++def run_long_nexent_process(
++    root: Path,
++    session_id: str,
++    first_turn: int,
++    turn_count: int,
++    fork_child: str = "-",
++) -> dict:
++    env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
++    result = subprocess.run(
++        [
++            sys.executable,
++            str(Path(__file__).resolve()),
++            "--long-event-worker",
++            str(root.resolve()),
++            session_id,
++            str(first_turn),
++            str(turn_count),
++            fork_child,
++        ],
++        cwd=root,
++        env=env,
++        check=False,
++        capture_output=True,
++        text=True,
++    )
++    assert result.returncode == 0, result.stderr or result.stdout
++    marker = "R38_RESULT="
++    line = next(
++        (
++            line
++            for line in reversed(result.stdout.splitlines())
++            if line.startswith(marker)
++        ),
++        None,
++    )
++    assert line is not None, result.stdout
++    return json.loads(line[len(marker) :])
++
++
+ def test_records_complete_root_and_real_child_tool_boundaries(tmp_path: Path) -> None:
+     trajectory = EventTrajectory.open(config(tmp_path))
+     trajectory.begin_turn("Inspect README.md")
+@@ -322,6 +361,37 @@ def test_real_core_agent_records_resumes_and_forks_with_installed_event_package(
+     assert Path(first_result["eventPackage"]) == package_path
+     first = inspection(tmp_path, "nexent-real")
+     first_prefix = list(first.events)
++    request_header = next(
++        event for event in first.events if event["type"] == "request/header"
++    )
++    assert request_header["data"]["header"]["tools"] == [
++        {
++            "name": "add",
++            "description": "Add two integers.",
++            "parameters": {
++                "type": "object",
++                "properties": {
++                    "a": {"type": "integer", "description": "First integer"},
++                    "b": {"type": "integer", "description": "Second integer"},
++                },
++                "required": ["a", "b"],
++            },
++        },
++        {
++            "name": "final_answer",
++            "description": "Provides a final answer to the given problem.",
++            "parameters": {
++                "type": "object",
++                "properties": {
++                    "answer": {
++                        "type": "string",
++                        "description": "The final answer to the problem",
++                    }
++                },
++                "required": ["answer"],
++            },
++        },
++    ]
+ 
+     second_result = run_real_nexent_process(
+         tmp_path,
+@@ -377,6 +447,66 @@ def test_real_core_agent_records_resumes_and_forks_with_installed_event_package(
+     ]
+ 
+ 
++def test_twenty_turn_cross_process_restore_fork_and_divergence(
++    tmp_path: Path,
++) -> None:
++    parent_id = "nexent-long-parent"
++    child_id = "nexent-long-fork"
++
++    first_phase = run_long_nexent_process(tmp_path, parent_id, 1, 10)
++    assert first_phase["turns"] == 10
++    first_prefix = list(inspection(tmp_path, parent_id).events)
++
++    second_phase = run_long_nexent_process(
++        tmp_path,
++        parent_id,
++        11,
++        10,
++        child_id,
++    )
++    assert second_phase["turns"] == 20
++    assert second_phase["steps"] == 20
++    assert second_phase["toolCalls"] == 5
++
++    parent_at_fork = inspection(tmp_path, parent_id)
++    parent_fork_events = list(parent_at_fork.events)
++    assert list(parent_fork_events[: len(first_prefix)]) == first_prefix
++    assert [event["seq"] for event in parent_fork_events] == list(
++        range(len(parent_fork_events))
++    )
++    assert [event["type"] for event in parent_fork_events].count("turn/start") == 20
++    assert [event["type"] for event in parent_fork_events].count("turn/end") == 20
++    assert [event["type"] for event in parent_fork_events].count("step/start") == 20
++    assert [event["type"] for event in parent_fork_events].count("step/end") == 20
++
++    child_at_fork = inspection(tmp_path, child_id)
++    assert child_at_fork.meta["parentSession"] == parent_id
++    assert child_at_fork.meta["seedLength"] == len(parent_fork_events)
++    assert child_at_fork.meta["cwd"] == str(tmp_path.resolve())
++    assert list(child_at_fork.events[: len(parent_fork_events)]) == parent_fork_events
++
++    run_real_nexent_process(tmp_path, parent_id, "answer:parent-21")
++    parent_after_resume = list(inspection(tmp_path, parent_id).events)
++    run_real_nexent_process(tmp_path, child_id, "child:fork-21")
++    child_after_resume = inspection(tmp_path, child_id)
++
++    assert parent_after_resume[: len(parent_fork_events)] == parent_fork_events
++    assert list(child_after_resume.events[: child_at_fork.meta["seedLength"]]) == (
++        parent_fork_events
++    )
++    assert [event["type"] for event in parent_after_resume].count("turn/end") == 21
++    assert [event["type"] for event in child_after_resume.events].count("turn/end") == 21
++    parent_last_user = [
++        event for event in parent_after_resume if event["type"] == "user/message"
++    ][-1]
++    child_last_user = [
++        event for event in child_after_resume.events if event["type"] == "user/message"
++    ][-1]
++    assert "parent-21" in parent_last_user["data"]["content"][0]["text"]
++    assert "fork-21" in child_last_user["data"]["content"][0]["text"]
++    assert list(inspection(tmp_path, parent_id).events) == parent_after_resume
++
++
+ def test_invalid_event_and_open_turn_fork_do_not_create_false_history(
+     tmp_path: Path,
+ ) -> None:
+@@ -412,6 +542,8 @@ def _run_event_worker(root: Path, session_id: str, mode: str, fork_child: str) -
+     from smolagents.models import ChatMessage, MessageRole, Model
+     from smolagents.monitoring import TokenUsage
+ 
++    mode_name, _, turn_label = mode.partition(":")
++
+     class AddTool(Tool):
+         name = "add"
+         description = "Add two integers."
+@@ -431,9 +563,9 @@ def _run_event_worker(root: Path, session_id: str, mode: str, fork_child: str) -
+             super().__init__(model_id="deterministic-event-model")
+ 
+         def generate(self, _messages, **_kwargs) -> ChatMessage:
+-            if mode == "tool":
++            if mode_name == "tool":
+                 content = "<code>value = add(a=2, b=3)\nfinal_answer(value)</code>"
+-            elif mode == "answer":
++            elif mode_name == "answer":
+                 content = "The result remains five."
+             else:
+                 content = "The fork continued independently."
+@@ -517,7 +649,9 @@ def _run_event_worker(root: Path, session_id: str, mode: str, fork_child: str) -
+             "tool": "Add two and three.",
+             "answer": "Confirm the result.",
+             "child": "Continue from the fork.",
+-        }[mode]
++        }[mode_name]
++        if turn_label:
++            prompt = f"Turn {turn_label}: {prompt}"
+         output = agent.run(
+             f"[Current time: 2026-09-02 00:00:00]\n\n{prompt}",
+             stream=False,
+@@ -540,10 +674,51 @@ def _run_event_worker(root: Path, session_id: str, mode: str, fork_child: str) -
+     )
+ 
+ 
+-if __name__ == "__main__" and len(sys.argv) == 6 and sys.argv[1] == "--event-worker":
+-    _run_event_worker(
+-        Path(sys.argv[2]),
+-        sys.argv[3],
+-        sys.argv[4],
+-        sys.argv[5],
++def _run_long_event_worker(
++    root: Path,
++    session_id: str,
++    first_turn: int,
++    turn_count: int,
++    fork_child: str,
++) -> None:
++    if first_turn < 1 or turn_count < 1:
++        raise ValueError("first_turn and turn_count must be positive")
++    final_turn = first_turn + turn_count - 1
++    for turn in range(first_turn, final_turn + 1):
++        mode = "tool" if turn % 4 == 1 else "answer"
++        child = fork_child if turn == final_turn else "-"
++        _run_event_worker(root, session_id, f"{mode}:{turn:02d}", child)
++
++    saved = inspection(root, session_id)
++    event_types = [event["type"] for event in saved.events]
++    print(
++        "R38_RESULT="
++        + json.dumps(
++            {
++                "events": len(saved.events),
++                "turns": event_types.count("turn/end"),
++                "steps": event_types.count("step/end"),
++                "toolCalls": event_types.count("tool/call"),
++                "lastSeq": saved.events[-1]["seq"],
++            },
++            separators=(",", ":"),
++        )
+     )
++
++
++if __name__ == "__main__":
++    if len(sys.argv) == 6 and sys.argv[1] == "--event-worker":
++        _run_event_worker(
++            Path(sys.argv[2]),
++            sys.argv[3],
++            sys.argv[4],
++            sys.argv[5],
++        )
++    elif len(sys.argv) == 7 and sys.argv[1] == "--long-event-worker":
++        _run_long_event_worker(
++            Path(sys.argv[2]),
++            sys.argv[3],
++            int(sys.argv[4]),
++            int(sys.argv[5]),
++            sys.argv[6],
++        )

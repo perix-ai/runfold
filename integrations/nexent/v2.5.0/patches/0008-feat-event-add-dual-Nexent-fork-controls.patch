@@ -1,0 +1,422 @@
+From f10c9b54f7cdf0dadd3beb4a2e87ab1383fe077d Mon Sep 17 00:00:00 2001
+From: Heiki Scott <heikiscott@gmail.com>
+Date: Wed, 2 Sep 2026 20:26:26 -0700
+Subject: [PATCH 8/8] feat(event): add dual Nexent fork controls
+
+---
+ .../conversation-trajectory-panel.tsx         | 50 +++++++++-
+ .../[locale]/newchat/assistant-ui/thread.tsx  | 98 +++++++++++++++++--
+ frontend/lib/conversationTrajectory.ts        | 29 +++++-
+ frontend/public/locales/en/common.json        |  5 +
+ frontend/public/locales/zh/common.json        |  5 +
+ frontend/tests/conversationTrajectory.test.ts | 29 ++++++
+ 6 files changed, 199 insertions(+), 17 deletions(-)
+
+diff --git a/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx b/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx
+index aad4267498e9c0154858cb799cf526886aa553e1..e0615c8ac2331951e8f5fcbafa1382e1480e2b4a 100644
+--- a/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx
++++ b/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx
+@@ -15,9 +15,9 @@ import "@perix/event-ui/style.css";
+ import { Button } from "@/components/ui/button";
+ import {
+   conversationUrlForFork,
+-  latestStableForkBoundary,
+   loadConversationTrajectory,
+   mergeConversationTrajectory,
++  stableForkBoundaries,
+   trajectoryFailureStatus,
+   writeConversationView,
+ } from "@/lib/conversationTrajectory";
+@@ -75,6 +75,9 @@ export function ConversationTrajectoryPanel({
+   const [state, setState] = useState<TrajectoryState>(initialState);
+   const [isForking, setIsForking] = useState(false);
+   const [forkError, setForkError] = useState<string>();
++  const [requestedForkBoundary, setRequestedForkBoundary] = useState<
++    number | null
++  >(null);
+ 
+   useEffect(() => {
+     const body = document.body;
+@@ -153,10 +156,25 @@ export function ConversationTrajectoryPanel({
+     };
+   }, [conversationId, isRunning, reloadKey]);
+ 
+-  const stableBoundary = useMemo(
+-    () => latestStableForkBoundary(state.events),
++  const forkBoundaries = useMemo(
++    () => stableForkBoundaries(state.events),
+     [state.events]
+   );
++  const stableBoundary = useMemo(() => {
++    if (
++      requestedForkBoundary !== null &&
++      forkBoundaries.some(
++        (candidate) => candidate.boundary === requestedForkBoundary
++      )
++    ) {
++      return requestedForkBoundary;
++    }
++    return forkBoundaries.at(-1)?.boundary;
++  }, [forkBoundaries, requestedForkBoundary]);
++
++  useEffect(() => {
++    setRequestedForkBoundary(null);
++  }, [conversationId]);
+ 
+   const forkTrajectory = async () => {
+     if (stableBoundary === undefined || isRunning || isForking) return;
+@@ -232,6 +250,32 @@ export function ConversationTrajectoryPanel({
+             </span>
+           )}
+         </div>
++        <label className="flex h-7 shrink-0 items-center gap-1.5 text-muted-foreground">
++          <span>{t("chatInterface.trajectoryForkPoint", "分叉点")}</span>
++          <select
++            className="h-7 max-w-44 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
++            aria-label={t("chatInterface.trajectoryForkPoint", "分叉点")}
++            data-testid="trajectory-fork-boundary"
++            value={stableBoundary ?? ""}
++            disabled={forkBoundaries.length === 0 || isRunning || isForking}
++            onChange={(event) => {
++              const boundary = Number(event.currentTarget.value);
++              if (Number.isSafeInteger(boundary)) {
++                setRequestedForkBoundary(boundary);
++              }
++            }}
++          >
++            {forkBoundaries.map((candidate) => (
++              <option key={candidate.boundary} value={candidate.boundary}>
++                {t("chatInterface.trajectoryForkPointOption", {
++                  turn: candidate.turn,
++                  boundary: candidate.boundary,
++                  defaultValue: "第 {{turn}} 轮 · Event {{boundary}}",
++                })}
++              </option>
++            ))}
++          </select>
++        </label>
+         <Button
+           type="button"
+           variant="ghost"
+diff --git a/frontend/app/[locale]/newchat/assistant-ui/thread.tsx b/frontend/app/[locale]/newchat/assistant-ui/thread.tsx
+index 5017274bfbecbd79db269cddd2fa9c61b05256a3..7bb546761bd7ee3a687876228ebf4db52629b3e5 100644
+--- a/frontend/app/[locale]/newchat/assistant-ui/thread.tsx
++++ b/frontend/app/[locale]/newchat/assistant-ui/thread.tsx
+@@ -49,6 +49,7 @@ import {
+   CopyIcon,
+   DownloadIcon,
+   FileTextIcon,
++  GitForkIcon,
+   ImageIcon,
+   MoreHorizontalIcon,
+   RefreshCwIcon,
+@@ -114,7 +115,10 @@ import { SkillFileCard } from "../ui/skill-file-card";
+ import type { SkillFileContent } from "@/types/skill";
+ import { ConversationTrajectoryPanel } from "./conversation-trajectory-panel";
+ import {
++  conversationUrlForFork,
++  loadConversationTrajectory,
+   readConversationView,
++  stableForkBoundaryForTurn,
+   writeConversationView,
+   type ConversationView,
+ } from "@/lib/conversationTrajectory";
+@@ -780,6 +784,7 @@ const ThreadView: FC<ThreadViewProps> = ({
+               {hasMessages ? (
+                 <ThreadMessages
+                   agent={agent}
++                  conversationId={conversationId}
+                   readOnly={readOnly}
+                   enableSkillDirectives={Boolean(skillFiles)}
+                   onSkillFileSelect={onSkillFileSelect}
+@@ -957,6 +962,7 @@ const ThreadWelcomeContent: FC<ThreadWelcomeContentProps> = ({
+ 
+ export const ThreadMessages: FC<{
+   agent: Agent | PublishedAgent;
++  conversationId?: number;
+   readOnly?: boolean;
+   shareMode?: boolean;
+   selectedShareMessageIds?: Set<number>;
+@@ -966,6 +972,7 @@ export const ThreadMessages: FC<{
+   onSkillFileSelect?: (path: string) => void;
+ }> = ({
+   agent,
++  conversationId,
+   readOnly = false,
+   shareMode = false,
+   selectedShareMessageIds,
+@@ -1012,12 +1019,13 @@ export const ThreadMessages: FC<{
+       AssistantMessage: () => (
+         <AssistantMessage
+           agent={agent}
++          conversationId={conversationId}
+           readOnly={readOnly}
+           onSkillFileSelect={onSkillFileSelect}
+         />
+       ),
+     }),
+-    [agent, enableSkillDirectives, onSkillFileSelect, readOnly]
++    [agent, conversationId, enableSkillDirectives, onSkillFileSelect, readOnly]
+   );
+ 
+   if (shareMode) {
+@@ -1083,6 +1091,7 @@ export const ThreadMessages: FC<{
+         return (
+           <AssistantMessage
+             agent={agent}
++            conversationId={conversationId}
+             readOnly={readOnly}
+             onSkillFileSelect={onSkillFileSelect}
+           />
+@@ -1223,9 +1232,10 @@ const MessageDateSeparator: FC = () => {
+ 
+ const AssistantMessage: FC<{
+   agent: Agent | PublishedAgent;
++  conversationId?: number;
+   readOnly?: boolean;
+   onSkillFileSelect?: (path: string) => void;
+-}> = ({ agent, readOnly = false, onSkillFileSelect }) => {
++}> = ({ agent, conversationId, readOnly = false, onSkillFileSelect }) => {
+   const { t } = useTranslation();
+   // Reserves space for the action bar; `-mb` compensates so the action bar's
+   // hover-revealed position does not shift the message spacing. For pt-[n]
+@@ -1304,11 +1314,13 @@ const AssistantMessage: FC<{
+                 Boolean((part as { image?: string }).image)) ||
+               (part.type === "text" &&
+                 Boolean(
+-                  (part as {
+-                    isSearchImage?: boolean;
+-                    imageSource?: SourcePartLike;
+-                  }).isSearchImage &&
+-                    (part as { imageSource?: SourcePartLike }).imageSource
++                  (
++                    part as {
++                      isSearchImage?: boolean;
++                      imageSource?: SourcePartLike;
++                    }
++                  ).isSearchImage &&
++                  (part as { imageSource?: SourcePartLike }).imageSource
+                 ));
+             const chainPath: `group-${string}`[] = isImagePart
+               ? ["group-image"]
+@@ -1531,14 +1543,67 @@ const AssistantMessage: FC<{
+         className={cn("ml-2 flex items-center", ACTION_BAR_HEIGHT)}
+       >
+         {!readOnly && <BranchPicker />}
+-        {!readOnly && <AssistantActionBar />}
++        {!readOnly && <AssistantActionBar conversationId={conversationId} />}
+       </div>
+     </MessagePrimitive.Root>
+   );
+ };
+ 
+-const AssistantActionBar: FC = () => {
++const AssistantActionBar: FC<{ conversationId?: number }> = ({
++  conversationId,
++}) => {
+   const { t } = useTranslation();
++  const [isForking, setIsForking] = useState(false);
++  const isRunning = useAuiState((s) => s.thread.isRunning);
++  const isComplete = useAuiState((s) => s.message.status?.type === "complete");
++  const turnNumber = useAuiState((s) => {
++    let turn = 0;
++    for (let index = 0; index <= s.message.index; index += 1) {
++      if (s.thread.messages[index]?.role === "assistant") turn += 1;
++    }
++    return turn;
++  });
++
++  const forkFromMessage = useCallback(async () => {
++    if (!conversationId || !isComplete || isRunning || isForking) return;
++    setIsForking(true);
++    try {
++      const trajectory = await loadConversationTrajectory((fromSeq, limit) =>
++        conversationService.getTrajectory(conversationId, { fromSeq, limit })
++      );
++      const boundary = stableForkBoundaryForTurn(trajectory.events, turnNumber);
++      if (boundary === undefined) {
++        throw new Error(
++          t(
++            "chatInterface.messageForkUnavailable",
++            "这条消息没有可用的完成 Turn 边界"
++          )
++        );
++      }
++      const result = await conversationService.forkTrajectory(conversationId, {
++        boundary,
++      });
++      const childId = Number(result.conversation.conversation_id);
++      if (!Number.isSafeInteger(childId) || childId <= 0) {
++        throw new Error("Fork response has no valid child conversation id");
++      }
++      try {
++        writeConversationView(window.localStorage, childId, "conversation");
++      } catch {
++        // Navigation must still succeed when browser storage is unavailable.
++      }
++      window.location.assign(
++        conversationUrlForFork(window.location.href, childId)
++      );
++    } catch (error) {
++      message.error(
++        error instanceof Error
++          ? error.message
++          : t("chatInterface.messageForkFailed", "分叉失败")
++      );
++      setIsForking(false);
++    }
++  }, [conversationId, isComplete, isForking, isRunning, t, turnNumber]);
+ 
+   return (
+     <ActionBarPrimitive.Root
+@@ -1557,6 +1622,21 @@ const AssistantActionBar: FC = () => {
+             </AuiIf>
+           </TooltipIconButton>
+         </ActionBarPrimitive.Copy>
++        {conversationId && (
++          <TooltipIconButton
++            tooltip={
++              isForking
++                ? t("chatInterface.trajectoryForking", "分叉中…")
++                : t("chatInterface.messageFork", "从此轮分叉")
++            }
++            aria-label={t("chatInterface.messageFork", "从此轮分叉")}
++            disabled={!isComplete || isRunning || isForking}
++            data-testid={`chat-fork-turn-${turnNumber}`}
++            onClick={() => void forkFromMessage()}
++          >
++            <GitForkIcon />
++          </TooltipIconButton>
++        )}
+         <ActionBarPrimitive.Reload asChild>
+           <TooltipIconButton tooltip={t("chat.thread.refresh")}>
+             <RefreshCwIcon />
+diff --git a/frontend/lib/conversationTrajectory.ts b/frontend/lib/conversationTrajectory.ts
+index cc2c137e895747d4a59ed192cd153755f996223c..87c8d916817a01b0bb5ad4cfbe41b3687a8dd475 100644
+--- a/frontend/lib/conversationTrajectory.ts
++++ b/frontend/lib/conversationTrajectory.ts
+@@ -23,6 +23,11 @@ export interface LoadedConversationTrajectory {
+   totalEvents: number;
+ }
+ 
++export interface StableForkBoundary {
++  turn: number;
++  boundary: number;
++}
++
+ export type ConversationTrajectoryPageFetcher = (
+   fromSeq: number,
+   limit: number
+@@ -146,14 +151,28 @@ export function mergeConversationTrajectory(
+   return [...current, ...update.events];
+ }
+ 
++export function stableForkBoundaries(
++  events: readonly SessionEvent[]
++): StableForkBoundary[] {
++  return events.flatMap((event) =>
++    event.type === "turn/end"
++      ? [{ turn: event.data.turn, boundary: event.seq }]
++      : []
++  );
++}
++
++export function stableForkBoundaryForTurn(
++  events: readonly SessionEvent[],
++  turn: number
++): number | undefined {
++  return stableForkBoundaries(events).find((item) => item.turn === turn)
++    ?.boundary;
++}
++
+ export function latestStableForkBoundary(
+   events: readonly SessionEvent[]
+ ): number | undefined {
+-  for (let index = events.length - 1; index >= 0; index -= 1) {
+-    const event = events[index];
+-    if (event?.type === "turn/end") return event.seq;
+-  }
+-  return undefined;
++  return stableForkBoundaries(events).at(-1)?.boundary;
+ }
+ 
+ export function trajectoryFailureStatus(
+diff --git a/frontend/public/locales/en/common.json b/frontend/public/locales/en/common.json
+index 4af2cbb96b9bea9677dac6a2a29aa89069807a11..753594ea9138670b041b372b8cfa00b73ec6795e 100644
+--- a/frontend/public/locales/en/common.json
++++ b/frontend/public/locales/en/common.json
+@@ -4877,6 +4877,11 @@
+   "chatInterface.trajectoryForkUnavailable": "No completed Turn is available to fork",
+   "chatInterface.trajectoryForking": "Forking…",
+   "chatInterface.trajectoryFork": "Fork",
++  "chatInterface.trajectoryForkPoint": "Fork point",
++  "chatInterface.trajectoryForkPointOption": "Turn {{turn}} · Event {{boundary}}",
++  "chatInterface.messageFork": "Fork from this turn",
++  "chatInterface.messageForkUnavailable": "This message has no completed Turn boundary",
++  "chatInterface.messageForkFailed": "Fork failed",
+   "chatInterface.trajectoryEmpty": "The Event Session has no events",
+   "chatInterface.trajectoryMissing": "This conversation has no Event trajectory yet",
+   "chatInterface.trajectoryUnavailable": "Event trajectory is currently unavailable",
+diff --git a/frontend/public/locales/zh/common.json b/frontend/public/locales/zh/common.json
+index 31f7b6b1f0f10c28586609b1e0a867bbca024547..d804b81829c6aad7a23c5d91cab88a7e1b841427 100644
+--- a/frontend/public/locales/zh/common.json
++++ b/frontend/public/locales/zh/common.json
+@@ -4891,6 +4891,11 @@
+   "chatInterface.trajectoryForkUnavailable": "尚无已完成的 Turn 可供分叉",
+   "chatInterface.trajectoryForking": "分叉中…",
+   "chatInterface.trajectoryFork": "分叉",
++  "chatInterface.trajectoryForkPoint": "分叉点",
++  "chatInterface.trajectoryForkPointOption": "第 {{turn}} 轮 · Event {{boundary}}",
++  "chatInterface.messageFork": "从此轮分叉",
++  "chatInterface.messageForkUnavailable": "这条消息没有可用的完成 Turn 边界",
++  "chatInterface.messageForkFailed": "分叉失败",
+   "chatInterface.trajectoryEmpty": "Event Session 暂无事件",
+   "chatInterface.trajectoryMissing": "该会话尚未生成 Event 轨迹",
+   "chatInterface.trajectoryUnavailable": "Event 轨迹功能当前不可用",
+diff --git a/frontend/tests/conversationTrajectory.test.ts b/frontend/tests/conversationTrajectory.test.ts
+index 6b3ce1687743886b7e216c60380a1049cf0bb811..3abaa840f18752134d018b85e859b02de69da51d 100644
+--- a/frontend/tests/conversationTrajectory.test.ts
++++ b/frontend/tests/conversationTrajectory.test.ts
+@@ -13,6 +13,8 @@ import {
+   loadConversationTrajectory,
+   mergeConversationTrajectory,
+   readConversationView,
++  stableForkBoundaries,
++  stableForkBoundaryForTurn,
+   trajectoryFailureStatus,
+   writeConversationView,
+   // @ts-expect-error -- Node's built-in TypeScript runner needs the extension.
+@@ -156,6 +158,33 @@ test("selects the latest completed turn as a stable fork boundary", () => {
+   assert.equal(latestStableForkBoundary([event(0)]), undefined);
+ });
+ 
++test("lists every completed Turn for precise trajectory forks", () => {
++  const events = [
++    event(0),
++    {
++      type: "turn/end",
++      seq: 4,
++      time: 5,
++      data: { turn: 1, reason: { kind: "completed" } },
++    },
++    { ...event(5), data: { turn: 2 } },
++    {
++      type: "turn/end",
++      seq: 9,
++      time: 10,
++      data: { turn: 2, reason: { kind: "interrupted" } },
++    },
++  ] as SessionEvent[];
++
++  assert.deepEqual(stableForkBoundaries(events), [
++    { turn: 1, boundary: 4 },
++    { turn: 2, boundary: 9 },
++  ]);
++  assert.equal(stableForkBoundaryForTurn(events, 1), 4);
++  assert.equal(stableForkBoundaryForTurn(events, 2), 9);
++  assert.equal(stableForkBoundaryForTurn(events, 3), undefined);
++});
++
+ test("persists the selected view per conversation", () => {
+   const values = new Map<string, string>();
+   const storage = {

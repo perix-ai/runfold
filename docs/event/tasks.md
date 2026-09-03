@@ -4,8 +4,8 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R43 与第 7 节总验收全部完成；R44 正在把 Nexent
-> v2.5.0 本地实验分支纳管为可重放、可校验的下游集成补丁。R43 已将 Nexent
+> 总体状态（2026-09-02）：R01–R44 与第 7 节总验收全部完成。R44 已把 Nexent
+> v2.5.0 本地实验分支纳管为可重放、可校验的下游集成补丁；R43 已将 Nexent
 > Demo 的合成脚本、真实截图和旁白源文件纳入 `scripts/event/demos/nexent/`；
 > 发布成品继续位于 `docs/event/demos/nexent/`，并可从仓库素材离线精确重制。
 > `npm run verify`
@@ -678,7 +678,7 @@
     均通过；重制 MP4、封面和旁白 PCM 分别与发布成品逐字节或逐样本相同。完整
     命令、哈希和环境边界见 R43 任务书。
 
-- [ ] **R44** · 难度 中 · 风险 中 · 位置 `integrations/nexent/v2.5.0/`
+- [x] **R44** · 难度 中 · 风险 中 · 位置 `integrations/nexent/v2.5.0/`
   - **问题**：Nexent 的 Event 记录、restore/resume/fork、后端接口和 UI 接入只
     存在于无 remote 的本地实验分支，当前仓库不能独立重放这些产品改动。
   - **处理**：按
@@ -686,6 +686,13 @@
     为版本化 Git patch series，并纳管基线 manifest、顺序、哈希和应用说明；在
     干净 v2.5.0 基线上重放并验证结果 tree 与实验分支完全一致。
   - **依赖**：R33、R37、R38、R40；不复制 Nexent 完整源码，不推送 Nexent。
+  - **结果**：已完成（2026-09-02）。8 个原始提交以 Git binary patch series
+    纳管；manifest、series、SHA-256 和应用说明完整，38 个变更文件及两个固定
+    Event 前端包均包含在内。
+  - **验证**：在不含实验提交对象的新仓库中从精确 baseline tree 按 series 重放
+    成功，最终 tree 与 `f10c9b5` 完全一致；新鲜 format-patch 输出逐字节一致，
+    本仓 1005 个行为测试、三个构建和双语言空白消费者门禁通过。完整证据见 R44
+    任务书。
 
 ## 7. 总体验收
 

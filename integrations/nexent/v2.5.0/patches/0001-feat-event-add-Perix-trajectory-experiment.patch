@@ -1,0 +1,2150 @@
+From 5c597209bb4a01866dc073ddacf7a2e682dd6d71 Mon Sep 17 00:00:00 2001
+From: Heiki Scott <heikiscott@gmail.com>
+Date: Wed, 2 Sep 2026 04:55:52 -0700
+Subject: [PATCH 1/8] feat(event): add Perix trajectory experiment
+
+Local validation only on the Nexent v2.5.0 release snapshot; intentionally has no remote.
+---
+ README.md                                     |   1 +
+ README_CN.md                                  |   1 +
+ docs/event-trajectory.md                      | 103 ++++
+ sdk/nexent/core/agents/__init__.py            |   1 +
+ sdk/nexent/core/agents/agent_model.py         |  26 +
+ sdk/nexent/core/agents/core_agent.py          | 181 +++++-
+ sdk/nexent/core/agents/event_trajectory.py    | 407 +++++++++++++
+ sdk/nexent/core/agents/nexent_agent.py        |   6 +-
+ sdk/nexent/core/agents/run_agent.py           |  21 +-
+ sdk/pyproject.toml                            |   5 +-
+ test/sdk/core/agents/test_agent_model.py      |  27 +
+ test/sdk/core/agents/test_core_agent.py       | 355 +++++++++++
+ test/sdk/core/agents/test_event_trajectory.py | 549 ++++++++++++++++++
+ test/sdk/core/agents/test_run_agent.py        |  22 +
+ 14 files changed, 1692 insertions(+), 13 deletions(-)
+ create mode 100644 docs/event-trajectory.md
+ create mode 100644 sdk/nexent/core/agents/event_trajectory.py
+ create mode 100644 test/sdk/core/agents/test_event_trajectory.py
+
+diff --git a/README.md b/README.md
+index de8fffeb480e9ad352574401bcd8ceda9fa3e9f3..d5669efb91e951ec4b11fdcda8b4749b57a5b179 100644
+--- a/README.md
++++ b/README.md
+@@ -119,6 +119,7 @@ Ready to dive deeper? Here are the main documentation entry points:
+ - **[Core Features](https://modelengine-group.github.io/nexent/en/getting-started/features.html)** — Comprehensive feature documentation
+ - **[User Guide](https://modelengine-group.github.io/nexent/en/user-guide/home-page.html)** — Agent development and usage
+ - **[Developer Guide](https://modelengine-group.github.io/nexent/en/developer-guide/overview)** — Build from source and customization
++- **[Event Trajectories](docs/event-trajectory.md)** — Record, resume, and fork agent runs with the optional Python Event SDK
+ - **[FAQ](https://modelengine-group.github.io/nexent/en/quick-start/faq.html)** — Common questions and troubleshooting
+ 
+ # 📄 License
+diff --git a/README_CN.md b/README_CN.md
+index 1a4052b8cadd8ea275e5a21998ab9d9bdc46f594..f755f57499eb5b13b8e17ff6b11268ae2d22089d 100644
+--- a/README_CN.md
++++ b/README_CN.md
+@@ -117,6 +117,7 @@ Nexent 为构建强大的 AI 智能体提供全面的功能集：
+ - **[核心特性详解](https://modelengine-group.github.io/nexent/zh/getting-started/features.html)** — 完整的功能说明
+ - **[用户指南](https://modelengine-group.github.io/nexent/zh/user-guide/home-page.html)** — 智能体开发与使用
+ - **[开发者指南](https://modelengine-group.github.io/nexent/zh/developer-guide/overview)** — 从源码构建和自定义
++- **[Event 轨迹](docs/event-trajectory.md)** — 使用可选 Python Event SDK 记录、恢复和 fork 智能体运行
+ - **[常见问题](https://modelengine-group.github.io/nexent/zh/quick-start/faq.html)** — 常见问题和故障排除
+ 
+ # 📄 许可证
+diff --git a/docs/event-trajectory.md b/docs/event-trajectory.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..492c55be0a4553d510e0f7f86a870024d18b5e05
+--- /dev/null
++++ b/docs/event-trajectory.md
+@@ -0,0 +1,103 @@
++# Event trajectory recording
++
++Nexent can optionally persist an agent run as a Perix Event v0 trajectory. The
++integration runs entirely inside the Python process: it does not require a Node
++server, sidecar, or TypeScript runtime.
++
++## Install
++
++The `event` extra is pinned to the exact Perix Event source revision used by
++this integration:
++
++```bash
++uv pip install './sdk[event]'
++```
++
++The current pin is `perix-event-sdk` 0.1.0 from Perix runtime data commit
++`2eea3f17e6a917ef3d640405b360664728d31e84`. Production deployments may install
++the wheel built from that revision instead, as long as they keep the same
++package version and Event v0 format.
++
++## Record a run
++
++Pass an explicit `EventTrajectoryConfig` when constructing `AgentRunInfo`:
++
++```python
++from nexent.core.agents import AgentRunInfo, EventTrajectoryConfig
++
++run_info = AgentRunInfo(
++    # Existing AgentRunInfo fields are omitted here.
++    event_trajectory=EventTrajectoryConfig(
++        root="/var/lib/nexent/events",
++        session_id="tenant-user-conversation",
++        cwd="/srv/nexent/workspaces/tenant-user-conversation",
++        compression="none",
++    ),
++)
++```
++
++`root`, `session_id`, and `cwd` are caller-owned stable identities. The SDK
++does not read environment variables. Use a tenant-qualified session id and a
++persistent root shared by the processes that may resume the conversation.
++Both `root` and `cwd` must be absolute. A resumed session must use the same
++`cwd` recorded in its header. Keep the selected compression (`none` or `zstd`)
++unchanged for a root.
++
++`agent_run_thread()` acquires one process-level writer lease, creates or
++resumes the configured Session, records the root agent's turn and real
++model/tool boundaries, flushes every Event before the corresponding side
++effect, and closes the Session when the worker exits. A concurrent writer for
++the same session id is rejected. Managed agents do not create a second writer
++for the root Session.
++
++## Inspect, resume, and fork
++
++Use the native Python Event package after the Nexent run has released its
++writer lease:
++
++```python
++from perix_event import JsonlSessionPersistence, SessionStore
++
++persistence = JsonlSessionPersistence(
++    "/var/lib/nexent/events",
++    compression="none",
++)
++
++# Read-only inspection does not publish a live Session.
++inspection = persistence.inspect("tenant-user-conversation")
++
++# restore() and resume() are equivalent live-session entry points.
++store = SessionStore(persistence)
++session = store.resume("tenant-user-conversation")
++child = store.fork(
++    session,
++    child_session_id="tenant-user-conversation-fork",
++)
++store.flush(child)
++store.close()
++```
++
++Do not open a second `SessionStore` writer while Nexent is recording the same
++Session. Cold restore repairs an interrupted open turn according to Event v0;
++fork accepts only a stable boundary outside an open turn. The resulting JSONL
++artifacts are the common Perix Event format and can be restored directly by the
++TypeScript SDK and rendered by the Trajectory UI.
++
++## Verification
++
++Install both optional test groups and run the focused acceptance suite:
++
++```bash
++uv pip install -e './sdk[event,quality]'
++python -m pytest test/sdk/core/agents/test_event_trajectory.py -q
++python -m pytest test/sdk/core/agents/test_core_agent.py -q
++python -m pytest test/sdk/core/agents/test_run_agent.py -q
++python -m pytest test/sdk/core/agents/test_nexent_agent.py -q
++python -m pytest test/sdk/core/agents/test_agent_model.py -q
++```
++
++Run each file in its own pytest process, matching Nexent's repository test
++runner. The acceptance test launches fresh Python processes from outside the
++repository root, verifies that `perix_event` resolves from `site-packages`,
++executes a real `CoreAgent` tool call, resumes the parent Session, forks it, and
++independently continues the child.
+diff --git a/sdk/nexent/core/agents/__init__.py b/sdk/nexent/core/agents/__init__.py
+index 3c5ca07c3495bbbb851cd0bda88a5071680d06c4..21a93638480da175b9ac3c1000f173ff74b786b6 100644
+--- a/sdk/nexent/core/agents/__init__.py
++++ b/sdk/nexent/core/agents/__init__.py
+@@ -21,6 +21,7 @@ _EXPORTS = {
+     "AgentConfig": (_AGENT_MODEL_MODULE, "AgentConfig"),
+     "AgentRunInfo": (_AGENT_MODEL_MODULE, "AgentRunInfo"),
+     "AgentHistory": (_AGENT_MODEL_MODULE, "AgentHistory"),
++    "EventTrajectoryConfig": (_AGENT_MODEL_MODULE, "EventTrajectoryConfig"),
+     "ContextItem": (".context", "ContextItem"),
+     "ContextItemInput": (".context", "ContextItemInput"),
+     "ContextItemType": (".context", "ContextItemType"),
+diff --git a/sdk/nexent/core/agents/agent_model.py b/sdk/nexent/core/agents/agent_model.py
+index bee5e05ce53b05afc2e3b7b7c28d628b24dbdfc5..9dde5f6f8c2546a818428a066c087784672dd341 100644
+--- a/sdk/nexent/core/agents/agent_model.py
++++ b/sdk/nexent/core/agents/agent_model.py
+@@ -1,5 +1,6 @@
+ from __future__ import annotations
+ 
++import os
+ from threading import Event
+ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+ 
+@@ -349,6 +350,27 @@ class AgentPlan(BaseModel):
+     )
+ 
+ 
++class EventTrajectoryConfig(BaseModel):
++    """Stable storage identity for optional Perix Event trajectory recording."""
++
++    root: str = Field(description="Persistent Event artifact root")
++    session_id: str = Field(description="Stable Event session id")
++    cwd: str = Field(description="Stable absolute project path recorded in the Session header")
++    compression: Literal["none", "zstd"] = Field(default="none")
++
++    @model_validator(mode="after")
++    def _validate_stable_identity(self) -> "EventTrajectoryConfig":
++        if not self.root.strip():
++            raise ValueError("Event trajectory root must not be empty")
++        if not os.path.isabs(self.root):
++            raise ValueError("Event trajectory root must be an absolute path")
++        if not self.session_id.strip():
++            raise ValueError("Event trajectory session_id must not be empty")
++        if not os.path.isabs(self.cwd):
++            raise ValueError("Event trajectory cwd must be an absolute path")
++        return self
++
++
+ class AgentRunInfo(BaseModel):
+     query: str = Field(description="User query")
+     model_config_list: List[ModelConfig] = Field(description="List of model configurations")
+@@ -366,6 +388,10 @@ class AgentRunInfo(BaseModel):
+     stop_event: Event = Field(description="Stop event control")
+     conversation_id: Optional[int] = Field(description="Conversation id for run-scoped persistence", default=None)
+     user_id: Optional[str] = Field(description="User id for run-scoped persistence", default=None)
++    event_trajectory: Optional[EventTrajectoryConfig] = Field(
++        description="Optional Perix Event trajectory storage configuration",
++        default=None,
++    )
+     runtime_metadata: Dict[str, Any] = Field(
+         description="Immutable application-resolved runtime metadata snapshot",
+         default_factory=dict,
+diff --git a/sdk/nexent/core/agents/core_agent.py b/sdk/nexent/core/agents/core_agent.py
+index 6a4686c3b1a7500b4ca41b3425bf867535e7dfed..31920f3e3240601667d046e6995d6b4979540a1b 100644
+--- a/sdk/nexent/core/agents/core_agent.py
++++ b/sdk/nexent/core/agents/core_agent.py
+@@ -448,6 +448,7 @@ def _wrap_tool_for_observer(
+     tool: Any,
+     observer: "MessageObserver",
+     agent_name: str,
++    event_trajectory: Any = None,
+ ) -> None:
+     """Emit one tool event and correlation context for every actual call."""
+     if tool is None or getattr(tool, "_tool_call_observer_wrapped", False):
+@@ -460,17 +461,38 @@ def _wrap_tool_for_observer(
+     tool_name = str(getattr(tool, "name", "") or "")
+ 
+     def observed_forward(*args, **kwargs):
+-        tool_call_id = str(uuid.uuid4())
++        tool_arguments = _observer_call_arguments(tool, args, kwargs)
++        tool_call_id = (
++            event_trajectory.start_dispatch(tool_name, tool_arguments)
++            if event_trajectory is not None
++            else str(uuid.uuid4())
++        )
+         observer.add_message(
+             agent_name or "",
+             ProcessType.TOOL,
+             "",
+             tool_name=tool_name,
+-            tool_arguments=_observer_call_arguments(tool, args, kwargs),
++            tool_arguments=tool_arguments,
+             tool_call_id=tool_call_id,
+         )
+         with observer.tool_call_context(tool_call_id):
+-            return original_forward(*args, **kwargs)
++            try:
++                result = original_forward(*args, **kwargs)
++            except BaseException as exc:
++                if event_trajectory is not None:
++                    event_trajectory.finish_dispatch(
++                        tool_call_id,
++                        str(exc),
++                        is_error=True,
++                    )
++                raise
++            if event_trajectory is not None:
++                event_trajectory.finish_dispatch(
++                    tool_call_id,
++                    result,
++                    is_error=False,
++                )
++            return result
+ 
+     tool.forward = observed_forward
+     try:
+@@ -494,6 +516,7 @@ class CoreAgent(CodeAgent):
+         self.conversation_id = kwargs.pop("conversation_id", None)
+         self.user_id = kwargs.pop("user_id", None)
+         self.workspace_path = kwargs.pop("workspace_path", None)
++        self.event_trajectory = kwargs.pop("event_trajectory", None)
+ 
+         context_runtime = kwargs.pop("context_runtime", None)
+         super().__init__(prompt_templates=prompt_templates, *args, **kwargs)
+@@ -596,7 +619,23 @@ class CoreAgent(CodeAgent):
+             for name, tool in iterable:
+                 if name is None or str(name) in hidden_names:
+                     continue
+-                _wrap_tool_for_observer(tool, self.observer, self.agent_name)
++                _wrap_tool_for_observer(
++                    tool,
++                    self.observer,
++                    self.agent_name,
++                    getattr(self, "event_trajectory", None),
++                )
++
++    def _event_model_identity(self) -> tuple[str, str]:
++        """Return the provider/model pair used by Event message provenance."""
++
++        provider = str(getattr(self.model, "model_factory", "") or "unknown")
++        model = str(
++            getattr(self.model, "model_id", "")
++            or getattr(self.model, "display_name", "")
++            or type(self.model).__name__
++        )
++        return provider, model
+ 
+     def _context_tools(self) -> List[Any]:
+         """Return a stable tool list for ContextRuntime/ContextManager evidence.
+@@ -802,6 +841,7 @@ Additional Args:
+         Perform one step in the ReAct framework: the agent thinks, acts, and observes the result.
+         Returns None if the step is not final.
+         """
++        event_trajectory = getattr(self, "event_trajectory", None)
+         self.observer.add_message(
+             self.agent_name, ProcessType.STEP_COUNT, self.step_number)
+ 
+@@ -857,6 +897,14 @@ Additional Args:
+                 input_messages = decision.masked_messages
+                 self._append_verification_feedback(memory_step, decision.verification_result)
+ 
++        if event_trajectory is not None:
++            provider, model = self._event_model_identity()
++            event_trajectory.record_request(
++                provider=provider,
++                model=model,
++                system=str(getattr(self, "system_prompt", "") or ""),
++            )
++
+         try:
+             chat_message: ChatMessage = self.model(input_messages,
+                                                    stop_sequences=stop_sequences, **additional_args)
+@@ -895,6 +943,11 @@ Additional Args:
+                 )
+                 if not precheck.passed and precheck.severity == "blocking":
+                     self._append_verification_feedback(memory_step, precheck)
++                    if event_trajectory is not None:
++                        event_trajectory.record_assistant_text(
++                            model_output,
++                            memory_step.token_usage,
++                        )
+                     raise AgentExecutionError(
+                         precheck.repair_instruction or precheck.user_visible_note or "Action failed verification.",
+                         self.logger,
+@@ -908,6 +961,11 @@ Additional Args:
+                 available_tool_names=self._known_tool_names(),
+                 finish_reason=getattr(self.model, "last_finish_reason", None),
+             ):
++                if event_trajectory is not None:
++                    event_trajectory.record_assistant_text(
++                        model_output,
++                        memory_step.token_usage,
++                    )
+                 raise InvalidActionFormatError(
+                     "The previous response described an action but ended before producing an executable tool call. "
+                     "Do not treat an action preamble as the final answer. Emit executable Python inside "
+@@ -918,6 +976,11 @@ Additional Args:
+             # treat it as a generation error so the retry loop can recover,
+             # instead of silently terminating the conversation with no output.
+             if not model_output or not str(model_output).strip():
++                if event_trajectory is not None:
++                    event_trajectory.record_assistant_text(
++                        model_output or "",
++                        memory_step.token_usage,
++                    )
+                 raise AgentGenerationError(
+                     "Model returned empty or whitespace-only output; "
+                     "this is likely a transient API issue and the step will be retried.",
+@@ -925,6 +988,11 @@ Additional Args:
+                 )
+             self.logger.log_markdown(
+                 content=model_output, title="AGENT FINAL ANSWER", level=LogLevel.INFO)
++            if event_trajectory is not None:
++                event_trajectory.record_assistant_text(
++                    model_output,
++                    memory_step.token_usage,
++                )
+             raise FinalAnswerError()
+ 
+         tool_call = ToolCall(
+@@ -934,6 +1002,14 @@ Additional Args:
+         )
+         memory_step.tool_calls = [tool_call]
+ 
++        if event_trajectory is not None:
++            event_trajectory.start_root_tool(
++                model_output=model_output,
++                name=tool_call.name,
++                arguments=tool_call.arguments,
++                token_usage=memory_step.token_usage,
++            )
++
+         # Execute
+         self.logger.log_code(title="Executing parsed code:",
+                              content=code_action, level=LogLevel.INFO)
+@@ -977,6 +1053,12 @@ Additional Args:
+                 refusal = pending_refusal or getattr(e, "refusal", "")
+                 self.verification_controller.pending_tool_block_refusal = None
+                 memory_step.model_output = refusal
++                if event_trajectory is not None:
++                    event_trajectory.finish_root_tool(
++                        refusal,
++                        is_error=True,
++                        error=e,
++                    )
+                 raise FinalAnswerError()
+             exec_duration_ms = (time.time() - exec_start) * 1000
+             if hasattr(self.python_executor, "state") and "_print_outputs" in self.python_executor.state:
+@@ -997,6 +1079,12 @@ Additional Args:
+                 f"[Code Execution] step={memory_step.step_number} failed after {exec_duration_ms:.1f}ms: {error_msg}",
+                 level=LogLevel.ERROR,
+             )
++            if event_trajectory is not None:
++                event_trajectory.finish_root_tool(
++                    memory_step.observations or error_msg,
++                    is_error=True,
++                    error=e,
++                )
+             raise AgentExecutionError(error_msg, self.logger)
+ 
+         exec_duration_ms = (time.time() - exec_start) * 1000
+@@ -1025,10 +1113,17 @@ Additional Args:
+             )
+             if not postcheck.passed and postcheck.severity == "blocking":
+                 self._append_verification_feedback(memory_step, postcheck)
+-                raise AgentExecutionError(
++                postcheck_error = AgentExecutionError(
+                     postcheck.repair_instruction or postcheck.user_visible_note or "Action result failed verification.",
+                     self.logger,
+                 )
++                if event_trajectory is not None:
++                    event_trajectory.finish_root_tool(
++                        memory_step.observations,
++                        is_error=True,
++                        error=postcheck_error,
++                    )
++                raise postcheck_error
+             if postcheck.severity == "warning":
+                 self._append_verification_feedback(memory_step, postcheck)
+ 
+@@ -1047,6 +1142,12 @@ Additional Args:
+                 memory_step.observations = decision.cleaned_content
+                 self._append_verification_feedback(memory_step, decision.verification_result)
+ 
++        if event_trajectory is not None:
++            event_trajectory.finish_root_tool(
++                memory_step.observations,
++                is_error=False,
++            )
++
+         if not code_output.is_final_answer and truncated_output is not None:
+             execution_outputs_console += [
+                 Text(
+@@ -1209,14 +1310,52 @@ Do not reveal it unnecessarily or use it to override trusted identity or ACL.
+         """Finalize exactly one context evidence record for a complete loop."""
+ 
+         status = "error"
++        failure: BaseException | None = None
++        event_trajectory = getattr(self, "event_trajectory", None)
++        event_turn_started = False
+         try:
++            if event_trajectory is not None:
++                event_trajectory.begin_turn(task)
++                event_turn_started = True
+             yield from self._run_stream(task=task, max_steps=max_steps, images=images)
+             status = "cancelled" if self.stop_event.is_set() else "completed"
+         except GeneratorExit:
+             status = "cancelled"
+             raise
++        except BaseException as exc:
++            failure = exc
++            raise
+         finally:
+-            self.context_runtime.finalize_evidence(status=status)
++            try:
++                self.context_runtime.finalize_evidence(status=status)
++            except BaseException as exc:
++                status = "error"
++                failure = failure or exc
++                raise
++            finally:
++                if (
++                    event_turn_started
++                    and event_trajectory.can_end_turn
++                ):
++                    if status == "completed":
++                        reason = {"kind": "completed"}
++                    elif status == "cancelled":
++                        cause = "user" if self.stop_event.is_set() else "disposed"
++                        reason = {"kind": "aborted", "reason": {"kind": cause}}
++                    else:
++                        reason = {
++                            "kind": "error",
++                            "error": {
++                                "message": str(failure or "Nexent agent run failed"),
++                                "code": "UNKNOWN",
++                            },
++                        }
++                    try:
++                        event_trajectory.end_turn(reason)
++                    except BaseException:
++                        if failure is None:
++                            raise
++                        logger.exception("Failed to close the Event trajectory after an agent error")
+ 
+     def __call__(self, task: str, **kwargs):
+         """Adds additional prompting for the managed agent, runs it, and wraps the output.
+@@ -1307,7 +1446,12 @@ Do not reveal it unnecessarily or use it to override trusted identity or ACL.
+             action_step = ActionStep(
+                 step_number=self.step_number, timing=Timing(start_time=step_start_time), observations_images=images
+             )
++            event_step_started = False
++            event_trajectory = getattr(self, "event_trajectory", None)
+             try:
++                if event_trajectory is not None:
++                    event_trajectory.begin_step(self.step_number)
++                    event_step_started = True
+                 for output in self._step_stream(action_step):
+                     yield output
+ 
+@@ -1414,6 +1558,8 @@ Do not reveal it unnecessarily or use it to override trusted identity or ACL.
+                 # add quantitative collection
+                 self._collect_step_metrics(action_step)
+                 self.memory.steps.append(action_step)
++                if event_step_started and event_trajectory.can_end_step:
++                    event_trajectory.end_step()
+                 yield action_step
+                 self.step_number += 1
+ 
+@@ -1536,6 +1682,12 @@ Do not reveal it unnecessarily or use it to override trusted identity or ACL.
+             The final answer content string
+         """
+         action_step_start_time = time.time()
++        event_trajectory = getattr(self, "event_trajectory", None)
++        event_step_started = False
++
++        if event_trajectory is not None:
++            event_trajectory.begin_step(self.step_number)
++            event_step_started = True
+ 
+         # Send STEP_COUNT to start a new step for the final answer thinking process
+         # This ensures the thinking content is displayed in the task details panel
+@@ -1556,6 +1708,14 @@ Do not reveal it unnecessarily or use it to override trusted identity or ACL.
+         self._ensure_context_within_hard_budget(final_context)
+         messages = final_context.messages
+ 
++        if event_trajectory is not None:
++            provider, model = self._event_model_identity()
++            event_trajectory.record_request(
++                provider=provider,
++                model=model,
++                system=str(getattr(self, "system_prompt", "") or ""),
++            )
++
+         # Create the final memory step with error
+         final_memory_step = ActionStep(
+             step_number=self.step_number,
+@@ -1608,9 +1768,18 @@ Do not reveal it unnecessarily or use it to override trusted identity or ACL.
+         )
+         final_memory_step.action_output = model_output
+ 
++        if event_trajectory is not None:
++            event_trajectory.record_assistant_text(
++                model_output,
++                final_memory_step.token_usage,
++            )
++
+         self._finalize_step(final_memory_step)
+         self.memory.steps.append(final_memory_step)
+ 
++        if event_step_started and event_trajectory.can_end_step:
++            event_trajectory.end_step()
++
+         return model_output
+ 
+     # ----------------------------------------------------------------------
+diff --git a/sdk/nexent/core/agents/event_trajectory.py b/sdk/nexent/core/agents/event_trajectory.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..141c4954788da7bf582a45a0a3aaa925d2f7d2f1
+--- /dev/null
++++ b/sdk/nexent/core/agents/event_trajectory.py
+@@ -0,0 +1,407 @@
++"""Direct Perix Event trajectory recording for one Nexent agent run."""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import threading
++import uuid
++from pathlib import Path
++from typing import Any, Mapping
++
++
++class EventTrajectoryError(RuntimeError):
++    """Raised when Nexent cannot preserve the Event trajectory contract."""
++
++
++class EventTrajectoryAlreadyActiveError(EventTrajectoryError):
++    """Raised when another process owns the same Event session."""
++
++
++class _SessionLease:
++    """Hold the caller-side single-writer guarantee required by Event v0."""
++
++    def __init__(self, root: str, session_id: str) -> None:
++        try:
++            import fcntl
++        except ImportError as exc:  # pragma: no cover - Nexent production is POSIX.
++            raise EventTrajectoryError("Event trajectories require a POSIX advisory-lock implementation") from exc
++
++        lock_root = Path(root).expanduser().resolve() / ".nexent-event-locks"
++        lock_root.mkdir(parents=True, exist_ok=True)
++        digest = hashlib.sha256(session_id.encode("utf-8")).hexdigest()
++        self.path = lock_root / f"{digest}.lock"
++        self._fcntl = fcntl
++        self._handle = self.path.open("a+b")
++        try:
++            fcntl.flock(self._handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
++        except BlockingIOError as exc:
++            self._handle.close()
++            raise EventTrajectoryAlreadyActiveError(
++                f'Event session "{session_id}" already has an active writer'
++            ) from exc
++        self._handle.seek(0)
++        self._handle.truncate()
++        self._handle.write(f"{os.getpid()}\n".encode("ascii"))
++        self._handle.flush()
++
++    def close(self) -> None:
++        if self._handle.closed:
++            return
++        try:
++            self._fcntl.flock(self._handle.fileno(), self._fcntl.LOCK_UN)
++        finally:
++            self._handle.close()
++
++
++def _text(value: Any) -> str:
++    if isinstance(value, str):
++        return value
++    try:
++        return json.dumps(
++            value,
++            ensure_ascii=False,
++            sort_keys=True,
++            separators=(",", ":"),
++            allow_nan=False,
++        )
++    except (TypeError, ValueError):
++        return str(value)
++
++
++def _json_value(value: Any) -> Any:
++    try:
++        return json.loads(json.dumps(value, ensure_ascii=False, allow_nan=False, default=str))
++    except (TypeError, ValueError):
++        return str(value)
++
++
++def _usage(token_usage: Any) -> dict[str, int] | None:
++    if token_usage is None:
++        return None
++    result: dict[str, int] = {}
++    for source, target in (
++        ("input_tokens", "inputTokens"),
++        ("output_tokens", "outputTokens"),
++    ):
++        value = getattr(token_usage, source, None)
++        if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
++            result[target] = value
++    return result or None
++
++
++class EventTrajectory:
++    """Map real Nexent execution boundaries onto one durable Event v0 session."""
++
++    def __init__(self, store: Any, session: Any, lease: _SessionLease) -> None:
++        from perix_event import (
++            canonical_header,
++            create_assistant_message,
++            create_tool_result_message,
++            create_user_message,
++            header_equals,
++        )
++
++        self.store = store
++        self.session = session
++        self._lease = lease
++        self._canonical_header = canonical_header
++        self._create_assistant_message = create_assistant_message
++        self._create_tool_result_message = create_tool_result_message
++        self._create_user_message = create_user_message
++        self._header_equals = header_equals
++        self._lock = threading.RLock()
++        self._turn: int | None = None
++        self._step: int | None = None
++        self._root_call_id: str | None = None
++        self._root_call_seq: int | None = None
++        self._dispatches: dict[str, tuple[str, Any]] = {}
++        self._turn_header_written = False
++        self._resumed_pending = bool(getattr(session, "first_live_seq", 0))
++        self._provider = "unknown"
++        self._model = "unknown"
++        self._closed = False
++
++    @classmethod
++    def open(cls, config: Any) -> "EventTrajectory":
++        """Acquire one writer and create or resume the configured session."""
++
++        try:
++            from perix_event import (
++                JsonlSessionPersistence,
++                SessionNotFoundError,
++                SessionStore,
++            )
++        except ImportError as exc:
++            raise EventTrajectoryError("Event trajectory support requires the perix-event-sdk package") from exc
++
++        root = str(config.root)
++        session_id = str(config.session_id)
++        configured_cwd = str(config.cwd)
++        lease = _SessionLease(root, session_id)
++        try:
++            persistence = JsonlSessionPersistence(
++                root,
++                compression=str(config.compression),
++            )
++            store = SessionStore(persistence)
++            try:
++                saved = persistence.inspect(session_id)
++            except SessionNotFoundError:
++                session = store.create(session_id, meta={"cwd": configured_cwd})
++            else:
++                saved_cwd = saved.meta.get("cwd")
++                if saved_cwd != configured_cwd:
++                    raise EventTrajectoryError(
++                        f'Event session "{session_id}" belongs to cwd {saved_cwd!r}, not {configured_cwd!r}'
++                    )
++                session = store.resume(session_id)
++            return cls(store, session, lease)
++        except BaseException:
++            lease.close()
++            raise
++
++    @property
++    def active_root_call_id(self) -> str | None:
++        return self._root_call_id
++
++    @property
++    def can_end_turn(self) -> bool:
++        return self._turn is not None and self._step is None
++
++    @property
++    def can_end_step(self) -> bool:
++        return self._step is not None and self._root_call_id is None and not self._dispatches
++
++    def _append(self, event_type: str, data: Any, **options: Any) -> dict[str, Any]:
++        event = self.session.append(event_type, data, **options)
++        self.store.flush(self.session)
++        return event
++
++    def begin_turn(self, query: str) -> int:
++        with self._lock:
++            if self._turn is not None:
++                raise EventTrajectoryError("cannot begin an Event turn while another is open")
++            turns = [
++                event["data"]["turn"]
++                for event in self.session.events
++                if event["type"] == "turn/start" and isinstance(event.get("data", {}).get("turn"), int)
++            ]
++            self._turn = max(turns, default=0) + 1
++            self._turn_header_written = False
++            self._append("turn/start", {"turn": self._turn})
++            message = self._create_user_message(
++                content=[{"type": "text", "text": str(query)}],
++                source={"kind": "user"},
++            )
++            self._append("user/message", message, surface_op="append")
++            return self._turn
++
++    def begin_step(self, step: int) -> None:
++        with self._lock:
++            if self._turn is None:
++                raise EventTrajectoryError("cannot begin an Event step outside a turn")
++            if self._step is not None:
++                raise EventTrajectoryError("cannot begin an Event step while another is open")
++            if not isinstance(step, int) or isinstance(step, bool) or step < 1:
++                raise EventTrajectoryError(f"invalid Nexent step number: {step!r}")
++            self._step = step
++            self._append("step/start", {"turn": self._turn, "step": step})
++
++    def record_request(self, *, provider: str, model: str, system: str = "") -> None:
++        with self._lock:
++            self._require_step()
++            provider = str(provider or "unknown")
++            model = str(model or "unknown")
++            header: dict[str, Any] = {"config": {"provider": provider, "model": model}}
++            if system:
++                header["system"] = str(system)
++            header = self._canonical_header(header)
++            previous = self.session.request_header()
++            if previous is None:
++                reason = "initial"
++            elif self._resumed_pending:
++                reason = "resume"
++            elif not self._header_equals(previous, header):
++                reason = "change"
++            elif self._turn_header_written:
++                self._provider = provider
++                self._model = model
++                return
++            else:
++                reason = "series"
++            data: dict[str, Any] = {"reason": reason, "header": header}
++            if reason == "change":
++                data["startsSeries"] = True
++            self._append("request/header", data)
++            self._provider = provider
++            self._model = model
++            self._turn_header_written = True
++            self._resumed_pending = False
++
++    def record_assistant_text(self, text: Any, token_usage: Any = None) -> None:
++        with self._lock:
++            turn, step = self._require_step()
++            message = self._create_assistant_message(
++                content=[{"type": "text", "text": _text(text)}],
++                source={"provider": self._provider, "model": self._model},
++            )
++            data: dict[str, Any] = {"turn": turn, "step": step, "message": message}
++            usage = _usage(token_usage)
++            if usage is not None:
++                data["usage"] = usage
++            self._append(
++                "assistant/message",
++                data,
++                surface_op="append",
++                source_event_seqs=[],
++            )
++
++    def start_root_tool(
++        self,
++        *,
++        model_output: Any,
++        name: str,
++        arguments: Any,
++        token_usage: Any = None,
++    ) -> str:
++        with self._lock:
++            turn, step = self._require_step()
++            if self._root_call_id is not None:
++                raise EventTrajectoryError("cannot start a second root tool call")
++            call_id = str(uuid.uuid4())
++            arguments_text = _text(arguments)
++            content: list[dict[str, Any]] = []
++            if model_output is not None and str(model_output):
++                content.append({"type": "text", "text": _text(model_output)})
++            content.append(
++                {
++                    "type": "tool-call",
++                    "id": call_id,
++                    "name": str(name),
++                    "arguments": arguments_text,
++                }
++            )
++            message = self._create_assistant_message(
++                content=content,
++                source={"provider": self._provider, "model": self._model},
++            )
++            data: dict[str, Any] = {"turn": turn, "step": step, "message": message}
++            usage = _usage(token_usage)
++            if usage is not None:
++                data["usage"] = usage
++            self._root_call_id = call_id
++            self._append(
++                "assistant/message",
++                data,
++                surface_op="append",
++                source_event_seqs=[],
++            )
++            call = self._append(
++                "tool/call",
++                {
++                    "turn": turn,
++                    "step": step,
++                    "callId": call_id,
++                    "name": str(name),
++                    "arguments": arguments_text,
++                },
++            )
++            self._root_call_seq = call["seq"]
++            return call_id
++
++    def finish_root_tool(self, result: Any, *, is_error: bool, error: BaseException | None = None) -> None:
++        with self._lock:
++            turn, step = self._require_step()
++            if self._root_call_id is None or self._root_call_seq is None:
++                raise EventTrajectoryError("cannot finish a root tool call that is not open")
++            if self._dispatches:
++                raise EventTrajectoryError("cannot finish a root tool while child calls are open")
++            call_id = self._root_call_id
++            message = self._create_tool_result_message(
++                call_id=call_id,
++                content=[{"type": "text", "text": _text(result)}],
++                is_error=is_error,
++            )
++            data: dict[str, Any] = {"turn": turn, "step": step, "message": message}
++            if error is not None:
++                data["error"] = {"name": type(error).__name__, "code": "UNKNOWN"}
++            self._append(
++                "tool/result",
++                data,
++                surface_op="append",
++                source_event_seqs=[self._root_call_seq],
++            )
++            self._root_call_id = None
++            self._root_call_seq = None
++
++    def start_dispatch(self, name: str, arguments: Mapping[str, Any]) -> str:
++        with self._lock:
++            if self._root_call_id is None:
++                raise EventTrajectoryError("cannot record a child tool outside a root call")
++            sub_call_id = str(uuid.uuid4())
++            normalized = _json_value(dict(arguments))
++            self._dispatches[sub_call_id] = (str(name), normalized)
++            self._append(
++                "tool/code-dispatch-start",
++                {
++                    "rootCallId": self._root_call_id,
++                    "parentCallId": self._root_call_id,
++                    "subCallId": sub_call_id,
++                    "name": str(name),
++                    "arguments": normalized,
++                },
++            )
++            return sub_call_id
++
++    def finish_dispatch(self, sub_call_id: str, result: Any, *, is_error: bool) -> None:
++        with self._lock:
++            if self._root_call_id is None or sub_call_id not in self._dispatches:
++                raise EventTrajectoryError("cannot finish a child tool call that is not open")
++            name, arguments = self._dispatches[sub_call_id]
++            self._append(
++                "tool/code-dispatch",
++                {
++                    "rootCallId": self._root_call_id,
++                    "parentCallId": self._root_call_id,
++                    "subCallId": sub_call_id,
++                    "name": name,
++                    "arguments": arguments,
++                    "isError": bool(is_error),
++                    "content": [{"type": "text", "text": _text(result)}],
++                },
++            )
++            del self._dispatches[sub_call_id]
++
++    def end_step(self) -> None:
++        with self._lock:
++            turn, step = self._require_step()
++            if self._root_call_id is not None or self._dispatches:
++                raise EventTrajectoryError("cannot close an Event step while tool calls are open")
++            self._append("step/end", {"turn": turn, "step": step})
++            self._step = None
++
++    def end_turn(self, reason: Mapping[str, Any]) -> None:
++        with self._lock:
++            if self._turn is None:
++                return
++            if self._step is not None:
++                raise EventTrajectoryError("cannot close an Event turn while a step is open")
++            turn = self._turn
++            self._append("turn/end", {"turn": turn, "reason": dict(reason)})
++            self._turn = None
++
++    def _require_step(self) -> tuple[int, int]:
++        if self._turn is None or self._step is None:
++            raise EventTrajectoryError("an Event turn and step must be open")
++        return self._turn, self._step
++
++    def close(self) -> None:
++        if self._closed:
++            return
++        self._closed = True
++        try:
++            self.store.close()
++        finally:
++            self._lease.close()
+diff --git a/sdk/nexent/core/agents/nexent_agent.py b/sdk/nexent/core/agents/nexent_agent.py
+index a593a32ab5a3ea0a0d2ea1839f608689b2abde19..2416a699974b38f7bf0dd5837f9b08eb462f46ce 100644
+--- a/sdk/nexent/core/agents/nexent_agent.py
++++ b/sdk/nexent/core/agents/nexent_agent.py
+@@ -218,7 +218,8 @@ class NexentAgent:
+                  tenant_id=None,
+                  workspace_path=None,
+                  workspace_run_id=None,
+-                 minio_files=None):
++                 minio_files=None,
++                 event_trajectory=None):
+         """
+         Initialize the NexentAgent factory.
+ 
+@@ -238,6 +239,7 @@ class NexentAgent:
+             workspace_path: Run-scoped host workspace path.
+             workspace_run_id: Opaque run id used to validate cleanup scope.
+             minio_files: Authorized files attached to the current request.
++            event_trajectory: Optional Perix Event trajectory owner for the root agent.
+         """
+         if not isinstance(observer, MessageObserver):
+             raise TypeError("Create Observer Object with MessageObserver")
+@@ -255,6 +257,7 @@ class NexentAgent:
+         self.workspace_path = workspace_path
+         self.workspace_run_id = workspace_run_id
+         self.minio_files = list(minio_files or [])
++        self.event_trajectory = event_trajectory
+         self._workspace_uploads: List[Dict[str, Any]] = []
+         self._workspace_uploaded_paths: set[str] = set()
+         self._sandbox_executors: List[Any] = []
+@@ -885,6 +888,7 @@ class NexentAgent:
+                 executor=python_executor,
+                 verification_config=getattr(agent_config, "verification_config", None),
+                 workspace_path=self.workspace_path,
++                event_trajectory=(self.event_trajectory if not _managed_context else None),
+             )
+             agent.stop_event = self.stop_event
+ 
+diff --git a/sdk/nexent/core/agents/run_agent.py b/sdk/nexent/core/agents/run_agent.py
+index 2bf4cc36292380747351bc86518cf7d50bf012ef..fb527dcb2a90fea0b4309786f2e28cf3b313c7e9 100644
+--- a/sdk/nexent/core/agents/run_agent.py
++++ b/sdk/nexent/core/agents/run_agent.py
+@@ -14,6 +14,7 @@ from ...monitor import (
+     set_monitoring_safe_input_budget_snapshot,
+ )
+ from .agent_model import AgentRunInfo
++from .event_trajectory import EventTrajectory
+ from .nexent_agent import NexentAgent, ProcessType, cleanup_run_workspace
+ 
+ 
+@@ -198,6 +199,7 @@ def _normalize_mcp_config(mcp_host_item: Union[str, Dict[str, Any]]) -> Dict[str
+ 
+ 
+ def agent_run_thread(agent_run_info: AgentRunInfo):
++    event_trajectory = None
+     try:
+         set_monitoring_capacity_snapshot(
+             getattr(agent_run_info, "capacity_snapshot", None)
+@@ -206,6 +208,9 @@ def agent_run_thread(agent_run_info: AgentRunInfo):
+             getattr(agent_run_info, "safe_input_budget_snapshot", None)
+         )
+         _emit_uncertainty_reserve_warning(agent_run_info)
++        event_config = getattr(agent_run_info, "event_trajectory", None)
++        if event_config is not None:
++            event_trajectory = EventTrajectory.open(event_config)
+         mcp_host = agent_run_info.mcp_host
+         if mcp_host is None or len(mcp_host) == 0:
+             nexent = NexentAgent(
+@@ -221,6 +226,7 @@ def agent_run_thread(agent_run_info: AgentRunInfo):
+                 workspace_path=getattr(agent_run_info, "workspace_path", None),
+                 workspace_run_id=getattr(agent_run_info, "workspace_run_id", None),
+                 minio_files=getattr(agent_run_info, "minio_files", None),
++                event_trajectory=event_trajectory,
+             )
+             agent = nexent.create_single_agent(  # NOSONAR - constructs the SDK's trusted CoreAgent implementation.
+                 agent_run_info.agent_config,
+@@ -257,6 +263,7 @@ def agent_run_thread(agent_run_info: AgentRunInfo):
+                     workspace_path=getattr(agent_run_info, "workspace_path", None),
+                     workspace_run_id=getattr(agent_run_info, "workspace_run_id", None),
+                     minio_files=getattr(agent_run_info, "minio_files", None),
++                    event_trajectory=event_trajectory,
+                 )
+                 agent = nexent.create_single_agent(  # NOSONAR - constructs the SDK's trusted CoreAgent implementation.
+                     agent_run_info.agent_config,
+@@ -287,11 +294,15 @@ def agent_run_thread(agent_run_info: AgentRunInfo):
+         # Agent construction, MCP setup, and executor initialization can fail
+         # before NexentAgent.agent_run_with_observer() enters its own cleanup
+         # block. This idempotent outer guard owns the complete worker lifetime.
+-        cleanup_run_workspace(
+-            getattr(agent_run_info, "workspace_path", None),
+-            getattr(agent_run_info, "workspace_run_id", None),
+-            logger,
+-        )
++        try:
++            if event_trajectory is not None:
++                event_trajectory.close()
++        finally:
++            cleanup_run_workspace(
++                getattr(agent_run_info, "workspace_path", None),
++                getattr(agent_run_info, "workspace_run_id", None),
++                logger,
++            )
+ 
+ 
+ async def agent_run(agent_run_info: AgentRunInfo):
+diff --git a/sdk/pyproject.toml b/sdk/pyproject.toml
+index f88f07c9066ee1fbb4e1c222152521fe9e68b655..2993789f0a37eee143001de0291da6880ab909a6 100644
+--- a/sdk/pyproject.toml
++++ b/sdk/pyproject.toml
+@@ -73,6 +73,9 @@ override-dependencies = [
+ ]
+ 
+ [project.optional-dependencies]
++event = [
++    "perix-event-sdk @ git+https://github.com/perix-ai/perix-runtime-data.git@2eea3f17e6a917ef3d640405b360664728d31e84#subdirectory=packages/event/python",
++]
+ quality = [
+     "ruff>=0.9.0",
+     "pytest>=8.1.0"
+@@ -91,7 +94,7 @@ performance = [
+     "opentelemetry-exporter-otlp>=1.20.0",
+ ]
+ dev = [
+-    "nexent[quality, data_process, performance]"
++    "nexent[quality, data_process, performance, event]"
+ ]
+ 
+ [tool.setuptools.packages.find]
+diff --git a/test/sdk/core/agents/test_agent_model.py b/test/sdk/core/agents/test_agent_model.py
+index 841341ffce2c0b8d85c6c2ba1108249882314db2..cc4d3f7ab815d6ff1c1d3286088cf1aabec8993a 100644
+--- a/test/sdk/core/agents/test_agent_model.py
++++ b/test/sdk/core/agents/test_agent_model.py
+@@ -668,6 +668,33 @@ class TestAgentRunInfo:
+     def test_agent_run_info_does_not_own_context_manager(self):
+         assert "context_manager" not in agent_model_module.AgentRunInfo.model_fields
+ 
++    def test_event_trajectory_config_requires_stable_identity(self, tmp_path):
++        config = agent_model_module.EventTrajectoryConfig(
++            root=str(tmp_path),
++            session_id="tenant-user-conversation",
++            cwd=str(tmp_path.resolve()),
++        )
++        assert config.compression == "none"
++
++        with pytest.raises(ValueError, match="root must be an absolute"):
++            agent_model_module.EventTrajectoryConfig(
++                root="relative/events",
++                session_id="conversation",
++                cwd=str(tmp_path.resolve()),
++            )
++        with pytest.raises(ValueError, match="session_id"):
++            agent_model_module.EventTrajectoryConfig(
++                root=str(tmp_path),
++                session_id="   ",
++                cwd=str(tmp_path.resolve()),
++            )
++        with pytest.raises(ValueError, match="absolute"):
++            agent_model_module.EventTrajectoryConfig(
++                root=str(tmp_path),
++                session_id="conversation",
++                cwd="relative/path",
++            )
++
+     def test_agent_run_info_creation(self):
+         """Test AgentRunInfo creation with all fields."""
+         observer = MessageObserver()
+diff --git a/test/sdk/core/agents/test_core_agent.py b/test/sdk/core/agents/test_core_agent.py
+index 91e0823367b76f0dfcbb5b1e95ea526b716aa914..cbcb8083d7ede2f3a2e2baec1a7eb6e3cc8e8923 100644
+--- a/test/sdk/core/agents/test_core_agent.py
++++ b/test/sdk/core/agents/test_core_agent.py
+@@ -322,6 +322,41 @@ def test_context_evidence_marks_an_early_closed_stream_as_cancelled():
+     agent.context_runtime.finalize_evidence.assert_called_once_with(status="cancelled")
+ 
+ 
++def test_context_evidence_brackets_the_root_event_turn():
++    module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
++    agent = object.__new__(module.CoreAgent)
++    agent.context_runtime = MagicMock()
++    agent.stop_event = MagicMock()
++    agent.stop_event.is_set.return_value = False
++    agent._run_stream = MagicMock(return_value=iter(["done"]))
++    agent.event_trajectory = MagicMock()
++    agent.event_trajectory.can_end_turn = True
++
++    assert list(agent._run_stream_with_context_evidence(task="task", max_steps=2)) == ["done"]
++
++    agent.event_trajectory.begin_turn.assert_called_once_with("task")
++    agent.event_trajectory.end_turn.assert_called_once_with({"kind": "completed"})
++
++
++def test_context_evidence_records_disposed_stream_as_aborted_event_turn():
++    module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
++    agent = object.__new__(module.CoreAgent)
++    agent.context_runtime = MagicMock()
++    agent.stop_event = MagicMock()
++    agent.stop_event.is_set.return_value = False
++    agent._run_stream = MagicMock(return_value=iter(["first", "second"]))
++    agent.event_trajectory = MagicMock()
++    agent.event_trajectory.can_end_turn = True
++
++    stream = agent._run_stream_with_context_evidence(task="task", max_steps=2)
++    assert next(stream) == "first"
++    stream.close()
++
++    agent.event_trajectory.end_turn.assert_called_once_with(
++        {"kind": "aborted", "reason": {"kind": "disposed"}}
++    )
++
++
+ def test_get_context_summary_returns_runtime_context_manager_summary():
+     agent = object.__new__(core_agent_module.CoreAgent)
+     context_manager = MagicMock()
+@@ -2630,6 +2665,58 @@ class TestRunStreamRealExecution:
+         assert len(agent.memory.steps) == 2
+         assert agent.memory.steps[0].error is not None
+ 
++    def test_run_stream_flushes_event_step_boundaries(self, monkeypatch):
++        class FakeActionOutput:
++            def __init__(self, output, is_final_answer):
++                self.output = output
++                self.is_final_answer = is_final_answer
++
++        monkeypatch.setattr(core_agent_module, "ActionOutput", FakeActionOutput)
++        trajectory = MagicMock()
++        agent = self._create_canonical_run_agent(
++            monkeypatch,
++            event_trajectory=trajectory,
++        )
++
++        def step_stream(_action_step):
++            yield FakeActionOutput("done", True)
++
++        agent._step_stream = step_stream
++
++        results = list(agent._run_stream("test task", max_steps=1))
++
++        assert results[-1].output == "done"
++        trajectory.begin_step.assert_called_once_with(1)
++        trajectory.end_step.assert_called_once_with()
++
++    def test_run_stream_leaves_an_incomplete_tool_step_for_cold_repair(self, monkeypatch):
++        class FakeAgentError(Exception):
++            pass
++
++        class ProcessInterrupted(BaseException):
++            pass
++
++        monkeypatch.setattr(core_agent_module, "AgentError", FakeAgentError)
++        trajectory = MagicMock()
++        trajectory.can_end_step = False
++        agent = self._create_canonical_run_agent(
++            monkeypatch,
++            event_trajectory=trajectory,
++        )
++
++        def step_stream(_action_step):
++            if False:
++                yield None
++            raise ProcessInterrupted()
++
++        agent._step_stream = step_stream
++
++        with pytest.raises(ProcessInterrupted):
++            list(agent._run_stream("test task", max_steps=1))
++
++        trajectory.begin_step.assert_called_once_with(1)
++        trajectory.end_step.assert_not_called()
++
+     def test_planning_run_retries_empty_direct_answer_then_verifies_valid_answer(self, monkeypatch):
+         """Planning runs reset state, retry an empty answer, and verify the next answer."""
+         module = core_agent_module
+@@ -2768,6 +2855,53 @@ class TestHandleMaxStepsReached:
+         assert len(agent.memory.steps) == 1
+         assert finalize_calls[0] is agent.memory.steps[0]
+ 
++    def test_handle_max_steps_reached_records_the_real_final_model_step(self):
++        agent, _module = self._create_agent_for_handle_max_steps_test()
++        order = []
++        trajectory = MagicMock()
++        trajectory.can_end_step = True
++        trajectory.begin_step.side_effect = lambda step: order.append(("begin", step))
++        trajectory.record_request.side_effect = lambda **kwargs: order.append(
++            ("request", kwargs)
++        )
++        trajectory.record_assistant_text.side_effect = lambda text, usage: order.append(
++            ("assistant", text, usage)
++        )
++        trajectory.end_step.side_effect = lambda: order.append(("end",))
++        agent.event_trajectory = trajectory
++
++        class Model:
++            model_factory = "acceptance"
++            model_id = "nexent-final"
++
++            def __call__(self, _messages):
++                order.append(("model",))
++                return SimpleNamespace(
++                    role="assistant",
++                    content="Final synthesis.",
++                    token_usage=SimpleNamespace(input_tokens=7, output_tokens=3),
++                )
++
++        agent.model = Model()
++        agent.system_prompt = "Be useful."
++        agent._finalize_step = MagicMock()
++
++        assert agent._handle_max_steps_reached("original task") == "Final synthesis."
++
++        assert [entry[0] for entry in order] == [
++            "begin",
++            "request",
++            "model",
++            "assistant",
++            "end",
++        ]
++        trajectory.record_request.assert_called_once_with(
++            provider="acceptance",
++            model="nexent-final",
++            system="Be useful.",
++        )
++        assert order[3][2] is agent.memory.steps[0].token_usage
++
+     def test_handle_max_steps_reached_model_error_fallback(self):
+         """Test that model errors are handled gracefully with fallback message."""
+         agent, module = self._create_agent_for_handle_max_steps_test()
+@@ -3332,6 +3466,227 @@ def test_wrap_visible_tool_events_skips_tools_without_forward():
+     assert not hasattr(agent.tools[0], "_tool_call_observer_wrapped")
+ 
+ 
++def test_tool_wrapper_flushes_child_boundaries_around_the_real_side_effect():
++    from contextlib import nullcontext
++
++    module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
++    order = []
++
++    class Tool:
++        name = "read_file"
++        inputs = {"path": {"type": "string"}}
++
++        def forward(self, path):
++            order.append(("side-effect", path))
++            return "contents"
++
++    observer = MagicMock()
++    observer.tool_call_context.side_effect = lambda _call_id: nullcontext()
++    trajectory = MagicMock()
++    trajectory.start_dispatch.side_effect = lambda name, arguments: (
++        order.append(("start", name, arguments)) or "child-call"
++    )
++    trajectory.finish_dispatch.side_effect = lambda call_id, result, is_error: order.append(
++        ("finish", call_id, result, is_error)
++    )
++    tool = Tool()
++
++    module._wrap_tool_for_observer(tool, observer, "root-agent", trajectory)
++
++    assert tool.forward("README.md") == "contents"
++    assert order == [
++        ("start", "read_file", {"path": "README.md"}),
++        ("side-effect", "README.md"),
++        ("finish", "child-call", "contents", False),
++    ]
++    assert observer.add_message.call_args.kwargs["tool_call_id"] == "child-call"
++
++
++def test_tool_wrapper_does_not_execute_when_start_boundary_cannot_flush():
++    module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
++
++    class Tool:
++        name = "write_file"
++        inputs = {}
++
++        def __init__(self):
++            self.called = False
++
++        def forward(self):
++            self.called = True
++
++    tool = Tool()
++    trajectory = MagicMock()
++    trajectory.start_dispatch.side_effect = OSError("flush failed")
++
++    module._wrap_tool_for_observer(tool, MagicMock(), "root-agent", trajectory)
++
++    with pytest.raises(OSError, match="flush failed"):
++        tool.forward()
++    assert tool.called is False
++
++
++def _event_step_agent(module, model_output, trajectory, side_effects):
++    from contextlib import nullcontext
++
++    agent = module.CoreAgent.__new__(module.CoreAgent)
++    agent.observer = MagicMock()
++    agent.agent_name = "root-agent"
++    agent.name = "root-agent"
++    agent.step_number = 1
++    agent.tools = {}
++    agent.managed_agents = {}
++    agent.memory = MagicMock()
++    agent._history_step_count = 0
++    agent._last_uncompressed_est = 0
++    agent.logger = MagicMock()
++    agent.system_prompt = "Be useful."
++    agent._use_structured_outputs_internally = False
++    agent.enable_planning = False
++    agent.verification_controller = None
++    agent.event_trajectory = trajectory
++    agent._log_model_call_parameters = MagicMock()
++    agent._context_tools = MagicMock(return_value=[])
++    agent.context_runtime = MagicMock()
++    agent.context_runtime.prepare_step.return_value = SimpleNamespace(
++        evidence=SimpleNamespace(over_hard_budget=False),
++        messages=[],
++    )
++    agent.context_runtime.chars_per_token = 4
++    agent.context_runtime.token_counts.return_value = {"uncompressed": None}
++    agent.context_runtime.consume_history_summary_event.return_value = None
++
++    token_usage = SimpleNamespace(input_tokens=4, output_tokens=2)
++
++    class Model:
++        model_factory = "test"
++        model_id = "nexent-model"
++        last_finish_reason = "stop"
++
++        def __call__(self, *_args, **_kwargs):
++            return SimpleNamespace(content=model_output, token_usage=token_usage)
++
++    agent.model = Model()
++    agent.python_executor = lambda code: (
++        side_effects.append(("execute", code))
++        or SimpleNamespace(output="contents", logs="", is_final_answer=False)
++    )
++    manager = MagicMock()
++    manager.trace_tool_call.side_effect = lambda *_args, **_kwargs: nullcontext()
++    module.get_monitoring_manager = MagicMock(return_value=manager)
++    module.AgentExecutionError = type("AgentExecutionError", (Exception,), {})
++    module.fix_final_answer_code = lambda code: code
++    module.ToolCall = lambda name, arguments, id: SimpleNamespace(
++        name=name,
++        arguments=arguments,
++        id=id,
++    )
++    return agent, token_usage
++
++
++def test_step_stream_flushes_request_and_root_call_before_execution():
++    module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
++    side_effects = []
++    trajectory = MagicMock()
++    trajectory.record_request.side_effect = lambda **_kwargs: side_effects.append("request")
++    trajectory.start_root_tool.side_effect = lambda **_kwargs: side_effects.append("root-start")
++    trajectory.finish_root_tool.side_effect = lambda *_args, **_kwargs: side_effects.append("root-finish")
++    agent, token_usage = _event_step_agent(
++        module,
++        "<code>print('ok')</code>",
++        trajectory,
++        side_effects,
++    )
++    memory_step = SimpleNamespace(step_number=1, observations=None)
++
++    list(agent._step_stream(memory_step))
++
++    assert side_effects == [
++        "request",
++        "root-start",
++        ("execute", "print('ok')"),
++        "root-finish",
++    ]
++    trajectory.record_request.assert_called_once_with(
++        provider="test",
++        model="nexent-model",
++        system="Be useful.",
++    )
++    assert trajectory.start_root_tool.call_args.kwargs["token_usage"] is token_usage
++    trajectory.finish_root_tool.assert_called_once_with(
++        "Execution logs:\nLast output from code snippet:\ncontents",
++        is_error=False,
++    )
++
++
++def test_step_stream_records_direct_model_answer_without_a_tool_call():
++    module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
++    trajectory = MagicMock()
++    agent, token_usage = _event_step_agent(module, "final answer", trajectory, [])
++    memory_step = SimpleNamespace(step_number=1, observations=None)
++
++    with pytest.raises(module.FinalAnswerError):
++        list(agent._step_stream(memory_step))
++
++    trajectory.record_assistant_text.assert_called_once_with("final answer", token_usage)
++    trajectory.start_root_tool.assert_not_called()
++
++
++def test_step_stream_records_a_truncated_model_output_before_retrying():
++    module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
++    trajectory = MagicMock()
++    agent, token_usage = _event_step_agent(
++        module,
++        "I will call the tool next",
++        trajectory,
++        [],
++    )
++    agent.model.last_finish_reason = "length"
++    memory_step = SimpleNamespace(step_number=1, observations=None)
++
++    with pytest.raises(module.InvalidActionFormatError):
++        list(agent._step_stream(memory_step))
++
++    trajectory.record_assistant_text.assert_called_once_with(
++        "I will call the tool next",
++        token_usage,
++    )
++    trajectory.start_root_tool.assert_not_called()
++
++
++def test_step_stream_records_code_rejected_before_tool_execution():
++    module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
++    trajectory = MagicMock()
++    side_effects = []
++    agent, token_usage = _event_step_agent(
++        module,
++        "<code>write_file()</code>",
++        trajectory,
++        side_effects,
++    )
++    controller = MagicMock()
++    controller.guardrail_engine = None
++    controller.verify_before_tool_call.return_value = SimpleNamespace(
++        passed=False,
++        severity="blocking",
++        repair_instruction="Do not write this file.",
++        user_visible_note=None,
++    )
++    controller.build_feedback_observation.return_value = "blocked"
++    agent.verification_controller = controller
++    memory_step = SimpleNamespace(step_number=1, observations=None)
++
++    with pytest.raises(module.AgentExecutionError):
++        list(agent._step_stream(memory_step))
++
++    trajectory.record_assistant_text.assert_called_once_with(
++        "<code>write_file()</code>",
++        token_usage,
++    )
++    trajectory.start_root_tool.assert_not_called()
++    assert side_effects == []
++
++
+ def _create_minimal_core_agent_for_time_tests():
+     """Create a CoreAgent with minimal mocking for time-prefix tests."""
+     module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
+diff --git a/test/sdk/core/agents/test_event_trajectory.py b/test/sdk/core/agents/test_event_trajectory.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2e1176933ad5b6c17abd2bded635dee58f67904
+--- /dev/null
++++ b/test/sdk/core/agents/test_event_trajectory.py
+@@ -0,0 +1,549 @@
++from __future__ import annotations
++
++import json
++import math
++import os
++import subprocess
++import sys
++from pathlib import Path
++from types import SimpleNamespace
++from typing import ClassVar
++
++import pytest
++from nexent.core.agents.event_trajectory import (
++    EventTrajectory,
++    EventTrajectoryAlreadyActiveError,
++    EventTrajectoryError,
++)
++
++perix_event = pytest.importorskip(
++    "perix_event",
++    reason="install the Nexent event extra to run Event trajectory tests",
++)
++TOOL_NOT_STARTED = perix_event.TOOL_NOT_STARTED
++TOOL_OUTCOME_UNKNOWN = perix_event.TOOL_OUTCOME_UNKNOWN
++EventValidationError = perix_event.EventValidationError
++JsonlSessionPersistence = perix_event.JsonlSessionPersistence
++SessionForkError = perix_event.SessionForkError
++
++
++def config(root: Path, session_id: str = "nexent-session") -> SimpleNamespace:
++    return SimpleNamespace(
++        root=str(root),
++        session_id=session_id,
++        cwd=str(root.resolve()),
++        compression="none",
++    )
++
++
++def close_direct_answer(trajectory: EventTrajectory, text: str, step: int = 1) -> None:
++    trajectory.begin_turn(text)
++    trajectory.begin_step(step)
++    trajectory.record_request(
++        provider="test", model="nexent-model", system="Be useful."
++    )
++    trajectory.record_assistant_text(f"answer: {text}")
++    trajectory.end_step()
++    trajectory.end_turn({"kind": "completed"})
++
++
++def inspection(root: Path, session_id: str = "nexent-session"):
++    return JsonlSessionPersistence(root, compression="none").load(session_id)
++
++
++def run_real_nexent_process(
++    root: Path,
++    session_id: str,
++    mode: str,
++    fork_child: str = "-",
++) -> dict:
++    env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
++    result = subprocess.run(
++        [
++            sys.executable,
++            str(Path(__file__).resolve()),
++            "--event-worker",
++            str(root.resolve()),
++            session_id,
++            mode,
++            fork_child,
++        ],
++        cwd=root,
++        env=env,
++        check=False,
++        capture_output=True,
++        text=True,
++    )
++    assert result.returncode == 0, result.stderr or result.stdout
++    marker = "R33_RESULT="
++    line = next(
++        (
++            line
++            for line in reversed(result.stdout.splitlines())
++            if line.startswith(marker)
++        ),
++        None,
++    )
++    assert line is not None, result.stdout
++    return json.loads(line[len(marker) :])
++
++
++def test_records_complete_root_and_real_child_tool_boundaries(tmp_path: Path) -> None:
++    trajectory = EventTrajectory.open(config(tmp_path))
++    trajectory.begin_turn("Inspect README.md")
++    trajectory.begin_step(1)
++    trajectory.record_request(
++        provider="test", model="nexent-model", system="Be useful."
++    )
++    root_call_id = trajectory.start_root_tool(
++        model_output="I will inspect the file.",
++        name="python_interpreter",
++        arguments="read_file(path='README.md')",
++        token_usage=SimpleNamespace(input_tokens=12, output_tokens=4),
++    )
++    child_call_id = trajectory.start_dispatch("read_file", {"path": "README.md"})
++    trajectory.finish_dispatch(child_call_id, "contents", is_error=False)
++    trajectory.finish_root_tool("contents", is_error=False)
++    trajectory.end_step()
++    trajectory.end_turn({"kind": "completed"})
++    trajectory.close()
++
++    saved = inspection(tmp_path)
++    assert [event["type"] for event in saved.events] == [
++        "turn/start",
++        "user/message",
++        "step/start",
++        "request/header",
++        "assistant/message",
++        "tool/call",
++        "tool/code-dispatch-start",
++        "tool/code-dispatch",
++        "tool/result",
++        "step/end",
++        "turn/end",
++    ]
++    assert [event["seq"] for event in saved.events] == list(range(11))
++    assistant = saved.events[4]["data"]["message"]
++    assert assistant["source"] == {
++        "kind": "model",
++        "provider": "test",
++        "model": "nexent-model",
++    }
++    assert assistant["content"][-1] == {
++        "type": "tool-call",
++        "id": root_call_id,
++        "name": "python_interpreter",
++        "arguments": "read_file(path='README.md')",
++    }
++    assert saved.events[6]["data"] == {
++        "rootCallId": root_call_id,
++        "parentCallId": root_call_id,
++        "subCallId": child_call_id,
++        "name": "read_file",
++        "arguments": {"path": "README.md"},
++    }
++    assert saved.events[7]["data"]["isError"] is False
++    assert saved.events[8]["sourceEventSeqs"] == [5]
++    reopened = EventTrajectory.open(config(tmp_path))
++    assert [message["role"] for message in reopened.session.derive_messages()] == [
++        "user",
++        "assistant",
++        "user",
++    ]
++    reopened.close()
++
++
++def test_second_process_cannot_open_the_same_live_session(tmp_path: Path) -> None:
++    trajectory = EventTrajectory.open(config(tmp_path))
++    script = """
++import sys
++from types import SimpleNamespace
++from nexent.core.agents.event_trajectory import EventTrajectory, EventTrajectoryAlreadyActiveError
++
++config = SimpleNamespace(root=sys.argv[1], session_id='nexent-session', cwd=sys.argv[1], compression='none')
++try:
++    EventTrajectory.open(config)
++except EventTrajectoryAlreadyActiveError:
++    raise SystemExit(0)
++raise SystemExit(9)
++"""
++    result = subprocess.run(
++        [sys.executable, "-c", script, str(tmp_path.resolve())],
++        check=False,
++        capture_output=True,
++        text=True,
++    )
++    trajectory.close()
++    assert result.returncode == 0, result.stderr
++
++
++def test_resume_rejects_cwd_identity_drift_without_mutating_history(
++    tmp_path: Path,
++) -> None:
++    trajectory = EventTrajectory.open(config(tmp_path))
++    close_direct_answer(trajectory, "first")
++    trajectory.close()
++    before = list(inspection(tmp_path).events)
++    other_cwd = tmp_path / "other-project"
++    other_cwd.mkdir()
++
++    with pytest.raises(EventTrajectoryError, match="belongs to cwd"):
++        EventTrajectory.open(
++            SimpleNamespace(
++                root=str(tmp_path),
++                session_id="nexent-session",
++                cwd=str(other_cwd.resolve()),
++                compression="none",
++            )
++        )
++
++    assert list(inspection(tmp_path).events) == before
++    reopened = EventTrajectory.open(config(tmp_path))
++    reopened.close()
++
++
++@pytest.mark.parametrize(
++    ("crash_after", "repair_code", "has_source"),
++    [
++        ("assistant/message", TOOL_NOT_STARTED, False),
++        ("tool/call", TOOL_OUTCOME_UNKNOWN, True),
++    ],
++)
++def test_process_crash_repairs_precise_root_tool_state(
++    tmp_path: Path,
++    crash_after: str,
++    repair_code: str,
++    has_source: bool,
++) -> None:
++    script = """
++import os
++import sys
++from types import SimpleNamespace
++from nexent.core.agents.event_trajectory import EventTrajectory
++
++config = SimpleNamespace(root=sys.argv[1], session_id='crash', cwd=sys.argv[1], compression='none')
++trajectory = EventTrajectory.open(config)
++trajectory.begin_turn('run a tool')
++trajectory.begin_step(1)
++trajectory.record_request(provider='test', model='nexent-model')
++original_flush = trajectory.store.flush
++
++def crash_on_boundary(session):
++    original_flush(session)
++    if session.events[-1]['type'] == sys.argv[2]:
++        os._exit(0)
++
++trajectory.store.flush = crash_on_boundary
++trajectory.start_root_tool(
++    model_output='run',
++    name='python_interpreter',
++    arguments='read_file()',
++)
++raise SystemExit(7)
++"""
++    result = subprocess.run(
++        [sys.executable, "-c", script, str(tmp_path.resolve()), crash_after],
++        check=False,
++        capture_output=True,
++        text=True,
++    )
++    assert result.returncode == 0, result.stderr
++
++    restored = EventTrajectory.open(config(tmp_path, "crash"))
++    events = list(restored.session.events)
++    repaired = next(event for event in events if event["type"] == "tool/result")
++    assert repaired["data"]["error"]["code"] == repair_code
++    assert ("sourceEventSeqs" in repaired) is has_source
++    assert [event["type"] for event in events[-3:]] == [
++        "step/end",
++        "turn/end",
++        "session/end-seed",
++    ]
++    assert events[-2]["data"]["reason"] == {"kind": "interrupted"}
++    restored.close()
++
++
++def test_cross_process_resume_and_fork_preserve_prefix_and_lineage(
++    tmp_path: Path,
++) -> None:
++    first = EventTrajectory.open(config(tmp_path))
++    close_direct_answer(first, "first")
++    first.close()
++    prefix = list(inspection(tmp_path).events)
++
++    script = """
++import sys
++from types import SimpleNamespace
++from nexent.core.agents.event_trajectory import EventTrajectory
++
++config = SimpleNamespace(root=sys.argv[1], session_id='nexent-session', cwd=sys.argv[1], compression='none')
++trajectory = EventTrajectory.open(config)
++trajectory.begin_turn('second')
++trajectory.begin_step(1)
++trajectory.record_request(provider='test', model='nexent-model')
++trajectory.record_assistant_text('answer: second')
++trajectory.end_step()
++trajectory.end_turn({'kind': 'completed'})
++child = trajectory.store.fork(trajectory.session, child_session_id='nexent-child')
++trajectory.store.flush(child)
++trajectory.close()
++"""
++    result = subprocess.run(
++        [sys.executable, "-c", script, str(tmp_path.resolve())],
++        check=False,
++        capture_output=True,
++        text=True,
++    )
++    assert result.returncode == 0, result.stderr
++
++    parent = inspection(tmp_path)
++    child = inspection(tmp_path, "nexent-child")
++    assert list(parent.events[: len(prefix)]) == prefix
++    assert [event["seq"] for event in parent.events] == list(range(len(parent.events)))
++    assert [event["type"] for event in parent.events].count("session/end-seed") == 1
++    assert child.meta["parentSession"] == "nexent-session"
++    assert child.meta["seedLength"] == len(parent.events)
++    assert child.meta["cwd"] == str(tmp_path.resolve())
++    assert list(child.events[: child.meta["seedLength"]]) == list(parent.events)
++
++
++def test_real_core_agent_records_resumes_and_forks_with_installed_event_package(
++    tmp_path: Path,
++) -> None:
++    package_path = Path(perix_event.__file__).resolve()
++    assert "site-packages" in package_path.parts
++
++    first_result = run_real_nexent_process(
++        tmp_path,
++        "nexent-real",
++        "tool",
++    )
++    assert first_result["output"] == 5
++    assert Path(first_result["eventPackage"]) == package_path
++    first = inspection(tmp_path, "nexent-real")
++    first_prefix = list(first.events)
++
++    second_result = run_real_nexent_process(
++        tmp_path,
++        "nexent-real",
++        "answer",
++        "nexent-real-fork",
++    )
++    assert second_result["output"] == "The result remains five."
++    parent = inspection(tmp_path, "nexent-real")
++    assert list(parent.events[: len(first_prefix)]) == first_prefix
++    assert parent.events[len(first_prefix)]["type"] == "session/end-seed"
++    assert [event["seq"] for event in parent.events] == list(range(len(parent.events)))
++
++    child_before = inspection(tmp_path, "nexent-real-fork")
++    assert child_before.meta["parentSession"] == "nexent-real"
++    assert child_before.meta["seedLength"] == len(parent.events)
++    assert child_before.meta["cwd"] == str(tmp_path.resolve())
++    assert list(child_before.events[: len(parent.events)]) == list(parent.events)
++
++    parent_before_child_resume = list(parent.events)
++    child_result = run_real_nexent_process(
++        tmp_path,
++        "nexent-real-fork",
++        "child",
++    )
++    assert child_result["output"] == "The fork continued independently."
++    assert (
++        list(inspection(tmp_path, "nexent-real").events) == parent_before_child_resume
++    )
++
++    child = inspection(tmp_path, "nexent-real-fork")
++    assert [event["seq"] for event in child.events] == list(range(len(child.events)))
++    assert list(child.events[: child.meta["seedLength"]]) == list(parent.events)
++    root_calls = [event for event in parent.events if event["type"] == "tool/call"]
++    dispatches = [
++        event["data"]
++        for event in parent.events
++        if event["type"] == "tool/code-dispatch"
++    ]
++    assert len(root_calls) == 1
++    assert {dispatch["name"] for dispatch in dispatches} == {"add", "final_answer"}
++    assert all(
++        dispatch["rootCallId"] == root_calls[0]["data"]["callId"]
++        for dispatch in dispatches
++    )
++    assert [
++        event["data"]["reason"]
++        for event in parent.events
++        if event["type"] == "request/header"
++    ] == [
++        "initial",
++        "resume",
++    ]
++
++
++def test_invalid_event_and_open_turn_fork_do_not_create_false_history(
++    tmp_path: Path,
++) -> None:
++    trajectory = EventTrajectory.open(config(tmp_path))
++    before = trajectory.session.events
++    with pytest.raises(EventValidationError):
++        trajectory.session.append("turn/start", {"turn": math.nan})
++    assert trajectory.session.events == before
++
++    trajectory.begin_turn("still running")
++    boundary = trajectory.session.events[-1]["seq"]
++    with pytest.raises(SessionForkError) as raised:
++        trajectory.store.fork(
++            trajectory.session,
++            boundary=boundary,
++            child_session_id="invalid-child",
++        )
++    assert raised.value.code == "OPEN_TURN"
++    assert all(session.id != "invalid-child" for session in trajectory.store.list())
++    trajectory.close()
++
++
++def test_lock_exception_type_is_public_and_specific() -> None:
++    assert issubclass(EventTrajectoryAlreadyActiveError, RuntimeError)
++
++
++def _run_event_worker(root: Path, session_id: str, mode: str, fork_child: str) -> None:
++    from nexent.core.agents import EventTrajectoryConfig
++    from nexent.core.agents.core_agent import CoreAgent
++    from nexent.core.context_runtime.contracts import ContextEvidence, FinalContext
++    from nexent.core.utils.observer import MessageObserver
++    from smolagents import Tool
++    from smolagents.models import ChatMessage, MessageRole, Model
++    from smolagents.monitoring import TokenUsage
++
++    class AddTool(Tool):
++        name = "add"
++        description = "Add two integers."
++        inputs: ClassVar[dict[str, dict[str, str]]] = {
++            "a": {"type": "integer", "description": "First integer"},
++            "b": {"type": "integer", "description": "Second integer"},
++        }
++        output_type = "integer"
++
++        def forward(self, a: int, b: int) -> int:
++            return a + b
++
++    class ScriptedModel(Model):
++        model_factory = "nexent-acceptance"
++
++        def __init__(self) -> None:
++            super().__init__(model_id="deterministic-event-model")
++
++        def generate(self, _messages, **_kwargs) -> ChatMessage:
++            if mode == "tool":
++                content = "<code>value = add(a=2, b=3)\nfinal_answer(value)</code>"
++            elif mode == "answer":
++                content = "The result remains five."
++            else:
++                content = "The fork continued independently."
++            return ChatMessage(
++                role=MessageRole.ASSISTANT,
++                content=content,
++                token_usage=TokenUsage(input_tokens=10, output_tokens=8),
++            )
++
++    class DeterministicContextRuntime:
++        context_manager = None
++        chars_per_token = 4
++        token_threshold = None
++        context_window_tokens = 8192
++        hard_input_budget_tokens = 4096
++        processing_mode = "passthrough"
++
++        def replace_items(self, _items) -> None:
++            return None
++
++        def prepare_run(self, **_kwargs) -> None:
++            return None
++
++        def prepare_step(self, **_kwargs) -> FinalContext:
++            return FinalContext(
++                messages=[{"role": "user", "content": f"acceptance mode: {mode}"}],
++                evidence=ContextEvidence(),
++            )
++
++        def prepare_final_answer(self, **_kwargs) -> FinalContext:
++            return FinalContext(
++                messages=[{"role": "user", "content": "summarize"}],
++                evidence=ContextEvidence(purpose="final_answer"),
++            )
++
++        def render_summary_messages(self, **_kwargs) -> list:
++            return []
++
++        def finalize_evidence(self, *, status: str) -> ContextEvidence:
++            return ContextEvidence(loop_status=status)
++
++        def compression_stats(self) -> dict:
++            return {
++                "calls": 0,
++                "input_tokens": 0,
++                "output_tokens": 0,
++                "cache_hits": 0,
++                "cache_types": [],
++            }
++
++        def global_compression_stats(self) -> dict:
++            return {"calls": 0, "records": []}
++
++        def token_counts(self) -> dict:
++            return {"uncompressed": None, "compressed": None}
++
++        def consume_history_summary_event(self):
++            return None
++
++    event_package = Path(perix_event.__file__).resolve()
++    if "site-packages" not in event_package.parts:
++        raise RuntimeError(f"Event package is not installed: {event_package}")
++    trajectory = EventTrajectory.open(
++        EventTrajectoryConfig(
++            root=str(root),
++            session_id=session_id,
++            cwd=str(root),
++            compression="none",
++        )
++    )
++    try:
++        agent = CoreAgent(
++            observer=MessageObserver(),
++            tools=[AddTool()],
++            model=ScriptedModel(),
++            context_runtime=DeterministicContextRuntime(),
++            event_trajectory=trajectory,
++            max_steps=2,
++        )
++        prompt = {
++            "tool": "Add two and three.",
++            "answer": "Confirm the result.",
++            "child": "Continue from the fork.",
++        }[mode]
++        output = agent.run(
++            f"[Current time: 2026-09-02 00:00:00]\n\n{prompt}",
++            stream=False,
++        )
++        if fork_child != "-":
++            child = trajectory.store.fork(
++                trajectory.session,
++                child_session_id=fork_child,
++            )
++            trajectory.store.flush(child)
++    finally:
++        trajectory.close()
++    print(
++        "R33_RESULT="
++        + json.dumps(
++            {"output": output, "eventPackage": str(event_package)},
++            ensure_ascii=False,
++            separators=(",", ":"),
++        )
++    )
++
++
++if __name__ == "__main__" and len(sys.argv) == 6 and sys.argv[1] == "--event-worker":
++    _run_event_worker(
++        Path(sys.argv[2]),
++        sys.argv[3],
++        sys.argv[4],
++        sys.argv[5],
++    )
+diff --git a/test/sdk/core/agents/test_run_agent.py b/test/sdk/core/agents/test_run_agent.py
+index 7cabea5ba5948228dfb3f32f80607a4920f45ee8..fd84dd30a7694dbf9f4d7d1702a4f7907c73270a 100644
+--- a/test/sdk/core/agents/test_run_agent.py
++++ b/test/sdk/core/agents/test_run_agent.py
+@@ -252,6 +252,7 @@ with patch.dict("sys.modules", module_mocks):
+         ModelConfig,
+         AgentConfig,
+         ToolConfig,
++        EventTrajectoryConfig,
+     )  # noqa: E402
+     import sdk.nexent.core.agents.run_agent as run_agent  # noqa: E402
+ 
+@@ -345,6 +346,7 @@ def test_agent_run_thread_local_flow(basic_agent_run_info, monkeypatch):
+         workspace_path=None,
+         workspace_run_id=None,
+         minio_files=None,
++        event_trajectory=None,
+     )
+ 
+     # Following methods on the NexentAgent instance should be invoked
+@@ -385,6 +387,25 @@ def test_agent_run_thread_binds_capacity_and_budget_snapshots(basic_agent_run_in
+     assert captured["budget"] == {"fingerprint": "w2"}
+ 
+ 
++def test_agent_run_thread_owns_configured_event_trajectory(basic_agent_run_info, tmp_path, monkeypatch):
++    basic_agent_run_info.event_trajectory = EventTrajectoryConfig(
++        root=str(tmp_path),
++        session_id="tenant-user-conversation",
++        cwd=str(tmp_path.resolve()),
++    )
++    trajectory = MagicMock(name="EventTrajectory")
++    open_trajectory = MagicMock(return_value=trajectory)
++    monkeypatch.setattr(run_agent.EventTrajectory, "open", open_trajectory)
++    nexent = MagicMock(name="NexentAgentInstance")
++    monkeypatch.setattr(run_agent, "NexentAgent", MagicMock(return_value=nexent))
++
++    run_agent.agent_run_thread(basic_agent_run_info)
++
++    open_trajectory.assert_called_once_with(basic_agent_run_info.event_trajectory)
++    assert run_agent.NexentAgent.call_args.kwargs["event_trajectory"] is trajectory
++    trajectory.close.assert_called_once_with()
++
++
+ def test_emit_uncertainty_reserve_warning(basic_agent_run_info):
+     basic_agent_run_info.safe_input_budget_snapshot = {
+         "warnings": ["uncertainty_reserve_active"],
+@@ -458,6 +479,7 @@ def test_agent_run_thread_mcp_flow(basic_agent_run_info, mock_memory_context, mo
+         workspace_path=None,
+         workspace_run_id=None,
+         minio_files=None,
++        event_trajectory=None,
+     )
+ 
+     # Subsequent calls on NexentAgent instance should mirror the local flow

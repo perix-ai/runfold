@@ -36,6 +36,8 @@ perix-runtime-data/
 │   └── event/v0/                   # Language-neutral wire schemas
 ├── conformance/
 │   └── event/v0/                   # Shared cases and wire fixtures
+├── integrations/
+│   └── nexent/                     # Versioned downstream Event integration patches
 └── third_party/
     └── deepseek-harness/
         └── upstream/               # Unmodified pinned DSH source snapshot
@@ -52,6 +54,7 @@ perix-runtime-data/
 | Why key choices were made | [`docs/event/decisions.md`](docs/event/decisions.md) |
 | Progress and open work | [`docs/event/tasks.md`](docs/event/tasks.md) |
 | Watch the Nexent trajectory restore/fork UI demo | [`docs/event/demos/nexent/`](docs/event/demos/nexent/) |
+| Apply the validated Nexent product integration | [`integrations/nexent/`](integrations/nexent/) |
 
 ## Quick start
 
@@ -84,7 +87,7 @@ after each verified commit instead of being accumulated into one large batch.
 ## Status
 
 The Event trajectory facility has completed its production acceptance and all
-recorded tasks through R39. The current full gate verifies 204 retained upstream
+recorded tasks through R44. The current full gate verifies 204 retained upstream
 files through 139 declared specifier mappings, runs 1005 behavior tests, and
 installs both language packages into blank consumers. R33 also proves the Python
 package in Nexent v2.5.0's real process and passes the resulting parent/fork
@@ -94,6 +97,8 @@ restore/fork test and renders the retained DSH detail panel, including the real
 Tool schema. The Nexent branch is intentionally a local interoperability
 experiment with no remote; any upstream proposal requires separate coordination
 with the Nexent team. A repository-local
-[65-second UI demo](docs/event/demos/nexent/) shows the complete trajectory,
+[UI demo](docs/event/demos/nexent/) shows the complete trajectory,
 cold restore, detail tabs, and fork result. See
-[`docs/event/tasks.md`](docs/event/tasks.md) for the full evidence.
+[`docs/event/tasks.md`](docs/event/tasks.md) for the full evidence. The exact
+Nexent product changes are preserved separately as a
+[versioned, replay-tested patch series](integrations/nexent/v2.5.0/).

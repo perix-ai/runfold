@@ -1,0 +1,79 @@
+From 0475d458d056970b0c5ad90af60607ee60a0d0d3 Mon Sep 17 00:00:00 2001
+From: Heiki Scott <heikiscott@gmail.com>
+Date: Wed, 2 Sep 2026 07:48:31 -0700
+Subject: [PATCH 6/8] docs(event): document trajectory UI verification
+
+---
+ docs/event-trajectory.md | 42 ++++++++++++++++++++++++++++++++++++++++
+ frontend/package.json    |  1 +
+ 2 files changed, 43 insertions(+)
+
+diff --git a/docs/event-trajectory.md b/docs/event-trajectory.md
+index bd82b20719c6ef3b306d17e9821c5288ec4ca136..e678580d3cf23d87602f03c2c621ad5b65c5b504 100644
+--- a/docs/event-trajectory.md
++++ b/docs/event-trajectory.md
+@@ -121,6 +121,33 @@ manager can create a fresh checkpoint after it continues. A normal subsequent
+ `/agent/run` on either conversation is the Event resume path; the existing SSE
+ `resume=true` parameter remains only a transport reconnection mechanism.
+ 
++## Product trajectory view
++
++The existing chat Thread keeps its Message, Reasoning, Tool, Plan,
++Verification, Sources, and Composer rendering. A per-conversation
++`Conversation / Trajectory` switch mounts the browser-only
++`@perix/event-ui` package directly in the same page; the integration does not
++copy the DSH components, use an iframe, or maintain a Nexent-specific
++trajectory renderer. The selected view is restored independently for each
++conversation after a reload.
++
++The frontend retrieves every trajectory page through the authenticated Nexent
++endpoint and passes the common Event v0 records to `TrajectoryViewer`. During
++an active run it polls incrementally from the last sequence number. Empty,
++missing, unavailable, and malformed responses remain distinct user-visible
++states. The fork action defaults to the latest completed `turn/end` boundary,
++creates the corresponding Nexent child conversation, and navigates directly to
++its inherited trajectory view.
++
++The frontend packages are committed as reproducible tarballs under
++`frontend/vendor/` and were packed from Perix runtime data commit
++`3a1f931ddcd7f94944789a195536208405b7182d`:
++
++```text
++perix-event-sdk-0.1.0.tgz  sha256 bb711c641314026522f2e54fe14e219411727c7192554275d8ed129ef3e1caed
++perix-event-ui-0.1.0.tgz   sha256 5ef17461ff7f8f0f5175687496140a2aa3bcd8ad831b7301b60863e94c7f6da1
++```
++
+ ## Verification
+ 
+ Install both optional test groups and run the focused acceptance suite:
+@@ -141,3 +168,18 @@ runner. The acceptance test launches fresh Python processes from outside the
+ repository root, verifies that `perix_event` resolves from `site-packages`,
+ executes a real `CoreAgent` tool call, resumes the parent Session, forks it, and
+ independently continues the child.
++
++Run the frontend trajectory and regression checks from `frontend/`:
++
++```bash
++pnpm test
++pnpm exec tsc --noEmit --incremental false
++pnpm build
++```
++
++`pnpm test` includes pagination, response validation, fork URL construction,
++completed-turn boundary selection, per-conversation view persistence, and the
++existing chat viewport/date/load-policy tests. Browser acceptance additionally
++uses the committed R33 parent/child Event fixture to verify the unchanged chat,
++toolbar, timeline, Turn/Step/Tool rows, search, global folding, event detail,
++reload persistence, and child navigation.
+diff --git a/frontend/package.json b/frontend/package.json
+index 0ff03eeaceba6a360a19c9ef1a1001c74de59fb2..607ff690ab44fff8023e6e4222eb87d9b07f77ec 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -7,6 +7,7 @@
+     "dev": "node server.js",
+     "build": "next build",
+     "start": "NODE_ENV=production node server.js",
++    "test": "node --test tests/*.test.ts",
+     "lint": "next lint",
+     "lint:fix": "next lint --fix",
+     "format": "prettier --write .",

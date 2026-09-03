@@ -1,0 +1,3 @@
+# Git mail patches encode empty context lines as one leading space. Preserve
+# generated patch bytes; whitespace checks still apply to the files they create.
+integrations/nexent/**/patches/*.patch -whitespace

@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "integration": "perix-event-for-nexent",
+  "status": "local-interoperability-experiment",
+  "created": "2026-09-02",
+  "upstream": {
+    "repository": "https://github.com/ModelEngine-Group/nexent",
+    "version": "v2.5.0",
+    "tagCommit": "86d75923dd549008d725d83db18a93d654c84fb0",
+    "releaseArchive": "https://github.com/ModelEngine-Group/nexent/archive/refs/tags/v2.5.0.zip",
+    "releaseArchiveSha256": "a4be5bc01472dd12947b2dce21a4b74ee58735cbd4de8668d367695b866ce77f",
+    "verifiedEntries": 2886,
+    "verifiedFiles": 2463,
+    "verifiedBytes": 85150229,
+    "localBaselineCommit": "1b184cf019fe2a539fe1c340afd526544492a90c",
+    "baselineTree": "b442446293b6793498dac09be0b86f1dd0d340c5"
+  },
+  "result": {
+    "sourceBranch": "codex/event-trajectory-v2.5.0",
+    "sourceHead": "f10c9b54f7cdf0dadd3beb4a2e87ab1383fe077d",
+    "expectedTree": "a3c97e4630464c5d5ae9492abb5c80fac3b6fd6f",
+    "commitCount": 8,
+    "changedFiles": 38,
+    "insertions": 4366,
+    "deletions": 86
+  },
+  "eventDependencies": {
+    "python": {
+      "distribution": "perix-event-sdk",
+      "version": "0.1.0",
+      "sourceRevision": "2eea3f17e6a917ef3d640405b360664728d31e84"
+    },
+    "typescript": {
+      "sourceRevision": "3a1f931ddcd7f94944789a195536208405b7182d",
+      "packages": [
+        {
+          "file": "frontend/vendor/perix-event-sdk-0.1.0.tgz",
+          "name": "@perix/event-sdk",
+          "version": "0.1.0",
+          "sha256": "bb711c641314026522f2e54fe14e219411727c7192554275d8ed129ef3e1caed"
+        },
+        {
+          "file": "frontend/vendor/perix-event-ui-0.1.0.tgz",
+          "name": "@perix/event-ui",
+          "version": "0.1.0",
+          "sha256": "5ef17461ff7f8f0f5175687496140a2aa3bcd8ad831b7301b60863e94c7f6da1"
+        }
+      ]
+    }
+  },
+  "patchFormat": {
+    "generator": "git format-patch",
+    "options": [
+      "--binary",
+      "--full-index",
+      "--no-signature"
+    ],
+    "seriesFile": "series"
+  },
+  "patches": [
+    {
+      "index": 1,
+      "file": "patches/0001-feat-event-add-Perix-trajectory-experiment.patch",
+      "sourceCommit": "5c597209bb4a01866dc073ddacf7a2e682dd6d71",
+      "sourceTree": "41fab43ca8f11510a96da8829480715f0c4902bf",
+      "subject": "feat(event): add Perix trajectory experiment",
+      "bytes": 86514,
+      "sha256": "ea3130cd51b520fffca6ac86b121242272d1d28eaa6d6034dcc1b528c1304896"
+    },
+    {
+      "index": 2,
+      "file": "patches/0002-feat-event-wire-conversation-trajectory-backend.patch",
+      "sourceCommit": "64347a3470786e7eaed81cbb84159cd6e80b4979",
+      "sourceTree": "3eefc9250ae808a54a48488abad3b5fc3e9f293a",
+      "subject": "feat(event): wire conversation trajectory backend",
+      "bytes": 54594,
+      "sha256": "810e04d69433d878394fd3934f59301c2f3ba84a873d2f3f968ca74031581fc3"
+    },
+    {
+      "index": 3,
+      "file": "patches/0003-build-event-vendor-reproducible-UI-packages.patch",
+      "sourceCommit": "1280f2a55ea76fe5b7be7fd0f0b2353778eaead6",
+      "sourceTree": "8fee35f512a1344b32f0bba1d5364deab547bbfe",
+      "subject": "build(event): vendor reproducible UI packages",
+      "bytes": 2135523,
+      "sha256": "8dcab112ad842017c0e481a2aadef237430c698c1f1cc8da293fb248a8ae974b"
+    },
+    {
+      "index": 4,
+      "file": "patches/0004-feat-event-add-trajectory-frontend-client.patch",
+      "sourceCommit": "88a4621f260502e859da63e07510fb7bfe26d96d",
+      "sourceTree": "b095ca5b752520158fc464383dda4670f60b9b0e",
+      "subject": "feat(event): add trajectory frontend client",
+      "bytes": 15873,
+      "sha256": "89b31ae6e68af0c50c9f92a75a5d3befa3d2adcfe360aaab1c0e8f36024a79d4"
+    },
+    {
+      "index": 5,
+      "file": "patches/0005-feat-event-embed-trajectory-view-in-Nexent-chat.patch",
+      "sourceCommit": "e3a25a25201a8eedab6d82ce5cbede5d51f6d125",
+      "sourceTree": "bbf964c28f9805a7b2c4967692bc811579abaec7",
+      "subject": "feat(event): embed trajectory view in Nexent chat",
+      "bytes": 28260,
+      "sha256": "b3a34e0e82a4957d31956ddbb71e6733f5bcb2f79015e6985ffb3c28a054285c"
+    },
+    {
+      "index": 6,
+      "file": "patches/0006-docs-event-document-trajectory-UI-verification.patch",
+      "sourceCommit": "0475d458d056970b0c5ad90af60607ee60a0d0d3",
+      "sourceTree": "cebd8e4c4a8da16112e28be81cfc1ba8e934e963",
+      "subject": "docs(event): document trajectory UI verification",
+      "bytes": 3687,
+      "sha256": "c7ff3288a83b7e04d1a64b6680ab023d11615326f19994978c7d5e13471120ad"
+    },
+    {
+      "index": 7,
+      "file": "patches/0007-feat-event-verify-long-Nexent-trajectories.patch",
+      "sourceCommit": "d341740758704382e02800ab3b96960e06f6214a",
+      "sourceTree": "56c6878e18038e16b2b83017fe90a60ba625d4a4",
+      "subject": "feat(event): verify long Nexent trajectories",
+      "bytes": 15681,
+      "sha256": "e9ec18668001ffe3da2f0b2c595eb9fdb8de5e269ce7713a96af81dc8fe02f1f"
+    },
+    {
+      "index": 8,
+      "file": "patches/0008-feat-event-add-dual-Nexent-fork-controls.patch",
+      "sourceCommit": "f10c9b54f7cdf0dadd3beb4a2e87ab1383fe077d",
+      "sourceTree": "a3c97e4630464c5d5ae9492abb5c80fac3b6fd6f",
+      "subject": "feat(event): add dual Nexent fork controls",
+      "bytes": 16811,
+      "sha256": "9bc2f7d0029d30fcfea4c185c618cb91bf2204f62dce3eac2acae97ab0212349"
+    }
+  ]
+}

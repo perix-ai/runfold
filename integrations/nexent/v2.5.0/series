@@ -1,0 +1,8 @@
+patches/0001-feat-event-add-Perix-trajectory-experiment.patch
+patches/0002-feat-event-wire-conversation-trajectory-backend.patch
+patches/0003-build-event-vendor-reproducible-UI-packages.patch
+patches/0004-feat-event-add-trajectory-frontend-client.patch
+patches/0005-feat-event-embed-trajectory-view-in-Nexent-chat.patch
+patches/0006-docs-event-document-trajectory-UI-verification.patch
+patches/0007-feat-event-verify-long-Nexent-trajectories.patch
+patches/0008-feat-event-add-dual-Nexent-fork-controls.patch
