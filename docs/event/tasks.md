@@ -890,6 +890,51 @@
     仓库协作者权限控制。更新后的 description、空 homepage 与 11 个 topics 已由
     GitHub API 回读确认；`git diff --check` 通过。
 
+## 9. 发布与产物治理（2026-09-03 复核）
+
+复核范围是 R36–R51。行为、依赖与身份工作已达标：完整 `npm run verify` 串行
+通过，代码级 `@deepseek-ai/` 引用与旧命名残留为空，`npm ls` 无 DSH 包，身份
+校验 204/10/139 与文档一致，`third_party` 快照与固定 commit 逐字节一致，
+许可证中的 DeepSeek 版权行与上游完全相同。下列条目补的是"可发布、可长期
+维护"的缺口，逐条证据见
+[`tasks/R52-R58-release-governance.md`](tasks/R52-R58-release-governance.md)。
+
+- [ ] **R52** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/{sdk,ui/trajectory}/package.json`、`packages/event/python/pyproject.toml`、`scripts/verify-public-identity.mjs`
+  - **问题**：两个 npm 包缺 `repository`、`homepage`、`bugs`、`keywords`、`publishConfig`；Python 缺 `[project.urls]`。scoped 包无 `publishConfig.access: "public"` 时 `npm publish` 会失败；无回源链接与 `OPEN_SOURCE_POLICY.md` 的可追溯要求不一致。
+  - **处理**：补齐三个 manifest 的元数据，并在身份校验脚本中加断言防回退。
+  - **依赖**：无。
+
+- [ ] **R53** · 难度 中 · 风险 中 · 位置 `integrations/nexent/v2.5.0/`
+  - **问题**：manifest 记录 vendored tarball 来自 `2249c5f`，其后 `ba50409`、`0a420bd` 改了两个发布包的 `package.json`、`LICENSE`、`NOTICE.md` 与第三方声明生成。补丁 0003 中 Nexent 实际安装的 tgz 仍带旧版权行（缺 `Copyright (c) 2026 Heiki Scott` 一行），与 `OPEN_SOURCE_POLICY.md` 分发要求第 1、3 条冲突。
+  - **处理**：按当前 HEAD 重建两个 tarball 并重放补丁 0003，同步 `manifest.json`、`SHA256SUMS` 与 README 中的版本绑定说明。
+  - **依赖**：R52。
+
+- [ ] **R54** · 难度 中 · 风险 低 · 位置 新增 `scripts/verify-integration-artifacts.mjs`、根 `package.json`
+  - **问题**：`integrations/` 与 demo 资产不在任何门禁内。`SHA256SUMS` 与 manifest 哈希只在 R44 时人工核对过一次；复核时手动执行仍全部通过，但改动补丁或资产不会被 `npm run verify` 发现。
+  - **处理**：新增校验脚本并纳入 `verify`，覆盖 `SHA256SUMS`、manifest 逐条 `bytes`/`sha256`、`series` 与 `patches/` 的一一对应，以及 demo README 登记的 MP4/封面哈希。补丁的可应用性需要 Nexent 基线，改为在 `integrations/nexent/README.md` 记录重放前置与最近一次结果。
+  - **依赖**：R53。
+
+- [ ] **R55** · 难度 易 · 风险 中 · 位置 `NOTICE.md`、`docs/event/demos/nexent/`、`docs/event/evidence/`
+  - **问题**：六段旁白 MP3 与合成 MP4 由 `edge-tts`（微软 Edge 朗读服务）生成并检入仓库，属于分发资产；根与各包 `NOTICE.md` 中检索 demo/mp3/mp4/tts/narration/audio 均无结果，与 `OPEN_SOURCE_POLICY.md`"第三方接收"要求不一致。R37/R38 的 Nexent 界面截图同样未登记来源与许可。
+  - **处理**：在 `NOTICE.md` 增加 demo 资产来源与条款结论；若结论不明确，改用可自证许可的方案（本地 TTS、无旁白版本或字幕替代）。
+  - **依赖**：无。**需你先确认条款口径再执行。**
+
+- [ ] **R56** · 难度 易 · 风险 低 · 位置 `vitest.config.ts`、`packages/event/typescript/TESTING.md`
+  - **问题**：`jsonl.spec.ts` 与 `zstd.spec.ts` 的协调器用例依赖固定的 vitest 默认 5000 ms 超时。复核时与其他任务并行运行，两个用例超时失败（单例报告约 459 秒）；串行重跑 626/626 通过、总耗时 3.95 秒。CI 并行或共享 runner 上会间歇性失败。
+  - **处理**：为这两个套件设置明确的 `testTimeout`，并在 TESTING.md 说明用途。
+  - **依赖**：无。
+
+- [ ] **R57** · 难度 易 · 风险 低 · 位置 `docs/event/README.md`、`AGENTS.md`
+  - **问题**：`docs/event/evidence/`（7 张验收截图）不在文档地图中；`AGENTS.md` 的布局规则未涵盖 `scripts/`、`integrations/`、`docs/<domain>/demos/`、`docs/<domain>/evidence/`；`scripts/` 同时放校验脚本与 demo 合成源码，职责不单一。
+  - **处理**：补全地图与布局规则，并决定 demo 合成源码的归属目录。
+  - **依赖**：无。
+
+- [ ] **R58** · 难度 易 · 风险 低 · 位置 `scripts/verify-public-identity.mjs:10`
+  - **问题**：`['per', 'ix'].join('')` 的拆写是必要的（脚本扫描包括自身在内的全部文本文件），但没有注释，读者易误判为混淆或笔误。
+  - **处理**：补一行注释说明原因。
+  - **依赖**：无。
+
+
 ## 执行顺序
 
 按"容易改、风险小"优先，跨章节排列。
@@ -910,6 +955,7 @@
 | 12 | R35 | 显式构建并从独立 wheel 安装 Python 空白消费者 | R34 |
 | 13 | R33 | Nexent 真实消费者接入与需求 A5 验收 | R25–R32、R34–R35 |
 | 14 | R36 | 上游测试文件的 DSH import 改写与别名清零（见 `tasks/R36-test-imports.md`） | 批次 9 |
+| 15 | R52, R56, R57, R58 → R53 → R54；R55 待条款确认 | 发布元数据、产物时效与治理缺口（见 `tasks/R52-R58-release-governance.md`） | R36–R51 |
 | 15 | R37 | Nexent 聊天页嵌入独立 Trajectory UI，并接通读取、resume、fork（见 `tasks/R37-nexent-trajectory-ui.md`） | R33 |
 | 16 | R38 | Nexent 20 Turn 长轨迹冷恢复、fork 与详情面板全景验收（见 `tasks/R38-nexent-long-trajectory.md`） | R37 |
 | 17 | R39 | Nexent 长轨迹、冷恢复、详情按钮与 fork 可播放 Demo（见 `tasks/R39-nexent-trajectory-demo.md`） | R38 |
