@@ -16,6 +16,10 @@
 > Schema 详情。按用户约定，该 Nexent 分支仅用于本地实验，不推送远端。R36
 > 最终移除了保留测试中的 DSH
 > module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
+>
+> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**，并计划执行
+> R45–R49。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
+> 不改变 Event 数据模型、restore/resume/fork 行为、Trajectory 交互或 DSH 快照。
 
 ## 任务生命周期
 
@@ -726,6 +730,59 @@
     声明映射、1005 个行为测试、全部构建/类型检查与 TypeScript/Python 空白
     消费者安装；Nexent v2.5.0 另通过 515 项相关测试和真实轨迹跨语言 UI 验收。
 
+## 8. Runfold 项目身份迁移
+
+- [ ] **R45** · 难度 中 · 风险 中 · 位置根 `package.json`、
+  `packages/event/typescript/`、`apps/event/typescript/trajectory-demo/`
+  - **问题**：TypeScript 公共产物、import 和开发宿主仍使用 `@perix/*`，使独立
+    开源组件把维护组织名称泄漏为使用方代码命名空间；`event-sdk` 也容易被误解为
+    只有调用封装，而当前包同时包含 Event 的公开 API 与真实实现。
+  - **处理**：项目根名改为 `runfold`；公开包改为 `@runfold/event` 与
+    `@runfold/trajectory-ui`，开发宿主改为 `@runfold/trajectory-demo`；只修改名称、
+    import、构建和测试预期，不重排保留源码、不改变行为。实施前确认所需 npm scope
+    没有现实冲突，但不在本任务中发布包。
+  - **依赖**：无。
+
+- [ ] **R46** · 难度 中 · 风险 中 · 位置 `packages/event/python/`、
+  `tests/event/cross-language/`
+  - **问题**：Python distribution 与 import 使用 `perix-event-sdk` / `perix_event`，
+    既把组织名写入下游代码，也无法形成与 TypeScript `@runfold/event` 对等的项目优先
+    命名空间。
+  - **处理**：distribution 改为 `runfold-event`，公开 import 改为
+    `runfold.event`；移动实现和类型标记，更新单语言、跨语言与独立 wheel 消费者，
+    不修改 Python Event 逻辑。
+  - **依赖**：R45。
+
+- [ ] **R47** · 难度 中 · 风险 中 · 位置 `schemas/event/`、
+  `conformance/event/`、`scripts/event/demos/nexent/`、`docs/event/demos/nexent/`、
+  `integrations/nexent/v2.5.0/`
+  - **问题**：Schema canonical ID、测试数据、Demo 标签/环境变量和可重放 Nexent
+    补丁仍包含 Perix 产品命名；即使 SDK 改名，下游集成仍会把旧名称带入业务代码和
+    UI。
+  - **处理**：Schema 使用不依赖公司域名的 `urn:runfold:event:v0:*`；测试与演示
+    标识改为 Runfold；从原 Nexent 实验提交重建或等价改写补丁、vendor 包、manifest
+    和哈希，使实际功能代码只引用 Runfold。不得改变轨迹数据与 UI 行为。
+  - **依赖**：R45、R46。
+
+- [ ] **R48** · 难度 中 · 风险 低 · 位置根 `README.md`、`docs/event/`、
+  `packages/event/**/README*`、LICENSE/NOTICE 与仓库维护脚本
+  - **问题**：文档仍把项目描述为 Perix Runtime Data，并在技术概念和历史记录中
+    混用项目品牌、维护组织与上游来源。
+  - **处理**：统一项目名为 Runfold，定位为 agent runtime data platform，Event
+    为第一个子系统；公共技术示例只使用 Runfold。Perix.ai 仅作为维护者及原创代码
+    权利归属出现；DeepSeek Harness 的固定来源、MIT 许可和原样快照保持明确且不改动。
+    历史任务结果允许保留当时事实，但必须与当前名称清楚区分。增加可执行扫描，防止
+    公共产物和 Nexent 功能代码重新出现 `perix` 命名空间。
+  - **依赖**：R45–R47。
+
+- [ ] **R49** · 难度 易 · 风险 中 · 位置 GitHub `perix-ai/perix-runtime-data`、
+  本地 `origin`
+  - **问题**：代码完成身份迁移后，仓库 slug 与公共项目名仍不一致。
+  - **处理**：全量验证通过并推送代码后，将 GitHub 仓库改名为
+    `perix-ai/runfold`，更新本地 `origin` 并验证 fetch/push；本次任务不发布 npm
+    或 PyPI 包，也不改名当前 Codex 工作目录。
+  - **依赖**：R48，完整 `npm run verify`。
+
 ## 执行顺序
 
 按"容易改、风险小"优先，跨章节排列。
@@ -754,6 +811,11 @@
 | 20 | R42 | 精简 Nexent Event Demo 标题（见 `tasks/R42-demo-title-copy.md`） | R41、用户反馈 |
 | 21 | R43 | 纳管 Nexent Event Demo 可复现源码（见 `tasks/R43-demo-reproduction-source.md`） | R42、用户确认 |
 | 22 | R44 | 纳管 Nexent v2.5.0 Event 下游集成补丁（见 `tasks/R44-nexent-integration-patches.md`） | R33、R37、R38、R40 |
+| 23 | R45 | TypeScript 公共包与项目根迁移到 Runfold | 无 |
+| 24 | R46 | Python distribution 与 import 迁移到 `runfold.event` | R45 |
+| 25 | R47 | Schema、Demo 与 Nexent 集成清除旧技术命名空间 | R45、R46 |
+| 26 | R48 | 文档、归属边界与公共产物名称门禁 | R45–R47 |
+| 27 | R49 | 全量验证后重命名 GitHub 仓库和本地远端 | R48 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
