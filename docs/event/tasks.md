@@ -836,8 +836,8 @@
   - **结果**：已完成（2026-09-03）：确认目标名未占用、当前账号对源仓库拥有
     ADMIN 权限且 R48 已经完整验证并推送后，将公开 GitHub 仓库重命名为
     `perix-ai/runfold`；本地 `origin` 更新为
-    `git@github.com:perix-ai/runfold.git`。本机工作目录保持原名，未发布 npm 或
-    PyPI 包。
+    `git@github.com:perix-ai/runfold.git`。本机工作目录随后同步为
+    `/Users/heikiscott/perix-ai/runfold`，未发布 npm 或 PyPI 包。
   - **验证**：GitHub API 返回 `nameWithOwner: perix-ai/runfold`、默认分支 `main`；
     新 origin fetch 成功，`HEAD` 与 `origin/main` 在 R48 提交 `ba50409` 上一致；
     本条完成记录通过新 origin 推送，验证写权限与 main 跟踪链路。
@@ -1006,12 +1006,18 @@
 
 ## 11. 工具链缺陷
 
-- [ ] **R69** · 难度 易 · 风险 高 · 位置 `~/.codex/config.toml`、`~/.codex/.codex-global-state.json`（仓库外）
+- [x] **R69** · 难度 易 · 风险 高 · 位置 `~/.codex/config.toml`、`~/.codex/.codex-global-state.json`（仓库外）
   - **问题**：本机仓库目录已是 `/Users/heikiscott/perix-ai/runfold`，但 Codex 仍把旧路径注册为项目根。核查证据：`config.toml:100` 有 `[projects."/Users/heikiscott/perix-ai/perix-runtime-data"]`；`.codex-global-state.json` 的 `local-projects.<uuid>.rootPaths[0]`、`name` 与两个 `thread-writable-roots` 条目均指向旧路径；`config.toml` 中没有任何指向 `runfold` 的注册。
     表现是旧路径被反复重建成一个空目录再消失：2026-09-03 09:16:17–09:16:35 两个目录同时存在且 inode 不同（`runfold`=42762796，`perix-runtime-data`=44426481），09:16:37 后者消失。inode 不同说明这不是改名，而是有进程按旧根路径重新创建目录。R49 的记录写的是"本机工作目录保持原名"，与当前实际路径不符，说明重命名发生在 R49 之外且未同步工具链配置。
   - **影响**：Codex 的 sandbox writable-root 指向一个空目录。轻则命令因工作目录消失而失败（本次核查中我的 shell 三次丢失 cwd），重则 Codex 在空目录内写入或初始化，产出落在仓库之外而不被察觉。这类错误不会被 `npm run verify` 捕获。
   - **处理**：先确定本机目录名的目标状态（`runfold` 与 GitHub slug 一致，推荐），然后在 Codex 中移除旧项目注册并以新路径重新添加，确认 `config.toml` 的 `[projects."..."]`、`local-projects.rootPaths` 与 `thread-writable-roots` 都指向新路径且旧路径不再出现；随后连续观察若干分钟，确认旧目录不再被重建。修完后回填 R49 的结果栏，纠正"工作目录保持原名"这一与实际不符的记录。
   - **依赖**：无。**优先于第 9、10 节的所有条目**，因为它会影响执行这些条目的工具本身。
+  - **结果**：已完成（2026-09-03）：保留 `~/.codex` 配置备份，删除旧的
+    `perix-runtime-data` 项目注册，将历史 writable-root 中的旧路径改为
+    `/Users/heikiscott/perix-ai/runfold`；旧目录未再存在。
+  - **验证**：`config.toml` 只保留 `runfold` 项目根；全局状态中旧项目和旧
+    writable-root 引用均为零，`runfold` 项目注册指向当前目录；`git status` 未见
+    仓库内的非预期修改。
 
 ## 执行顺序
 
