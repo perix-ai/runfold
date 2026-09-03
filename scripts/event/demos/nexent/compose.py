@@ -52,7 +52,7 @@ def resolve_font_path(environment_name: str, candidates: list[str]) -> str:
 
 
 FONT_LIGHT = resolve_font_path(
-    "PERIX_DEMO_FONT_REGULAR",
+    "RUNFOLD_DEMO_FONT_REGULAR",
     [
         "/System/Library/Fonts/STHeiti Light.ttc",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
@@ -61,7 +61,7 @@ FONT_LIGHT = resolve_font_path(
     ],
 )
 FONT_MEDIUM = resolve_font_path(
-    "PERIX_DEMO_FONT_MEDIUM",
+    "RUNFOLD_DEMO_FONT_MEDIUM",
     [
         "/System/Library/Fonts/STHeiti Medium.ttc",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
@@ -173,7 +173,7 @@ def title_card() -> Image.Image:
     draw.rounded_rectangle((296, 512, 1144, 607), radius=18, fill=NAVY_2 + (238,))
     draw.ellipse((332, 544, 348, 560), fill=GREEN)
     draw.text((370, 531), "Resume 由宿主自动完成，不虚构额外按钮", font=FONTS["subtitle"], fill=WHITE)
-    draw.text((44, 850), "PERIX EVENT · NEXENT UI ACCEPTANCE", font=FONTS["footer"], fill=MUTED)
+    draw.text((44, 850), "RUNFOLD · NEXENT UI ACCEPTANCE", font=FONTS["footer"], fill=MUTED)
     draw.text((1205, 850), "R41", font=FONTS["footer"], fill=MUTED)
     return source.convert("RGB")
 
@@ -799,7 +799,7 @@ def resolve_ffmpeg(requested: str | None) -> str:
     candidate = requested or shutil.which("ffmpeg")
     if candidate is None:
         raise SystemExit(
-            "ffmpeg was not found; install it, pass --ffmpeg, or set PERIX_DEMO_FFMPEG"
+            "ffmpeg was not found; install it, pass --ffmpeg, or set RUNFOLD_DEMO_FFMPEG"
         )
     resolved = shutil.which(candidate)
     path = Path(resolved or candidate).expanduser()
@@ -870,8 +870,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--ffmpeg",
-        default=os.environ.get("PERIX_DEMO_FFMPEG"),
-        help="ffmpeg executable (default: PERIX_DEMO_FFMPEG or PATH)",
+        default=os.environ.get("RUNFOLD_DEMO_FFMPEG"),
+        help="ffmpeg executable (default: RUNFOLD_DEMO_FFMPEG or PATH)",
     )
     parser.add_argument(
         "--install",

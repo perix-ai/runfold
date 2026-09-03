@@ -1,7 +1,7 @@
-From 0475d458d056970b0c5ad90af60607ee60a0d0d3 Mon Sep 17 00:00:00 2001
+From 84f7725ca241b42a512acd6f96e7a4158c804d28 Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Wed, 2 Sep 2026 07:48:31 -0700
-Subject: [PATCH 6/8] docs(event): document trajectory UI verification
+Subject: [PATCH 6/9] docs(event): document trajectory UI verification
 
 ---
  docs/event-trajectory.md | 42 ++++++++++++++++++++++++++++++++++++++++
@@ -9,7 +9,7 @@ Subject: [PATCH 6/8] docs(event): document trajectory UI verification
  2 files changed, 43 insertions(+)
 
 diff --git a/docs/event-trajectory.md b/docs/event-trajectory.md
-index bd82b20719c6ef3b306d17e9821c5288ec4ca136..e678580d3cf23d87602f03c2c621ad5b65c5b504 100644
+index 33845424fde41976b50fdb5aa46bb474367f58cd..bba4502b54929d3083cefe9adaf40af06dfef49c 100644
 --- a/docs/event-trajectory.md
 +++ b/docs/event-trajectory.md
 @@ -121,6 +121,33 @@ manager can create a fresh checkpoint after it continues. A normal subsequent
@@ -21,7 +21,7 @@ index bd82b20719c6ef3b306d17e9821c5288ec4ca136..e678580d3cf23d87602f03c2c621ad5b
 +The existing chat Thread keeps its Message, Reasoning, Tool, Plan,
 +Verification, Sources, and Composer rendering. A per-conversation
 +`Conversation / Trajectory` switch mounts the browser-only
-+`@perix/event-ui` package directly in the same page; the integration does not
++`@runfold/trajectory-ui` package directly in the same page; the integration does not
 +copy the DSH components, use an iframe, or maintain a Nexent-specific
 +trajectory renderer. The selected view is restored independently for each
 +conversation after a reload.
@@ -35,19 +35,19 @@ index bd82b20719c6ef3b306d17e9821c5288ec4ca136..e678580d3cf23d87602f03c2c621ad5b
 +its inherited trajectory view.
 +
 +The frontend packages are committed as reproducible tarballs under
-+`frontend/vendor/` and were packed from Perix runtime data commit
-+`3a1f931ddcd7f94944789a195536208405b7182d`:
++`frontend/vendor/` and were packed from Runfold runtime data commit
++`2249c5f`:
 +
 +```text
-+perix-event-sdk-0.1.0.tgz  sha256 bb711c641314026522f2e54fe14e219411727c7192554275d8ed129ef3e1caed
-+perix-event-ui-0.1.0.tgz   sha256 5ef17461ff7f8f0f5175687496140a2aa3bcd8ad831b7301b60863e94c7f6da1
++runfold-event-0.1.0.tgz  sha256 fe9bc5ea7cc0f4c7595f7f2bfb7599048470973e90cf4fcdcc9d985bb575a950
++runfold-trajectory-ui-0.1.0.tgz   sha256 d75ad834374bffbc516c95246a6269562db3db4c095fe64f0b515f0b760d496c
 +```
 +
  ## Verification
  
  Install both optional test groups and run the focused acceptance suite:
 @@ -141,3 +168,18 @@ runner. The acceptance test launches fresh Python processes from outside the
- repository root, verifies that `perix_event` resolves from `site-packages`,
+ repository root, verifies that `runfold_event` resolves from `site-packages`,
  executes a real `CoreAgent` tool call, resumes the parent Session, forks it, and
  independently continues the child.
 +
@@ -66,7 +66,7 @@ index bd82b20719c6ef3b306d17e9821c5288ec4ca136..e678580d3cf23d87602f03c2c621ad5b
 +toolbar, timeline, Turn/Step/Tool rows, search, global folding, event detail,
 +reload persistence, and child navigation.
 diff --git a/frontend/package.json b/frontend/package.json
-index 0ff03eeaceba6a360a19c9ef1a1001c74de59fb2..607ff690ab44fff8023e6e4222eb87d9b07f77ec 100644
+index dd871572c57c7b9b85f698d0650ec725f06668d5..b1cdd72950fcf961bcf5e29e4fb85ced9c84a80d 100644
 --- a/frontend/package.json
 +++ b/frontend/package.json
 @@ -7,6 +7,7 @@

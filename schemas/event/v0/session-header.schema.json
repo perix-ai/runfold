@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://perix.ai/schemas/event/v0/session-header.schema.json",
-  "title": "Perix Event Session Header v0",
+  "$id": "urn:runfold:event:v0:session-header",
+  "title": "Runfold Event Session Header v0",
   "type": "object",
   "required": ["version", "id", "createdAt"],
   "properties": {

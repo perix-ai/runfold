@@ -1,7 +1,7 @@
-From 88a4621f260502e859da63e07510fb7bfe26d96d Mon Sep 17 00:00:00 2001
+From 8fdcf03810ad6287970df7f9850c5885561e21b8 Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Wed, 2 Sep 2026 06:45:36 -0700
-Subject: [PATCH 4/8] feat(event): add trajectory frontend client
+Subject: [PATCH 4/9] feat(event): add trajectory frontend client
 
 ---
  frontend/lib/conversationTrajectory.ts        | 177 ++++++++++++++++++
@@ -15,14 +15,14 @@ Subject: [PATCH 4/8] feat(event): add trajectory frontend client
 
 diff --git a/frontend/lib/conversationTrajectory.ts b/frontend/lib/conversationTrajectory.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..6f188fd27c90f51a0c71b5418680af8026f0a6a3
+index 0000000000000000000000000000000000000000..ff218b61f5a576cd45c7d594329ef375d58f13b3
 --- /dev/null
 +++ b/frontend/lib/conversationTrajectory.ts
 @@ -0,0 +1,177 @@
 +import type {
 +  SessionEvent,
 +  SessionHeader,
-+} from "@perix/event-sdk/session/types";
++} from "@runfold/event/session/types";
 +
 +import type { ConversationTrajectoryPage } from "../types/conversation";
 +
@@ -283,7 +283,7 @@ index e4b940d659c3eee186ea68b6d6f2a1a47669c2ea..9d5797b4cdf4c5ada69c3cbae5f94b3d
      mode: "all" | "selected";
 diff --git a/frontend/tests/conversationTrajectory.test.ts b/frontend/tests/conversationTrajectory.test.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..b036f30022dea9a451c42a5d98572eb2546dc783
+index 0000000000000000000000000000000000000000..3c3cebf596062a31e543f514d470e041f86162d6
 --- /dev/null
 +++ b/frontend/tests/conversationTrajectory.test.ts
 @@ -0,0 +1,162 @@
@@ -293,7 +293,7 @@ index 0000000000000000000000000000000000000000..b036f30022dea9a451c42a5d98572eb2
 +import type {
 +  SessionEvent,
 +  SessionHeader,
-+} from "@perix/event-sdk/session/types";
++} from "@runfold/event/session/types";
 +
 +import {
 +  ConversationTrajectoryProtocolError,
@@ -450,14 +450,14 @@ index 0000000000000000000000000000000000000000..b036f30022dea9a451c42a5d98572eb2
 +  );
 +});
 diff --git a/frontend/types/conversation.ts b/frontend/types/conversation.ts
-index 336a94c1c029707b94de6452feeb169aa41ab9f2..b267bf657e83eb5d7b07b35970cbad455a2dff67 100644
+index 336a94c1c029707b94de6452feeb169aa41ab9f2..54d726bb2b2713c396910b7ef5fa8a30afb4843a 100644
 --- a/frontend/types/conversation.ts
 +++ b/frontend/types/conversation.ts
 @@ -1,3 +1,8 @@
 +import type {
 +  SessionEvent,
 +  SessionHeader,
-+} from "@perix/event-sdk/session/types";
++} from "@runfold/event/session/types";
 +
  export interface ConversationListItem {
    conversation_id: number;

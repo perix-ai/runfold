@@ -2,9 +2,9 @@
 
 This directory is the reproducible, reviewable delivery form of the Nexent
 changes that were validated locally in branch
-`codex/event-trajectory-v2.5.0`. It was exported directly from the eight
-commits listed in [`manifest.json`](manifest.json); the patch bodies have not
-been rewritten.
+`codex/runfold-event-v2.5.0`. It was exported directly from the nine commits
+listed in [`manifest.json`](manifest.json); the generated patch bodies have not
+been edited after export.
 
 The integration adds:
 
@@ -12,7 +12,7 @@ The integration adds:
 - persistent Session identity, single-writer protection, cold restore/resume,
   repair, and stable-boundary fork;
 - tenant-authorized trajectory read and fork endpoints;
-- direct embedding of `@perix/event-ui` in the existing chat page while
+- direct embedding of `@runfold/trajectory-ui` in the existing chat page while
   preserving the original conversation view and Composer;
 - message-level and precise trajectory-level fork controls;
 - tool schemas in Event request headers so the retained DSH detail panel can
@@ -20,16 +20,18 @@ The integration adds:
 - backend, frontend, short-trajectory, long-trajectory, failure-path, and
   cross-process tests.
 
-This remains a Perix local interoperability experiment. It has not been
+This remains a local Runfold interoperability experiment. It has not been
 submitted to, endorsed by, or deployed by the Nexent project.
 
 ## Why patches
 
 The files under [`patches/`](patches/) are a standard Git mail patch series.
-They preserve the original commit boundaries and authorship and include binary
-patches for the two pinned frontend packages. A single squashed diff would lose
-that history; a Git bundle would unnecessarily redistribute the complete
-Nexent repository.
+The first eight commits preserve the validated implementation's authorship,
+dates, logical boundaries, and behavior while replacing only its public project
+identity; the ninth records installation before registry publication. The
+series includes binary patches for the two pinned frontend packages. A single
+squashed diff would lose that history; a Git bundle would unnecessarily
+redistribute the complete Nexent repository.
 
 This directory is therefore an integration artifact, not a second source of
 truth for Event. Event implementation and packages remain under
@@ -41,7 +43,7 @@ Run from this directory:
 
 ```bash
 shasum -a 256 -c SHA256SUMS
-test "$(find patches -type f -name '*.patch' | wc -l | tr -d ' ')" = 8
+test "$(find patches -type f -name '*.patch' | wc -l | tr -d ' ')" = 9
 ```
 
 [`series`](series) records the only supported application order.
@@ -59,12 +61,12 @@ git clone https://github.com/ModelEngine-Group/nexent.git
 cd nexent
 git switch --detach 86d75923dd549008d725d83db18a93d654c84fb0
 test "$(git rev-parse HEAD^{tree})" = b442446293b6793498dac09be0b86f1dd0d340c5
-git switch -c perix/event-trajectory-v2.5.0
+git switch -c runfold/event-trajectory-v2.5.0
 integration_dir=/absolute/path/to/integrations/nexent/v2.5.0
 while IFS= read -r patch; do
   git am --3way "$integration_dir/$patch" || exit
 done < "$integration_dir/series"
-test "$(git rev-parse HEAD^{tree})" = a3c97e4630464c5d5ae9492abb5c80fac3b6fd6f
+test "$(git rev-parse HEAD^{tree})" = dce67cdda790e6e88507a00442613d83e47c8329
 ```
 
 The full path in `integration_dir` is intentional: run the commands inside
@@ -72,11 +74,13 @@ Nexent while the patches remain in this repository. If either tree assertion
 fails, stop instead of forcing the patches; the checked-out source is not the
 verified baseline or the replay is not identical.
 
-The series includes two frontend package tarballs built from Perix commit
-`3a1f931ddcd7f94944789a195536208405b7182d`. Their package-level hashes are
+The series includes two frontend package tarballs built from Runfold commit
+`2249c5f811fdaf632bc75a685fb9c12fc7ac3c75`. Their package-level hashes are
 recorded in the manifest and in Nexent's resulting
-`frontend/vendor/SHA256SUMS`. The Python package pin uses Perix commit
-`2eea3f17e6a917ef3d640405b360664728d31e84`.
+`frontend/vendor/SHA256SUMS`. The Python dependency is `runfold-event==0.1.0`,
+validated from Runfold commit `cb5916e02409e8c83e02ee4f99699c1be9c9fb40`;
+before registry publication, build and install that wheel from this repository
+before installing Nexent's `event` extra.
 
 ## Validate the applied integration
 

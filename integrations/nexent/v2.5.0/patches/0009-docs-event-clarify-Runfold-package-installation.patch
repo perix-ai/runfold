@@ -1,0 +1,55 @@
+From 431adb15b45ca79109bf1df0d04fae1fe8f89f53 Mon Sep 17 00:00:00 2001
+From: Heiki Scott <heikiscott@gmail.com>
+Date: Thu, 3 Sep 2026 00:33:08 -0700
+Subject: [PATCH 9/9] docs(event): clarify Runfold package installation
+
+---
+ docs/event-trajectory.md | 23 ++++++++++++++++-------
+ 1 file changed, 16 insertions(+), 7 deletions(-)
+
+diff --git a/docs/event-trajectory.md b/docs/event-trajectory.md
+index 39b57fdd5134169fca15e7df028fa7d08c961f3e..0a0fbd2f64704c148f6a414a1543f5e0059ac6a9 100644
+--- a/docs/event-trajectory.md
++++ b/docs/event-trajectory.md
+@@ -6,17 +6,26 @@ server, sidecar, or TypeScript runtime.
+ 
+ ## Install
+ 
+-The `event` extra is pinned to the exact Runfold Event source revision used by
+-this integration:
++The `event` extra requires `runfold-event==0.1.0`. After that distribution is
++published, install the Nexent extra normally:
+ 
+ ```bash
+ uv pip install './sdk[event]'
+ ```
+ 
+-The current pin is `runfold-event` 0.1.0 from Runfold runtime data commit
+-`cb5916e`. Production deployments may install
+-the wheel built from that revision instead, as long as they keep the same
+-package version and Event v0 format.
++Before registry publication, build and install the matching Runfold wheel
++locally, then install the Nexent extra; the already installed exact version
++satisfies the dependency:
++
++```bash
++python -m pip wheel --no-deps --wheel-dir /tmp/runfold-dist \
++  /absolute/path/to/runfold/packages/event/python
++uv pip install /tmp/runfold-dist/runfold_event-0.1.0-py3-none-any.whl
++uv pip install -e './sdk[event]'
++```
++
++This integration was validated against `runfold-event` 0.1.0 from Runfold
++commit `cb5916e`. Keep the same package version and Event v0 format.
+ 
+ ## Record product conversations
+ 
+@@ -171,7 +180,7 @@ python -m pytest test/backend/app/test_event_trajectory_app.py -q
+ 
+ Run each file in its own pytest process, matching Nexent's repository test
+ runner. The acceptance test launches fresh Python processes from outside the
+-repository root, verifies that `runfold_event` resolves from `site-packages`,
++repository root, verifies that `runfold.event` resolves from `site-packages`,
+ executes a real `CoreAgent` tool call, resumes the parent Session, forks it, and
+ independently continues the child. Its long-trajectory case writes 10 Turns in
+ one process, cold-resumes the same Session for another 10 Turns in a new

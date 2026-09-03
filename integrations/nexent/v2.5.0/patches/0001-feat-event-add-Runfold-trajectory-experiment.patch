@@ -1,7 +1,7 @@
-From 5c597209bb4a01866dc073ddacf7a2e682dd6d71 Mon Sep 17 00:00:00 2001
+From f79c8c88974244d4830a4679bc82fdd315cc828a Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Wed, 2 Sep 2026 04:55:52 -0700
-Subject: [PATCH 1/8] feat(event): add Perix trajectory experiment
+Subject: [PATCH 1/9] feat(event): add Runfold trajectory experiment
 
 Local validation only on the Nexent v2.5.0 release snapshot; intentionally has no remote.
 ---
@@ -50,27 +50,27 @@ index 1a4052b8cadd8ea275e5a21998ab9d9bdc46f594..f755f57499eb5b13b8e17ff6b11268ae
  # 📄 许可证
 diff --git a/docs/event-trajectory.md b/docs/event-trajectory.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..492c55be0a4553d510e0f7f86a870024d18b5e05
+index 0000000000000000000000000000000000000000..0b17afd4e1dd792c71645e0049c2831dd2aeffa4
 --- /dev/null
 +++ b/docs/event-trajectory.md
 @@ -0,0 +1,103 @@
 +# Event trajectory recording
 +
-+Nexent can optionally persist an agent run as a Perix Event v0 trajectory. The
++Nexent can optionally persist an agent run as a Runfold Event v0 trajectory. The
 +integration runs entirely inside the Python process: it does not require a Node
 +server, sidecar, or TypeScript runtime.
 +
 +## Install
 +
-+The `event` extra is pinned to the exact Perix Event source revision used by
++The `event` extra is pinned to the exact Runfold Event source revision used by
 +this integration:
 +
 +```bash
 +uv pip install './sdk[event]'
 +```
 +
-+The current pin is `perix-event-sdk` 0.1.0 from Perix runtime data commit
-+`2eea3f17e6a917ef3d640405b360664728d31e84`. Production deployments may install
++The current pin is `runfold-event` 0.1.0 from Runfold runtime data commit
++`cb5916e`. Production deployments may install
 +the wheel built from that revision instead, as long as they keep the same
 +package version and Event v0 format.
 +
@@ -112,7 +112,7 @@ index 0000000000000000000000000000000000000000..492c55be0a4553d510e0f7f86a870024
 +writer lease:
 +
 +```python
-+from perix_event import JsonlSessionPersistence, SessionStore
++from runfold.event import JsonlSessionPersistence, SessionStore
 +
 +persistence = JsonlSessionPersistence(
 +    "/var/lib/nexent/events",
@@ -136,7 +136,7 @@ index 0000000000000000000000000000000000000000..492c55be0a4553d510e0f7f86a870024
 +Do not open a second `SessionStore` writer while Nexent is recording the same
 +Session. Cold restore repairs an interrupted open turn according to Event v0;
 +fork accepts only a stable boundary outside an open turn. The resulting JSONL
-+artifacts are the common Perix Event format and can be restored directly by the
++artifacts are the common Runfold Event format and can be restored directly by the
 +TypeScript SDK and rendered by the Trajectory UI.
 +
 +## Verification
@@ -154,7 +154,7 @@ index 0000000000000000000000000000000000000000..492c55be0a4553d510e0f7f86a870024
 +
 +Run each file in its own pytest process, matching Nexent's repository test
 +runner. The acceptance test launches fresh Python processes from outside the
-+repository root, verifies that `perix_event` resolves from `site-packages`,
++repository root, verifies that `runfold_event` resolves from `site-packages`,
 +executes a real `CoreAgent` tool call, resumes the parent Session, forks it, and
 +independently continues the child.
 diff --git a/sdk/nexent/core/agents/__init__.py b/sdk/nexent/core/agents/__init__.py
@@ -170,7 +170,7 @@ index 3c5ca07c3495bbbb851cd0bda88a5071680d06c4..21a93638480da175b9ac3c1000f173ff
      "ContextItemInput": (".context", "ContextItemInput"),
      "ContextItemType": (".context", "ContextItemType"),
 diff --git a/sdk/nexent/core/agents/agent_model.py b/sdk/nexent/core/agents/agent_model.py
-index bee5e05ce53b05afc2e3b7b7c28d628b24dbdfc5..9dde5f6f8c2546a818428a066c087784672dd341 100644
+index bee5e05ce53b05afc2e3b7b7c28d628b24dbdfc5..ab63ae39d9a5a3538a28e2609dbdcfe90a8dc981 100644
 --- a/sdk/nexent/core/agents/agent_model.py
 +++ b/sdk/nexent/core/agents/agent_model.py
 @@ -1,5 +1,6 @@
@@ -185,7 +185,7 @@ index bee5e05ce53b05afc2e3b7b7c28d628b24dbdfc5..9dde5f6f8c2546a818428a066c087784
  
  
 +class EventTrajectoryConfig(BaseModel):
-+    """Stable storage identity for optional Perix Event trajectory recording."""
++    """Stable storage identity for optional Runfold Event trajectory recording."""
 +
 +    root: str = Field(description="Persistent Event artifact root")
 +    session_id: str = Field(description="Stable Event session id")
@@ -213,7 +213,7 @@ index bee5e05ce53b05afc2e3b7b7c28d628b24dbdfc5..9dde5f6f8c2546a818428a066c087784
      conversation_id: Optional[int] = Field(description="Conversation id for run-scoped persistence", default=None)
      user_id: Optional[str] = Field(description="User id for run-scoped persistence", default=None)
 +    event_trajectory: Optional[EventTrajectoryConfig] = Field(
-+        description="Optional Perix Event trajectory storage configuration",
++        description="Optional Runfold Event trajectory storage configuration",
 +        default=None,
 +    )
      runtime_metadata: Dict[str, Any] = Field(
@@ -575,11 +575,11 @@ index 6a4686c3b1a7500b4ca41b3425bf867535e7dfed..31920f3e3240601667d046e6995d6b49
      # ----------------------------------------------------------------------
 diff --git a/sdk/nexent/core/agents/event_trajectory.py b/sdk/nexent/core/agents/event_trajectory.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..141c4954788da7bf582a45a0a3aaa925d2f7d2f1
+index 0000000000000000000000000000000000000000..4aa50d66a78d8bf7b25873a634bd3a1800dfe413
 --- /dev/null
 +++ b/sdk/nexent/core/agents/event_trajectory.py
 @@ -0,0 +1,407 @@
-+"""Direct Perix Event trajectory recording for one Nexent agent run."""
++"""Direct Runfold Event trajectory recording for one Nexent agent run."""
 +
 +from __future__ import annotations
 +
@@ -676,7 +676,7 @@ index 0000000000000000000000000000000000000000..141c4954788da7bf582a45a0a3aaa925
 +    """Map real Nexent execution boundaries onto one durable Event v0 session."""
 +
 +    def __init__(self, store: Any, session: Any, lease: _SessionLease) -> None:
-+        from perix_event import (
++        from runfold.event import (
 +            canonical_header,
 +            create_assistant_message,
 +            create_tool_result_message,
@@ -709,13 +709,13 @@ index 0000000000000000000000000000000000000000..141c4954788da7bf582a45a0a3aaa925
 +        """Acquire one writer and create or resume the configured session."""
 +
 +        try:
-+            from perix_event import (
++            from runfold.event import (
 +                JsonlSessionPersistence,
 +                SessionNotFoundError,
 +                SessionStore,
 +            )
 +        except ImportError as exc:
-+            raise EventTrajectoryError("Event trajectory support requires the perix-event-sdk package") from exc
++            raise EventTrajectoryError("Event trajectory support requires the runfold-event package") from exc
 +
 +        root = str(config.root)
 +        session_id = str(config.session_id)
@@ -987,7 +987,7 @@ index 0000000000000000000000000000000000000000..141c4954788da7bf582a45a0a3aaa925
 +        finally:
 +            self._lease.close()
 diff --git a/sdk/nexent/core/agents/nexent_agent.py b/sdk/nexent/core/agents/nexent_agent.py
-index a593a32ab5a3ea0a0d2ea1839f608689b2abde19..2416a699974b38f7bf0dd5837f9b08eb462f46ce 100644
+index a593a32ab5a3ea0a0d2ea1839f608689b2abde19..287f585ae956cf5d127e1600ede06f0087ff2bdb 100644
 --- a/sdk/nexent/core/agents/nexent_agent.py
 +++ b/sdk/nexent/core/agents/nexent_agent.py
 @@ -218,7 +218,8 @@ class NexentAgent:
@@ -1004,7 +1004,7 @@ index a593a32ab5a3ea0a0d2ea1839f608689b2abde19..2416a699974b38f7bf0dd5837f9b08eb
              workspace_path: Run-scoped host workspace path.
              workspace_run_id: Opaque run id used to validate cleanup scope.
              minio_files: Authorized files attached to the current request.
-+            event_trajectory: Optional Perix Event trajectory owner for the root agent.
++            event_trajectory: Optional Runfold Event trajectory owner for the root agent.
          """
          if not isinstance(observer, MessageObserver):
              raise TypeError("Create Observer Object with MessageObserver")
@@ -1092,7 +1092,7 @@ index 2bf4cc36292380747351bc86518cf7d50bf012ef..fb527dcb2a90fea0b4309786f2e28cf3
  
  async def agent_run(agent_run_info: AgentRunInfo):
 diff --git a/sdk/pyproject.toml b/sdk/pyproject.toml
-index f88f07c9066ee1fbb4e1c222152521fe9e68b655..2993789f0a37eee143001de0291da6880ab909a6 100644
+index f88f07c9066ee1fbb4e1c222152521fe9e68b655..94c30842115b9f2335d8abc4d7569b1d143b3e93 100644
 --- a/sdk/pyproject.toml
 +++ b/sdk/pyproject.toml
 @@ -73,6 +73,9 @@ override-dependencies = [
@@ -1100,7 +1100,7 @@ index f88f07c9066ee1fbb4e1c222152521fe9e68b655..2993789f0a37eee143001de0291da688
  
  [project.optional-dependencies]
 +event = [
-+    "perix-event-sdk @ git+https://github.com/perix-ai/perix-runtime-data.git@2eea3f17e6a917ef3d640405b360664728d31e84#subdirectory=packages/event/python",
++    "runfold-event==0.1.0",
 +]
  quality = [
      "ruff>=0.9.0",
@@ -1541,7 +1541,7 @@ index 91e0823367b76f0dfcbb5b1e95ea526b716aa914..cbcb8083d7ede2f3a2e2baec1a7eb6e3
      module = TestRunStreamRealExecution()._load_core_agent_in_isolation()
 diff --git a/test/sdk/core/agents/test_event_trajectory.py b/test/sdk/core/agents/test_event_trajectory.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..b2e1176933ad5b6c17abd2bded635dee58f67904
+index 0000000000000000000000000000000000000000..ce4dbdbf7b465e3a04c3f956ed0df22ea751c4e1
 --- /dev/null
 +++ b/test/sdk/core/agents/test_event_trajectory.py
 @@ -0,0 +1,549 @@
@@ -1563,15 +1563,15 @@ index 0000000000000000000000000000000000000000..b2e1176933ad5b6c17abd2bded635dee
 +    EventTrajectoryError,
 +)
 +
-+perix_event = pytest.importorskip(
-+    "perix_event",
++runfold_event = pytest.importorskip(
++    "runfold.event",
 +    reason="install the Nexent event extra to run Event trajectory tests",
 +)
-+TOOL_NOT_STARTED = perix_event.TOOL_NOT_STARTED
-+TOOL_OUTCOME_UNKNOWN = perix_event.TOOL_OUTCOME_UNKNOWN
-+EventValidationError = perix_event.EventValidationError
-+JsonlSessionPersistence = perix_event.JsonlSessionPersistence
-+SessionForkError = perix_event.SessionForkError
++TOOL_NOT_STARTED = runfold_event.TOOL_NOT_STARTED
++TOOL_OUTCOME_UNKNOWN = runfold_event.TOOL_OUTCOME_UNKNOWN
++EventValidationError = runfold_event.EventValidationError
++JsonlSessionPersistence = runfold_event.JsonlSessionPersistence
++SessionForkError = runfold_event.SessionForkError
 +
 +
 +def config(root: Path, session_id: str = "nexent-session") -> SimpleNamespace:
@@ -1857,7 +1857,7 @@ index 0000000000000000000000000000000000000000..b2e1176933ad5b6c17abd2bded635dee
 +def test_real_core_agent_records_resumes_and_forks_with_installed_event_package(
 +    tmp_path: Path,
 +) -> None:
-+    package_path = Path(perix_event.__file__).resolve()
++    package_path = Path(runfold_event.__file__).resolve()
 +    assert "site-packages" in package_path.parts
 +
 +    first_result = run_real_nexent_process(
@@ -2040,7 +2040,7 @@ index 0000000000000000000000000000000000000000..b2e1176933ad5b6c17abd2bded635dee
 +        def consume_history_summary_event(self):
 +            return None
 +
-+    event_package = Path(perix_event.__file__).resolve()
++    event_package = Path(runfold_event.__file__).resolve()
 +    if "site-packages" not in event_package.parts:
 +        raise RuntimeError(f"Event package is not installed: {event_package}")
 +    trajectory = EventTrajectory.open(

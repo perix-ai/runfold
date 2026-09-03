@@ -52,7 +52,7 @@ Event 两个入口执行真实 Fork。视频包含 `zh-CN-XiaoxiaoNeural` 自然
 
 ## 数据来源与边界
 
-轨迹由 Nexent v2.5.0 本地实验分支的真实 `CoreAgent` 和 `perix-event-sdk` 生成，
+轨迹由 Nexent v2.5.0 本地实验分支的真实 `CoreAgent` 和 `runfold-event` 生成，
 恢复、持久化和 Fork 均经过实际 Python 进程。生成轨迹时使用的四个独立命令形状
 如下，其中第二个命令负责冷恢复并在完成 Turn 边界创建子 Session：
 
@@ -87,8 +87,8 @@ Nexent 页面外围的 user、agent 和 conversation HTTP 数据来自确定性�
 | 恢复前父 Session JSONL | `f00e0b9ef7ae5e79b3e21d0e85946fb0f009b51b0eb477f676dc4599b37ba940` |
 | 最终父 Session JSONL | `5bd9cffa495667ae49b0b51623c5a6f668bace79ea2c2cf18f76972641664b74` |
 | 最终子 Session JSONL | `ac19f80cf285ca9607f51402b64fae43910647fae30086e1ccdd584f1aca8530` |
-| [`trajectory-restore-fork-demo.mp4`](trajectory-restore-fork-demo.mp4) | `3fab1f25459b0b3e6e7e4239d3dad2c2bd6489cc3b93fbff1d9570e55486508a` |
-| [`cover.jpg`](cover.jpg) | `eb08c4199c97c787d840600e7e4646458e3c5f9ac35b8e4176157594f513b2c5` |
+| [`trajectory-restore-fork-demo.mp4`](trajectory-restore-fork-demo.mp4) | `21e1d5af6c975d59eb21472cfc43fbf89cb898d024238a71c8163ee0e078b36e` |
+| [`cover.jpg`](cover.jpg) | `f42f9849a4d09893ada754c0084644bd7dd0aba945dd5e9291df6a8c559720fe` |
 
 MP4 为 H.264 High / yuv420p、1440×900、24 fps；声音为 AAC-LC、48 kHz、
 单声道、约 118 kb/s。实测时长 `00:01:23.07`，大小约 2.81 MiB；平均音量

@@ -18,18 +18,18 @@
 
 需要 Python 3.10+、ffmpeg、Pillow 和一套支持中文的本机字体。脚本会优先使用
 macOS 的 STHeiti、Linux 常见 Noto CJK/WenQuanYi 字体；其他环境可设置
-`PERIX_DEMO_FONT_REGULAR` 与 `PERIX_DEMO_FONT_MEDIUM` 指向 TTF、TTC 或 OTF。
+`RUNFOLD_DEMO_FONT_REGULAR` 与 `RUNFOLD_DEMO_FONT_MEDIUM` 指向 TTF、TTC 或 OTF。
 
 ```bash
-python3 -m venv /tmp/perix-event-demo-venv
-/tmp/perix-event-demo-venv/bin/pip install \
+python3 -m venv /tmp/runfold-event-demo-venv
+/tmp/runfold-event-demo-venv/bin/pip install \
   -r scripts/event/demos/nexent/requirements.txt
-/tmp/perix-event-demo-venv/bin/python \
+/tmp/runfold-event-demo-venv/bin/python \
   scripts/event/demos/nexent/compose.py
 ```
 
 ffmpeg 不在 PATH 时，可传 `--ffmpeg /absolute/path/to/ffmpeg`，或设置
-`PERIX_DEMO_FFMPEG`。默认输出到被 Git 忽略的
+`RUNFOLD_DEMO_FFMPEG`。默认输出到被 Git 忽略的
 `build/event-demo/nexent/`，不会覆盖发布成品。确认结果后，只有显式增加
 `--install` 才会复制到 `docs/event/demos/nexent/`。
 
@@ -48,8 +48,8 @@ shasum -a 256 \
 
 | 输出 | SHA-256 |
 | --- | --- |
-| `trajectory-restore-fork-demo.mp4` | `3fab1f25459b0b3e6e7e4239d3dad2c2bd6489cc3b93fbff1d9570e55486508a` |
-| `cover.jpg` | `eb08c4199c97c787d840600e7e4646458e3c5f9ac35b8e4176157594f513b2c5` |
+| `trajectory-restore-fork-demo.mp4` | `21e1d5af6c975d59eb21472cfc43fbf89cb898d024238a71c8163ee0e078b36e` |
+| `cover.jpg` | `f42f9849a4d09893ada754c0084644bd7dd0aba945dd5e9291df6a8c559720fe` |
 
 不同字体或 ffmpeg 版本可能产生不同的容器字节；验收时还应检查 1440×900、24 fps、
 83.07 秒、AAC 音轨、完整解码，以及关键画面内容。
@@ -60,9 +60,9 @@ shasum -a 256 \
 `narration/`：
 
 ```bash
-/tmp/perix-event-demo-venv/bin/pip install \
+/tmp/runfold-event-demo-venv/bin/pip install \
   -r scripts/event/demos/nexent/requirements-voice.txt
-/tmp/perix-event-demo-venv/bin/python \
+/tmp/runfold-event-demo-venv/bin/python \
   scripts/event/demos/nexent/generate_narration.py
 ```
 

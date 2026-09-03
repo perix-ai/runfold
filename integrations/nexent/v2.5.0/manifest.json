@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "integration": "perix-event-for-nexent",
+  "integration": "runfold-event-for-nexent",
   "status": "local-interoperability-experiment",
   "created": "2026-09-02",
+  "updated": "2026-09-03",
   "upstream": {
     "repository": "https://github.com/ModelEngine-Group/nexent",
     "version": "v2.5.0",
@@ -16,34 +17,34 @@
     "baselineTree": "b442446293b6793498dac09be0b86f1dd0d340c5"
   },
   "result": {
-    "sourceBranch": "codex/event-trajectory-v2.5.0",
-    "sourceHead": "f10c9b54f7cdf0dadd3beb4a2e87ab1383fe077d",
-    "expectedTree": "a3c97e4630464c5d5ae9492abb5c80fac3b6fd6f",
-    "commitCount": 8,
+    "sourceBranch": "codex/runfold-event-v2.5.0",
+    "sourceHead": "431adb15b45ca79109bf1df0d04fae1fe8f89f53",
+    "expectedTree": "dce67cdda790e6e88507a00442613d83e47c8329",
+    "commitCount": 9,
     "changedFiles": 38,
-    "insertions": 4366,
+    "insertions": 4375,
     "deletions": 86
   },
   "eventDependencies": {
     "python": {
-      "distribution": "perix-event-sdk",
+      "distribution": "runfold-event",
       "version": "0.1.0",
-      "sourceRevision": "2eea3f17e6a917ef3d640405b360664728d31e84"
+      "sourceRevision": "cb5916e02409e8c83e02ee4f99699c1be9c9fb40"
     },
     "typescript": {
-      "sourceRevision": "3a1f931ddcd7f94944789a195536208405b7182d",
+      "sourceRevision": "2249c5f811fdaf632bc75a685fb9c12fc7ac3c75",
       "packages": [
         {
-          "file": "frontend/vendor/perix-event-sdk-0.1.0.tgz",
-          "name": "@perix/event-sdk",
+          "file": "frontend/vendor/runfold-event-0.1.0.tgz",
+          "name": "@runfold/event",
           "version": "0.1.0",
-          "sha256": "bb711c641314026522f2e54fe14e219411727c7192554275d8ed129ef3e1caed"
+          "sha256": "fe9bc5ea7cc0f4c7595f7f2bfb7599048470973e90cf4fcdcc9d985bb575a950"
         },
         {
-          "file": "frontend/vendor/perix-event-ui-0.1.0.tgz",
-          "name": "@perix/event-ui",
+          "file": "frontend/vendor/runfold-trajectory-ui-0.1.0.tgz",
+          "name": "@runfold/trajectory-ui",
           "version": "0.1.0",
-          "sha256": "5ef17461ff7f8f0f5175687496140a2aa3bcd8ad831b7301b60863e94c7f6da1"
+          "sha256": "d75ad834374bffbc516c95246a6269562db3db4c095fe64f0b515f0b760d496c"
         }
       ]
     }
@@ -60,75 +61,84 @@
   "patches": [
     {
       "index": 1,
-      "file": "patches/0001-feat-event-add-Perix-trajectory-experiment.patch",
-      "sourceCommit": "5c597209bb4a01866dc073ddacf7a2e682dd6d71",
-      "sourceTree": "41fab43ca8f11510a96da8829480715f0c4902bf",
-      "subject": "feat(event): add Perix trajectory experiment",
-      "bytes": 86514,
-      "sha256": "ea3130cd51b520fffca6ac86b121242272d1d28eaa6d6034dcc1b528c1304896"
+      "file": "patches/0001-feat-event-add-Runfold-trajectory-experiment.patch",
+      "sourceCommit": "f79c8c88974244d4830a4679bc82fdd315cc828a",
+      "sourceTree": "a043f795e206ae81a2d807a2ded4d94099abd32c",
+      "subject": "feat(event): add Runfold trajectory experiment",
+      "bytes": 86393,
+      "sha256": "aef837e0d53bee7b18ddb260f5ab5fc908eb7759f6bf6b6b2beb5440234b533c"
     },
     {
       "index": 2,
       "file": "patches/0002-feat-event-wire-conversation-trajectory-backend.patch",
-      "sourceCommit": "64347a3470786e7eaed81cbb84159cd6e80b4979",
-      "sourceTree": "3eefc9250ae808a54a48488abad3b5fc3e9f293a",
+      "sourceCommit": "013ba9db65dabdb3c76e37ee70b3232ca3830cf3",
+      "sourceTree": "41f175874fba23c8ab13991a12b8d56508ac409d",
       "subject": "feat(event): wire conversation trajectory backend",
-      "bytes": 54594,
-      "sha256": "810e04d69433d878394fd3934f59301c2f3ba84a873d2f3f968ca74031581fc3"
+      "bytes": 54608,
+      "sha256": "2d0e9dbfd1d84682f35a453a998b0f196527f7f7440db986e89fc033d5b7984c"
     },
     {
       "index": 3,
       "file": "patches/0003-build-event-vendor-reproducible-UI-packages.patch",
-      "sourceCommit": "1280f2a55ea76fe5b7be7fd0f0b2353778eaead6",
-      "sourceTree": "8fee35f512a1344b32f0bba1d5364deab547bbfe",
+      "sourceCommit": "0dec7708ecd4e829294e4fca63523c9e0621287a",
+      "sourceTree": "37778b98054bb5d5a9693465689d9d22b188eab3",
       "subject": "build(event): vendor reproducible UI packages",
-      "bytes": 2135523,
-      "sha256": "8dcab112ad842017c0e481a2aadef237430c698c1f1cc8da293fb248a8ae974b"
+      "bytes": 2135516,
+      "sha256": "59b0893fb1a32179a24925ae8cd7165447e553f628e0dfa50c7fde94d4b7dc48"
     },
     {
       "index": 4,
       "file": "patches/0004-feat-event-add-trajectory-frontend-client.patch",
-      "sourceCommit": "88a4621f260502e859da63e07510fb7bfe26d96d",
-      "sourceTree": "b095ca5b752520158fc464383dda4670f60b9b0e",
+      "sourceCommit": "8fdcf03810ad6287970df7f9850c5885561e21b8",
+      "sourceTree": "8c25c327a1613e03d7ac0670c30d2e245ab9351f",
       "subject": "feat(event): add trajectory frontend client",
-      "bytes": 15873,
-      "sha256": "89b31ae6e68af0c50c9f92a75a5d3befa3d2adcfe360aaab1c0e8f36024a79d4"
+      "bytes": 15867,
+      "sha256": "e28608e936fd50b1dcb72ee6b01340b910ed3d16cd5f52633fae0a0844e13101"
     },
     {
       "index": 5,
       "file": "patches/0005-feat-event-embed-trajectory-view-in-Nexent-chat.patch",
-      "sourceCommit": "e3a25a25201a8eedab6d82ce5cbede5d51f6d125",
-      "sourceTree": "bbf964c28f9805a7b2c4967692bc811579abaec7",
+      "sourceCommit": "77214e574ab34874d4e9956c22b5d885cb08e8a7",
+      "sourceTree": "712dedb62ad355cc7d541d1cb7dfbb8e5dcc7981",
       "subject": "feat(event): embed trajectory view in Nexent chat",
-      "bytes": 28260,
-      "sha256": "b3a34e0e82a4957d31956ddbb71e6733f5bcb2f79015e6985ffb3c28a054285c"
+      "bytes": 28279,
+      "sha256": "544f5e514c0ba358f83aec3692ca369106169b28ef66a79f431d1847c189a4cc"
     },
     {
       "index": 6,
       "file": "patches/0006-docs-event-document-trajectory-UI-verification.patch",
-      "sourceCommit": "0475d458d056970b0c5ad90af60607ee60a0d0d3",
-      "sourceTree": "cebd8e4c4a8da16112e28be81cfc1ba8e934e963",
+      "sourceCommit": "84f7725ca241b42a512acd6f96e7a4158c804d28",
+      "sourceTree": "2c5602f8ea8a8316b29b56b706c6a65507022a40",
       "subject": "docs(event): document trajectory UI verification",
-      "bytes": 3687,
-      "sha256": "c7ff3288a83b7e04d1a64b6680ab023d11615326f19994978c7d5e13471120ad"
+      "bytes": 3670,
+      "sha256": "a31285a79621a43f1ba03ec2b03f9ae8bfe6428b135d7e28312b4c01547e14f3"
     },
     {
       "index": 7,
       "file": "patches/0007-feat-event-verify-long-Nexent-trajectories.patch",
-      "sourceCommit": "d341740758704382e02800ab3b96960e06f6214a",
-      "sourceTree": "56c6878e18038e16b2b83017fe90a60ba625d4a4",
+      "sourceCommit": "a8866104697655116d2dfa10b7b9f4e99def9141",
+      "sourceTree": "29e38cf328d38dde0f8c822e4a4b20e415ed7f05",
       "subject": "feat(event): verify long Nexent trajectories",
-      "bytes": 15681,
-      "sha256": "e9ec18668001ffe3da2f0b2c595eb9fdb8de5e269ce7713a96af81dc8fe02f1f"
+      "bytes": 15652,
+      "sha256": "b78bd490f8e476c8ab799437a09e85f97150aa735fbeee693f7e5b3fd4f77084"
     },
     {
       "index": 8,
       "file": "patches/0008-feat-event-add-dual-Nexent-fork-controls.patch",
-      "sourceCommit": "f10c9b54f7cdf0dadd3beb4a2e87ab1383fe077d",
-      "sourceTree": "a3c97e4630464c5d5ae9492abb5c80fac3b6fd6f",
+      "sourceCommit": "87135a25ce31c0bd582ef07a17d65a030112189d",
+      "sourceTree": "13ff71443446490148d34f689d9e2789bc89da52",
       "subject": "feat(event): add dual Nexent fork controls",
-      "bytes": 16811,
-      "sha256": "9bc2f7d0029d30fcfea4c185c618cb91bf2204f62dce3eac2acae97ab0212349"
+      "bytes": 16818,
+      "sha256": "a5311c8fd30a1a9a35609117f5c6b4f72691899bc8f2c290c17d6772a0f90c4d"
+    },
+    {
+      "index": 9,
+      "file": "patches/0009-docs-event-clarify-Runfold-package-installation.patch",
+      "sourceCommit": "431adb15b45ca79109bf1df0d04fae1fe8f89f53",
+      "sourceTree": "dce67cdda790e6e88507a00442613d83e47c8329",
+      "subject": "docs(event): clarify Runfold package installation",
+      "bytes": 2371,
+      "sha256": "6afe30e7817279db2455b4d51631dd4d658d0337bf5df0cd68b0196baf1cd3e6"
     }
   ]
 }

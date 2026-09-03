@@ -17,8 +17,8 @@
 > 最终移除了保留测试中的 DSH
 > module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
 >
-> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**；R45–R46 已完成，
-> R47–R49 待执行。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
+> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**；R45–R47 已完成，
+> R48–R49 待执行。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
 > 不改变 Event 数据模型、restore/resume/fork 行为、Trajectory 交互或 DSH 快照。
 
 ## 任务生命周期
@@ -772,7 +772,7 @@
     `runfold_event-0.1.0-py3-none-any.whl`，在第二个无源码路径的空白 venv 中以
     `runfold.event` 完成 create、append、resume 和 fork，wheel 内容门禁通过。
 
-- [ ] **R47** · 难度 中 · 风险 中 · 位置 `schemas/event/`、
+- [x] **R47** · 难度 中 · 风险 中 · 位置 `schemas/event/`、
   `conformance/event/`、`scripts/event/demos/nexent/`、`docs/event/demos/nexent/`、
   `integrations/nexent/v2.5.0/`
   - **问题**：Schema canonical ID、测试数据、Demo 标签/环境变量和可重放 Nexent
@@ -782,6 +782,21 @@
     标识改为 Runfold；从原 Nexent 实验提交重建或等价改写补丁、vendor 包、manifest
     和哈希，使实际功能代码只引用 Runfold。不得改变轨迹数据与 UI 行为。
   - **依赖**：R45、R46。
+  - **结果**：已完成（2026-09-03）：两个 Schema canonical ID 改为 Runfold URN；
+    Demo 制作环境变量和可见页脚改为 Runfold，并以原截图、原旁白和原时序离线重制
+    发布媒体。Nexent 从原 8 个已验收提交的完整 tree 重建 Runfold 等价提交，保留
+    原作者、日期和逻辑边界，再增加 1 个发布前安装说明提交；本地分支为
+    `codex/runfold-event-v2.5.0`，head `431adb1`、tree `dce67cd`，没有 remote 或
+    推送。集成产物重新导出为 9 个未经后改的 binary patch，Python 依赖为
+    `runfold-event==0.1.0`，前端 vendor 为 `@runfold/event` 与
+    `@runfold/trajectory-ui`；最终 Nexent 源码和补丁文本的 `perix` 扫描为空。
+  - **验证**：Nexent Python 540/540、前端 27/27、TypeScript 与 production build
+    通过；新 wheel 从 `site-packages/runfold/event` 加载且旧模块不可导入。9 个补丁
+    在不含实验对象的干净 v2.5.0 基线上全部 `git am` 成功，最终 tree 精确等于
+    `dce67cdda790e6e88507a00442613d83e47c8329`，两个 vendor tarball 及外层 manifest/
+    series/SHA256SUMS 校验通过。Demo 83.07 秒完整解码，视频/封面哈希分别为
+    `21e1d5a`/`f42f984`，重制前后音轨 PCM MD5 均为 `5a2108a`；跨语言 7/7、JSON
+    解析和 diff 检查通过。
 
 - [ ] **R48** · 难度 中 · 风险 低 · 位置根 `README.md`、`docs/event/`、
   `packages/event/**/README*`、LICENSE/NOTICE 与仓库维护脚本

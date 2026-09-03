@@ -1,7 +1,7 @@
-From 64347a3470786e7eaed81cbb84159cd6e80b4979 Mon Sep 17 00:00:00 2001
+From 013ba9db65dabdb3c76e37ee70b3232ca3830cf3 Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Wed, 2 Sep 2026 06:22:04 -0700
-Subject: [PATCH 2/8] feat(event): wire conversation trajectory backend
+Subject: [PATCH 2/9] feat(event): wire conversation trajectory backend
 
 ---
  backend/apps/conversation_management_app.py   |  96 +++-
@@ -157,7 +157,7 @@ index 0bc7229bc051e75fd16b8296362ddfa6eb600269..815c42cb2e3a8c4cd6c90146703524a0
  async def update_conversation_knowledge_scope_endpoint(
      conversation_id: int,
 diff --git a/backend/consts/const.py b/backend/consts/const.py
-index 593bd7dba48c233f12202830af9d5db075a45925..99f1200cee9d20e68b3278c9ee0e7b15c300893f 100644
+index 593bd7dba48c233f12202830af9d5db075a45925..a7891789fd03457c35c70382dc517a3edd6e3b81 100644
 --- a/backend/consts/const.py
 +++ b/backend/consts/const.py
 @@ -697,6 +697,19 @@ def _resolve_app_version(default: str = "v2.2.1") -> str:
@@ -165,7 +165,7 @@ index 593bd7dba48c233f12202830af9d5db075a45925..99f1200cee9d20e68b3278c9ee0e7b15
  
  
 +# =============================================================================
-+# Perix Event Trajectory Configuration
++# Runfold Event Trajectory Configuration
 +# =============================================================================
 +
 +NEXENT_EVENT_TRAJECTORY_ROOT = os.getenv("NEXENT_EVENT_TRAJECTORY_ROOT", "").strip()
@@ -228,11 +228,11 @@ index e157fb79a21b8992779a1bc0bf262985fe4aeb96..d0a1de8c3a2a59ec8a665b3981cc5799
      # The application boundary only injects the persistence callback into its
 diff --git a/backend/services/event_trajectory_service.py b/backend/services/event_trajectory_service.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..6182c4e5311f276afafaa8a8efc7c71180b55d55
+index 0000000000000000000000000000000000000000..beb5e1f378c4be73fa5f2c626fc8078e29526e6f
 --- /dev/null
 +++ b/backend/services/event_trajectory_service.py
 @@ -0,0 +1,453 @@
-+"""Application boundary for Nexent-backed Perix Event trajectories."""
++"""Application boundary for Nexent-backed Runfold Event trajectories."""
 +
 +from __future__ import annotations
 +
@@ -377,7 +377,7 @@ index 0000000000000000000000000000000000000000..6182c4e5311f276afafaa8a8efc7c711
 +
 +def _event_api() -> dict[str, Any]:
 +    try:
-+        from perix_event import (
++        from runfold.event import (
 +            JsonlSessionPersistence,
 +            SessionForkError,
 +            SessionNotFoundError,
@@ -385,7 +385,7 @@ index 0000000000000000000000000000000000000000..6182c4e5311f276afafaa8a8efc7c711
 +        )
 +    except ImportError as exc:
 +        raise EventTrajectoryUnavailableError(
-+            "Event trajectory support requires the perix-event-sdk package"
++            "Event trajectory support requires the runfold-event package"
 +        ) from exc
 +    return {
 +        "JsonlSessionPersistence": JsonlSessionPersistence,
@@ -686,14 +686,14 @@ index 0000000000000000000000000000000000000000..6182c4e5311f276afafaa8a8efc7c711
 +            finally:
 +                parent_lease.close()
 diff --git a/deploy/env/.env.example b/deploy/env/.env.example
-index 47a77b7fb19eddd45325b50bf5425750fee0829f..770954276d5977712bbdc4ca3dbbb808ddd468c9 100644
+index 47a77b7fb19eddd45325b50bf5425750fee0829f..5b86d896a5261c51ce2d349ea0e08cd90904e738 100644
 --- a/deploy/env/.env.example
 +++ b/deploy/env/.env.example
 @@ -258,6 +258,12 @@ AIDP_TENANT_ID=aidp
  # empty, the backend uses JWT_SECRET so existing deployments need no change.
  IND_AIDP_IMAGE_SIGNING_KEY=
  
-+# ===== Perix Event Trajectory Configuration =====
++# ===== Runfold Event Trajectory Configuration =====
 +# Keep this root on the persistent /mnt/nexent host mount. Empty disables the
 +# Event recorder and trajectory APIs. Compression is fixed per artifact root.
 +NEXENT_EVENT_TRAJECTORY_ROOT=/mnt/nexent/events
@@ -716,10 +716,10 @@ index 46ac0b05feeae0fe620ef4be9e1e41698a274b5c..21c1d8260c3145871d8095a23665fb53
  FROM base AS final
  
 diff --git a/docs/event-trajectory.md b/docs/event-trajectory.md
-index 492c55be0a4553d510e0f7f86a870024d18b5e05..bd82b20719c6ef3b306d17e9821c5288ec4ca136 100644
+index 0b17afd4e1dd792c71645e0049c2831dd2aeffa4..33845424fde41976b50fdb5aa46bb474367f58cd 100644
 --- a/docs/event-trajectory.md
 +++ b/docs/event-trajectory.md
-@@ -18,7 +18,27 @@ The current pin is `perix-event-sdk` 0.1.0 from Perix runtime data commit
+@@ -18,7 +18,27 @@ The current pin is `runfold-event` 0.1.0 from Runfold runtime data commit
  the wheel built from that revision instead, as long as they keep the same
  package version and Event v0 format.
  
@@ -749,7 +749,7 @@ index 492c55be0a4553d510e0f7f86a870024d18b5e05..bd82b20719c6ef3b306d17e9821c5288
  Pass an explicit `EventTrajectoryConfig` when constructing `AgentRunInfo`:
  
 @@ -83,6 +103,24 @@ fork accepts only a stable boundary outside an open turn. The resulting JSONL
- artifacts are the common Perix Event format and can be restored directly by the
+ artifacts are the common Runfold Event format and can be restored directly by the
  TypeScript SDK and rendered by the Trajectory UI.
  
 +Nexent's authenticated product endpoints expose the same operations without
@@ -799,7 +799,7 @@ index 21a93638480da175b9ac3c1000f173ff74b786b6..fa93993b7b4962586b515b4db025e49a
      "ContextItemInput": (".context", "ContextItemInput"),
      "ContextItemType": (".context", "ContextItemType"),
 diff --git a/sdk/nexent/core/agents/event_trajectory.py b/sdk/nexent/core/agents/event_trajectory.py
-index 141c4954788da7bf582a45a0a3aaa925d2f7d2f1..b948a68456451feaef85c6173ddb930a094791b4 100644
+index 4aa50d66a78d8bf7b25873a634bd3a1800dfe413..357a117fdf763faf28c149f5f7ceb231da4aad72 100644
 --- a/sdk/nexent/core/agents/event_trajectory.py
 +++ b/sdk/nexent/core/agents/event_trajectory.py
 @@ -19,7 +19,7 @@ class EventTrajectoryAlreadyActiveError(EventTrajectoryError):
@@ -817,7 +817,7 @@ index 141c4954788da7bf582a45a0a3aaa925d2f7d2f1..b948a68456451feaef85c6173ddb930a
  
 -    def __init__(self, store: Any, session: Any, lease: _SessionLease) -> None:
 +    def __init__(self, store: Any, session: Any, lease: EventSessionLease) -> None:
-         from perix_event import (
+         from runfold.event import (
              canonical_header,
              create_assistant_message,
 @@ -139,7 +139,7 @@ class EventTrajectory:
@@ -1054,11 +1054,11 @@ index 7e962f64732d0325fa42d30c9ccdfb6688ed9924..22c15bb2432e924bb20b2b99e5092976
      mock_create_run_info.assert_called_once_with(
 diff --git a/test/backend/services/test_event_trajectory_service.py b/test/backend/services/test_event_trajectory_service.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..2fe4798d32ef9b90c8069044bd8108dbe2d247f9
+index 0000000000000000000000000000000000000000..815fe0fa590202959a899e73568b323b692bf58e
 --- /dev/null
 +++ b/test/backend/services/test_event_trajectory_service.py
 @@ -0,0 +1,366 @@
-+"""Behavioral tests for the Nexent application boundary around Perix Event."""
++"""Behavioral tests for the Nexent application boundary around Runfold Event."""
 +
 +from __future__ import annotations
 +
@@ -1069,7 +1069,7 @@ index 0000000000000000000000000000000000000000..2fe4798d32ef9b90c8069044bd8108db
 +import pytest
 +from nexent.core.agents import EventTrajectoryConfig
 +from nexent.core.agents.event_trajectory import EventTrajectory
-+from perix_event import JsonlSessionPersistence, SessionStore
++from runfold.event import JsonlSessionPersistence, SessionStore
 +
 +conversation_db = types.ModuleType("database.conversation_db")
 +for function_name in (

@@ -1,7 +1,7 @@
-From f10c9b54f7cdf0dadd3beb4a2e87ab1383fe077d Mon Sep 17 00:00:00 2001
+From 87135a25ce31c0bd582ef07a17d65a030112189d Mon Sep 17 00:00:00 2001
 From: Heiki Scott <heikiscott@gmail.com>
 Date: Wed, 2 Sep 2026 20:26:26 -0700
-Subject: [PATCH 8/8] feat(event): add dual Nexent fork controls
+Subject: [PATCH 8/9] feat(event): add dual Nexent fork controls
 
 ---
  .../conversation-trajectory-panel.tsx         | 50 +++++++++-
@@ -13,10 +13,10 @@ Subject: [PATCH 8/8] feat(event): add dual Nexent fork controls
  6 files changed, 199 insertions(+), 17 deletions(-)
 
 diff --git a/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx b/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx
-index aad4267498e9c0154858cb799cf526886aa553e1..e0615c8ac2331951e8f5fcbafa1382e1480e2b4a 100644
+index 5b17ff7ab0ec548271374c1d2447a68f506c02ba..300e5b852b7829f8c140fdcfc6d51efba38a0d74 100644
 --- a/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx
 +++ b/frontend/app/[locale]/newchat/assistant-ui/conversation-trajectory-panel.tsx
-@@ -15,9 +15,9 @@ import "@perix/event-ui/style.css";
+@@ -15,9 +15,9 @@ import "@runfold/trajectory-ui/style.css";
  import { Button } from "@/components/ui/button";
  import {
    conversationUrlForFork,
@@ -292,7 +292,7 @@ index 5017274bfbecbd79db269cddd2fa9c61b05256a3..7bb546761bd7ee3a687876228ebf4db5
            <TooltipIconButton tooltip={t("chat.thread.refresh")}>
              <RefreshCwIcon />
 diff --git a/frontend/lib/conversationTrajectory.ts b/frontend/lib/conversationTrajectory.ts
-index cc2c137e895747d4a59ed192cd153755f996223c..87c8d916817a01b0bb5ad4cfbe41b3687a8dd475 100644
+index 074bf552b86cbbb79463bd84e7bcbb1fab9d963b..4947f225790b427a6df692ec1c3c73379c600b04 100644
 --- a/frontend/lib/conversationTrajectory.ts
 +++ b/frontend/lib/conversationTrajectory.ts
 @@ -23,6 +23,11 @@ export interface LoadedConversationTrajectory {
@@ -374,7 +374,7 @@ index 31f7b6b1f0f10c28586609b1e0a867bbca024547..d804b81829c6aad7a23c5d91cab88a7e
    "chatInterface.trajectoryMissing": "该会话尚未生成 Event 轨迹",
    "chatInterface.trajectoryUnavailable": "Event 轨迹功能当前不可用",
 diff --git a/frontend/tests/conversationTrajectory.test.ts b/frontend/tests/conversationTrajectory.test.ts
-index 6b3ce1687743886b7e216c60380a1049cf0bb811..3abaa840f18752134d018b85e859b02de69da51d 100644
+index eedabd8a5c257f9b62fbc211a2f820d626943396..594dbaf748f9cb8ea8e0c0ad474c26e24897b3d7 100644
 --- a/frontend/tests/conversationTrajectory.test.ts
 +++ b/frontend/tests/conversationTrajectory.test.ts
 @@ -13,6 +13,8 @@ import {
