@@ -4,9 +4,9 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R42 与第 7 节总验收全部完成。R42 已删除 Demo
-> 标题中的制作质量自述，只保留“轨迹恢复与 Fork”这一功能主题；R41 的旁白、
-> 点击反馈以及 R40 的双 Fork 入口与自动 Resume 语义保持不变。
+> 总体状态（2026-09-02）：R01–R42 与第 7 节总验收全部完成；R43 正在把 Nexent
+> Demo 的合成脚本、真实截图和旁白源文件从临时目录纳入仓库，使现有成片可离线
+> 重制。发布成品仍留在 `docs/event/demos/nexent/`。
 > `npm run verify`
 > 全绿，SDK、UI、保留测试和构建配置均不依赖任何 DSH 包名解析。R33 已在与官方 tag
 > 逐文件一致的 Nexent v2.5.0 本地快照上完成真实进程、wheel 和轨迹 UI 验收；
@@ -664,6 +664,14 @@
     PCM MD5 相同，确认只改变标题画面。Nexent、DSH `EventTrajectory` 与 Event
     实现无改动。
 
+- [ ] **R43** · 难度 中 · 风险 低 · 位置 `scripts/event/demos/nexent/`
+  - **问题**：Demo 成品已纳管，但合成脚本、真实截图和旁白输入仍在临时目录，
+    无法从仓库内容独立重制。
+  - **处理**：按
+    [`R43 任务书`](tasks/R43-demo-reproduction-source.md) 纳管可复现制作源码与素材，
+    移除临时绝对路径，并以离线重制和音轨等价校验验收。
+  - **依赖**：R42；不移动发布成品，不修改功能实现。
+
 ## 7. 总体验收
 
 - [x] **R33** · 难度 中 · 风险 中 · 位置 Nexent 使用方仓库、
@@ -722,6 +730,7 @@
 | 18 | R40 | Nexent 有声交互 Demo 与 DSH Fork/Resume 控件一致性（见 `tasks/R40-nexent-narrated-interaction-demo.md`） | R39、用户决策 |
 | 19 | R41 | Nexent Demo 自然人声与清晰点击动作（见 `tasks/R41-demo-natural-voice-clicks.md`） | R40、用户反馈 |
 | 20 | R42 | 精简 Nexent Event Demo 标题（见 `tasks/R42-demo-title-copy.md`） | R41、用户反馈 |
+| 21 | R43 | 纳管 Nexent Event Demo 可复现源码（见 `tasks/R43-demo-reproduction-source.md`） | R42、用户确认 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
