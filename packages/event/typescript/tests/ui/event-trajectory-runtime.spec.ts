@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { EventTrajectoryRuntime } from '../../ui/trajectory/src/trajectory-runtime.js'
 import { eventLog } from '../fixtures/event-log.js'
 
-describe('Perix Event trajectory projection runtime', () => {
+describe('Runfold Event trajectory projection runtime', () => {
   it('projects user, assistant, request, and location state', () => {
     const snapshot = new EventTrajectoryRuntime(eventLog()).getSnapshot()
 

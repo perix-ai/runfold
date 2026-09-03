@@ -5,11 +5,11 @@ import { join, resolve } from 'node:path'
 import React from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { createEventRuntime, interruptedTurnClosers, Session, SessionId } from '@perix/event-sdk'
-import type { EventRuntime } from '@perix/event-sdk'
-import JsonlSessionPersistence, { type JsonlCompression } from '@perix/event-sdk/persistence-jsonl'
-import { createUserMessage } from '@perix/event-sdk/messages'
-import { EventTrajectory } from '@perix/event-ui'
+import { createEventRuntime, interruptedTurnClosers, Session, SessionId } from '@runfold/event'
+import type { EventRuntime } from '@runfold/event'
+import JsonlSessionPersistence, { type JsonlCompression } from '@runfold/event/persistence-jsonl'
+import { createUserMessage } from '@runfold/event/messages'
+import { EventTrajectory } from '@runfold/trajectory-ui'
 
 const repositoryRoot = resolve(import.meta.dirname, '../../..')
 const pythonSource = join(repositoryRoot, 'packages/event/python/src')

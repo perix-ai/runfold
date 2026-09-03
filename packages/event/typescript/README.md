@@ -40,14 +40,14 @@ must match the pinned snapshot.
 
 The publishable boundaries added around this source are:
 
-- `sdk/`: `@perix/event-sdk`, a zero-business-logic export package for Session,
+- `sdk/`: `@runfold/event`, a zero-business-logic export package for Session,
   persistence, and JSONL persistence;
-- `ui/trajectory/`: `@perix/event-ui`, the standalone Trajectory library;
+- `ui/trajectory/`: `@runfold/trajectory-ui`, the standalone Trajectory library;
 - `apps/event/typescript/trajectory-demo/`: a development-only consumer of
   both packages.
 
-All consumer-facing package, component, and test names use the Perix namespace:
-`@perix/event-sdk`, `@perix/event-ui`, and `EventTrajectory`. Core Session and
+All consumer-facing package, component, and test names use the Runfold namespace:
+`@runfold/event`, `@runfold/trajectory-ui`, and `EventTrajectory`. Core Session and
 persistence implementation imports, retained UI type imports, and retained test
 imports use explicit local relative paths; every such import-only rewrite is
 declared and checked against the audited upstream bytes by
@@ -133,21 +133,21 @@ package manifests, lockfiles, installed dependencies, or published artifacts.
   receives from the complete DSH shell. Its manifest directly declares the
   third-party packages used by the retained closure; it has no DSH package
   dependency, and the repository no longer needs npm `overrides` for DSH.
-- `runtime/` is Perix-authored code that replaces the DSH utility packages the
+- `runtime/` is Runfold-authored code that replaces the DSH utility packages the
   retained sources import: `brand.ts` (`@deepseek-ai/dsh-brand`), `values.ts`
   (`@deepseek-ai/dsh-util-values`), `timeout.ts` (`@deepseek-ai/dsh-timeout`),
   and `messages.ts` (the Event-facing subset of `@deepseek-ai/dsh-llm` plus the
   `ImageAttachmentRef` shape from `@deepseek-ai/dsh-attachment`). Core and
   persistence sources import these modules by relative path; `ui-types.ts` and
   `event-types.ts` provide the host-bound UI contracts and Event augmentations.
-  The SDK bundles its imports directly. `vitest.config.ts` resolves only Perix
+  The SDK bundles its imports directly. `vitest.config.ts` resolves only Runfold
   public entry points; retained tests reach local seams through the declared
   relative specifiers. TypeScript and Trajectory compiler configs likewise
   contain no DSH aliases. The published SDK depends on none of the replaced
   packages.
   `runtime/README.md` records each file's provenance.
 - `sdk/` adds only package exports; the implementation remains in the retained
-  DSH package trees above and in `runtime/`. `@perix/event-sdk/runtime` is the
+  DSH package trees above and in `runtime/`. `@runfold/event/runtime` is the
   host (`EventHost`), and the root entry adds `createEventRuntime()`, the
   composition root that replaces `ctx.plugin(SessionStore)` and the
   persistence plugin. Its build bundles those three local implementation
@@ -180,9 +180,9 @@ Trajectory; both execute the
   rewrites are identity-checked against the fixed snapshot;
 - `tests/runtime`: 11 direct `EventHost` lifecycle cases covering event order,
   effect setup/disposal/failure, scope teardown, and scoped service views;
-- `tests/sdk`: Perix public exports, lifecycle, fork, immutability, JSONL,
+- `tests/sdk`: Runfold public exports, lifecycle, fork, immutability, JSONL,
   restart, suffix/raw reads, and concurrent-session isolation;
-- `tests/ui`: Perix component API, projection, localization,
+- `tests/ui`: Runfold component API, projection, localization,
   pagination callback, input replacement, and a 20,000-event history;
 - `tests/integration`: SDK validation through fork,
   persistence, restart, and UI rendering;

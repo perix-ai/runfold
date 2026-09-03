@@ -8,7 +8,7 @@ import type {
   ConversationViewDefinition,
   TrajectoryRegistrationContext,
 } from './conversation-client.js'
-import type { SessionEvent } from '@perix/event-sdk/session/types'
+import type { SessionEvent } from '@runfold/event/session/types'
 import {
   ConversationNodeAssembler,
   inspectRequestPrompt,

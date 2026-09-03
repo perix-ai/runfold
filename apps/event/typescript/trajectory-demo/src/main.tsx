@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { EventTrajectory } from '@perix/event-ui'
+import { EventTrajectory } from '@runfold/trajectory-ui'
 import { demoEvents } from './demo-events.js'
 import './page.css'
 

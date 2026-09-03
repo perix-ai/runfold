@@ -2,7 +2,7 @@
  * Test-only stand-in for the pinned DeepSeek Harness Cordis host, imported by
  * retained Event and persistence tests through identity-checked local
  * specifiers. It adds the plugin-loading vocabulary those tests use
- * (`ctx.plugin`, `fiber.dispose`) on top of the Perix {@link EventHost} scopes
+ * (`ctx.plugin`, `fiber.dispose`) on top of the Runfold {@link EventHost} scopes
  * and nothing else. It is never built or published.
  */
 

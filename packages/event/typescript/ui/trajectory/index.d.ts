@@ -1,4 +1,4 @@
-import type { SessionEvent } from '@perix/event-sdk/session/types'
+import type { SessionEvent } from '@runfold/event/session/types'
 import type { ReactNode } from 'react'
 
 export type EventImageMediaType = 'image/png' | 'image/jpeg' | 'image/webp' | 'image/gif'

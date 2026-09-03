@@ -6,7 +6,7 @@
  * @module @deepseek-ai/dsh-session-persistence-jsonl
  */
 
-import type { EventHost } from '@perix/event-sdk/runtime'
+import type { EventHost } from '@runfold/event/runtime'
 import { readdirSync } from 'node:fs'
 import { open, mkdir, readFile, readdir, realpath, link, rm, stat, truncate } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'

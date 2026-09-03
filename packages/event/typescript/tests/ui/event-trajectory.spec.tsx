@@ -1,14 +1,14 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { EventTrajectory } from '@perix/event-ui'
-import * as eventUi from '@perix/event-ui'
+import { EventTrajectory } from '@runfold/trajectory-ui'
+import * as eventUi from '@runfold/trajectory-ui'
 import { eventLog } from '../fixtures/event-log.js'
 
 afterEach(cleanup)
 
-describe('@perix/event-ui public trajectory', () => {
-  it('exports only Perix public names', () => {
+describe('@runfold/trajectory-ui public trajectory', () => {
+  it('exports only Runfold public names', () => {
     expect(Object.keys(eventUi)).toEqual(['EventTrajectory'])
     expect('DshTrajectory' in eventUi).toBe(false)
   })

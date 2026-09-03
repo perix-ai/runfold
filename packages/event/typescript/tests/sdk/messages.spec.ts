@@ -8,11 +8,11 @@ import {
   freezeMessage,
   MessageId,
   ToolCallId,
-} from '@perix/event-sdk/messages'
+} from '@runfold/event/messages'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
 
-describe('@perix/event-sdk/messages', () => {
+describe('@runfold/event/messages', () => {
   it('mints v4 identities and freezes a detached copy', () => {
     const input = { content: [{ type: 'text' as const, text: 'before' }], source: { kind: 'user' as const } }
     const message = createUserMessage(input)
@@ -29,10 +29,10 @@ describe('@perix/event-sdk/messages', () => {
   it('fixes the assistant and tool-result envelopes', () => {
     const assistant = createAssistantMessage({
       content: [{ type: 'text', text: 'answer' }],
-      source: { provider: 'perix-test', model: 'event-test-model' },
+      source: { provider: 'runfold-test', model: 'event-test-model' },
     })
     expect(assistant.role).toBe('assistant')
-    expect(assistant.source).toEqual({ kind: 'model', provider: 'perix-test', model: 'event-test-model' })
+    expect(assistant.source).toEqual({ kind: 'model', provider: 'runfold-test', model: 'event-test-model' })
 
     const callId = ToolCallId('call-1')
     const result = createToolResultMessage({ callId, content: [{ type: 'text', text: 'ok' }], isError: false })

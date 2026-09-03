@@ -5,7 +5,7 @@
  * @module @deepseek-ai/dsh-session-persistence/coordinator
  */
 
-import type { EventHost } from '@perix/event-sdk/runtime'
+import type { EventHost } from '@runfold/event/runtime'
 import {
   adoptSessionEvent,
   interruptedTurnClosers,

@@ -4,10 +4,10 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { createEventRuntime, SessionId } from '@perix/event-sdk'
-import type { EventRuntime } from '@perix/event-sdk'
-import JsonlSessionPersistence from '@perix/event-sdk/persistence-jsonl'
-import { EventTrajectory } from '@perix/event-ui'
+import { createEventRuntime, SessionId } from '@runfold/event'
+import type { EventRuntime } from '@runfold/event'
+import JsonlSessionPersistence from '@runfold/event/persistence-jsonl'
+import { EventTrajectory } from '@runfold/trajectory-ui'
 import { eventLog } from '../fixtures/event-log.js'
 
 const runtimes: EventRuntime[] = []
@@ -31,9 +31,9 @@ afterEach(async () => {
   for (const root of roots.splice(0)) await rm(root, { recursive: true, force: true })
 })
 
-describe('complete Perix Event system', () => {
+describe('complete Runfold Event system', () => {
   it('moves one log through SDK validation, fork, JSONL, restart, and UI projection', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'perix-event-system-'))
+    const root = await mkdtemp(join(tmpdir(), 'runfold-event-system-'))
     roots.push(root)
     const writer = runtime(root)
     const parent = writer.sessions.create(SessionId('system-parent'), {

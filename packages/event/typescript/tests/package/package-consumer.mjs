@@ -9,7 +9,7 @@ const testsDirectory = dirname(fileURLToPath(import.meta.url))
 const repository = resolve(testsDirectory, '../../../../..')
 const sdkDirectory = join(repository, 'packages/event/typescript/sdk')
 const uiDirectory = join(repository, 'packages/event/typescript/ui/trajectory')
-const temporary = await mkdtemp(join(tmpdir(), 'perix-event-consumer-'))
+const temporary = await mkdtemp(join(tmpdir(), 'runfold-event-consumer-'))
 const artifacts = join(temporary, 'artifacts')
 const consumer = join(temporary, 'consumer')
 
@@ -64,7 +64,7 @@ try {
   const uiTarball = join(artifacts, uiPack.filename)
 
   await writeFile(join(consumer, 'package.json'), JSON.stringify({
-    name: 'perix-event-blank-consumer',
+    name: 'runfold-event-blank-consumer',
     private: true,
     type: 'module',
   }, null, 2) + '\n')
@@ -82,16 +82,16 @@ try {
     include: ['consumer.tsx'],
   }, null, 2) + '\n')
   await writeFile(join(consumer, 'consumer.tsx'), `
-import { createEventRuntime, SessionId } from '@perix/event-sdk'
-import JsonlSessionPersistence from '@perix/event-sdk/persistence-jsonl'
-import type { SessionEvent } from '@perix/event-sdk/session/types'
-import { createUserMessage } from '@perix/event-sdk/messages'
-import type { EventHost } from '@perix/event-sdk/runtime'
-import { EventTrajectory, type EventTrajectoryProps } from '@perix/event-ui'
-import '@perix/event-ui/style.css'
+import { createEventRuntime, SessionId } from '@runfold/event'
+import JsonlSessionPersistence from '@runfold/event/persistence-jsonl'
+import type { SessionEvent } from '@runfold/event/session/types'
+import { createUserMessage } from '@runfold/event/messages'
+import type { EventHost } from '@runfold/event/runtime'
+import { EventTrajectory, type EventTrajectoryProps } from '@runfold/trajectory-ui'
+import '@runfold/trajectory-ui/style.css'
 
 const context = createEventRuntime({
-  persistence: (host: EventHost) => new JsonlSessionPersistence(host, { root: '/tmp/perix-consumer', compression: 'none' }),
+  persistence: (host: EventHost) => new JsonlSessionPersistence(host, { root: '/tmp/runfold-consumer', compression: 'none' }),
 })
 const session = context.sessions.create(SessionId('typed-consumer'))
 session.append('user/message', createUserMessage({
@@ -105,8 +105,8 @@ void view
 await context.dispose()
 `)
   await writeFile(join(consumer, 'runtime.mjs'), `
-import { createEventRuntime, SessionId } from '@perix/event-sdk'
-import { createUserMessage } from '@perix/event-sdk/messages'
+import { createEventRuntime, SessionId } from '@runfold/event'
+import { createUserMessage } from '@runfold/event/messages'
 
 const context = createEventRuntime()
 const session = context.sessions.create(SessionId('runtime-consumer'))
@@ -134,17 +134,17 @@ await context.dispose()
   run(resolve(consumer, 'node_modules/.bin/tsc'), ['--project', 'tsconfig.json'], consumer)
   run(process.execPath, ['runtime.mjs'], consumer)
 
-  await assertExportFiles(join(consumer, 'node_modules/@perix/event-sdk'))
-  await assertExportFiles(join(consumer, 'node_modules/@perix/event-ui'))
+  await assertExportFiles(join(consumer, 'node_modules/@runfold/event'))
+  await assertExportFiles(join(consumer, 'node_modules/@runfold/trajectory-ui'))
   // No DSH package may be listed, required at runtime, or mentioned by a
   // published JavaScript/declaration artifact. Generated declaration comments
   // carry source-path provenance without registry package names.
   const installedSdk = JSON.parse(await readFile(
-    join(consumer, 'node_modules/@perix/event-sdk/package.json'),
+    join(consumer, 'node_modules/@runfold/event/package.json'),
     'utf8',
   ))
   const installedUi = JSON.parse(await readFile(
-    join(consumer, 'node_modules/@perix/event-ui/package.json'),
+    join(consumer, 'node_modules/@runfold/trajectory-ui/package.json'),
     'utf8',
   ))
   for (const [label, manifest] of [['SDK', installedSdk], ['UI', installedUi]]) {
@@ -154,23 +154,23 @@ await context.dispose()
       }
     }
   }
-  for (const packageName of ['event-sdk', 'event-ui']) {
+  for (const packageName of ['event', 'trajectory-ui']) {
     for (const file of await generatedTextFiles(
-      join(consumer, `node_modules/@perix/${packageName}/lib`),
+      join(consumer, `node_modules/@runfold/${packageName}/lib`),
     )) {
       const content = await readFile(file, 'utf8')
       assert.equal(content.includes('@deepseek-ai'), false, `DSH namespace leaked into ${file}`)
     }
   }
   const uiDeclaration = await readFile(
-    join(consumer, 'node_modules/@perix/event-ui/index.d.ts'),
+    join(consumer, 'node_modules/@runfold/trajectory-ui/index.d.ts'),
     'utf8',
   )
   assert.equal(uiDeclaration.includes('@deepseek-ai'), false)
   assert.equal(uiDeclaration.includes('DshTrajectory'), false)
   assert.equal(uiDeclaration.includes('EventTrajectory'), true)
 
-  console.log('Perix Event package consumer verification passed')
+  console.log('Runfold Event package consumer verification passed')
 } finally {
   await rm(temporary, { recursive: true, force: true })
 }

@@ -1,22 +1,22 @@
 import { readFile } from 'node:fs/promises'
 import { describe, expect, it } from 'vitest'
-import SessionStore, { createEventRuntime, KNOWN_SESSION_EVENT_TYPES, Session, SessionId } from '@perix/event-sdk'
-import SessionStoreFromSession from '@perix/event-sdk/session'
-import JsonlSessionPersistence from '@perix/event-sdk/persistence-jsonl'
-import SessionPersistence from '@perix/event-sdk/persistence'
-import { EventHost } from '@perix/event-sdk/runtime'
-import { createAssistantMessage, createUserMessage } from '@perix/event-sdk/messages'
-import * as chunkRows from '@perix/event-sdk/session/chunk-rows'
-import * as surface from '@perix/event-sdk/session/surface'
+import SessionStore, { createEventRuntime, KNOWN_SESSION_EVENT_TYPES, Session, SessionId } from '@runfold/event'
+import SessionStoreFromSession from '@runfold/event/session'
+import JsonlSessionPersistence from '@runfold/event/persistence-jsonl'
+import SessionPersistence from '@runfold/event/persistence'
+import { EventHost } from '@runfold/event/runtime'
+import { createAssistantMessage, createUserMessage } from '@runfold/event/messages'
+import * as chunkRows from '@runfold/event/session/chunk-rows'
+import * as surface from '@runfold/event/session/surface'
 
-describe('@perix/event-sdk public contract', () => {
-  it('exposes every documented entry point under the Perix namespace', async () => {
+describe('@runfold/event public contract', () => {
+  it('exposes every documented entry point under the Runfold namespace', async () => {
     const manifest = JSON.parse(await readFile(new URL('../../sdk/package.json', import.meta.url), 'utf8')) as {
       name: string
       exports: Record<string, unknown>
     }
 
-    expect(manifest.name).toBe('@perix/event-sdk')
+    expect(manifest.name).toBe('@runfold/event')
     expect(Object.keys(manifest.exports).sort()).toEqual([
       '.',
       './messages',
@@ -55,7 +55,7 @@ describe('@perix/event-sdk public contract', () => {
     }).role).toBe('user')
     expect(createAssistantMessage({
       content: [{ type: 'text', text: 'hello' }],
-      source: { provider: 'perix-test', model: 'event-test-model' },
+      source: { provider: 'runfold-test', model: 'event-test-model' },
     }).role).toBe('assistant')
   })
 

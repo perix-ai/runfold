@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import type { SessionSnapshot } from '../../../runtime/src/ui-types.ts'
 import { createSnapshotStore } from '../../../packages/client/store/src/index.ts'
 import type { MessageImageLoader } from './conversation-client.js'
-import type { SessionEvent, SessionId } from '@perix/event-sdk/session/types'
+import type { SessionEvent, SessionId } from '@runfold/event/session/types'
 import { bindSnapshotSelector } from '../../../packages/client/ui-renderer/src/client/bind.ts'
 import { makeTranslate } from '../../../packages/test-support/client-runtime/src/translate.ts'
 import {
@@ -63,7 +63,7 @@ function sessionSnapshot(hasMore: boolean): SessionSnapshot {
   }
 }
 
-/** Perix host for the retained upstream Trajectory view over a SessionEvent log. */
+/** Runfold host for the retained upstream Trajectory view over a SessionEvent log. */
 export function EventTrajectory({
   events,
   locale = 'en',

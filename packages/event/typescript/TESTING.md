@@ -8,8 +8,8 @@ The Event implementations are verified at ten independent layers.
 | Upstream UI-runtime regression | `packages/client/store/tests`, selected `packages/client/ui-primitives/tests` | The locally retained store, Tooltip, JsonTree, Markdown parser/renderer, streaming highlighter, and 48 DOM baselines match the pinned implementation |
 | Upstream Trajectory regression | `packages/client/ui-trajectory/tests` | Retained projection, layout, table, timeline, and view behavior remains intact |
 | EventHost lifecycle | `tests/runtime` | 11 direct cases lock event order/carriers, effect setup and reverse disposal, rejection handling, nested scopes, and scoped service views to the fixed Cordis subset |
-| Perix SDK | `tests/sdk` | Public exports, lifecycle, immutability, replay, fork, JSONL round-trip/restart, raw/suffix reads, and isolation work through `@perix/*` imports |
-| Perix UI | `tests/ui` | `EventTrajectory` projects, renders, localizes, pages, replaces input, and handles 20,000 events; the ported upstream view cases cover ledger, inspector, timeline, and duration state on the standalone host |
+| Runfold SDK | `tests/sdk` | Public exports, lifecycle, immutability, replay, fork, JSONL round-trip/restart, raw/suffix reads, and isolation work through `@runfold/*` imports |
+| Runfold UI | `tests/ui` | `EventTrajectory` projects, renders, localizes, pages, replaces input, and handles 20,000 events; the ported upstream view cases cover ledger, inspector, timeline, and duration state on the standalone host |
 | Complete system | `tests/integration` | One log crosses validation, fork, JSONL durability, process-style restart, and React rendering |
 | Cross-language conformance | `tests/event/cross-language`, `conformance/event/v0` | Both languages agree on valid/invalid inputs and repair; each reads, resumes, appends, and forks the other's plain/Zstd files; repeated restores preserve DSH seed boundaries; a real Nexent parent/fork trajectory passes TypeScript public restore, projection, and Trajectory rendering |
 | Python implementation | `packages/event/python/tests` | Native Session, surface, repair, codecs, persistence, recovery, and 20,000-Event history work without TypeScript |
@@ -45,7 +45,7 @@ Three host-only test files are not retained in the extraction:
 
 | Test in pinned snapshot | Reason | Coverage status |
 | --- | --- | --- |
-| `packages/core/session/tests/scoped.spec.ts` | Tests dsh-scope's scope-filtered dispatch, a Harness host mechanism the Perix host does not have | Every listener hears every session by design |
+| `packages/core/session/tests/scoped.spec.ts` | Tests dsh-scope's scope-filtered dispatch, a Harness host mechanism the Runfold host does not have | Every listener hears every session by design |
 | `packages/core/session/tests/typert.spec.ts` | Tests the Typert lookup registration removed with Cordis | Not applicable |
 | `packages/core/session/tests/invariant.spec.ts` | Tests the Cordis invariants companion plugin removed in R13 | Not applicable |
 

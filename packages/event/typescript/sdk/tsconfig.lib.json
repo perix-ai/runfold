@@ -6,7 +6,7 @@
     "allowImportingTsExtensions": true,
     "target": "ES2024",
     "paths": {
-      "@perix/event-sdk/runtime": [
+      "@runfold/event/runtime": [
         "../runtime/src/host.ts"
       ]
     },

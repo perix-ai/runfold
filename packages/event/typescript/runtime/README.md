@@ -1,6 +1,6 @@
-# Perix Event runtime modules
+# Runfold Event runtime modules
 
-Perix-authored TypeScript that replaces the DeepSeek Harness host and utility
+Runfold-authored TypeScript that replaces the DeepSeek Harness host and utility
 packages the retained Event sources import. Nothing here is upstream source;
 each file states what it was copied or reduced from and why.
 
@@ -13,12 +13,12 @@ each file states what it was copied or reduced from and why.
 | `src/host.ts` | `@deepseek-ai/cordis` `Context`/`Service`, `@deepseek-ai/dsh-scope` carriers | `EventHost`: an event bus for the four `session/*` events (plus the `internal/dispatch` instrumentation hook), ownership scopes with reverse-order disposal, and `provide`/`get` composition slots. No plugin registry, no scope-filtered dispatch, no Typert |
 | `src/create.ts` | DSH plugin composition (`ctx.plugin(SessionStore)` + a persistence plugin) | `createEventRuntime()`: one host, one Session store, an optional persistence backend, `restore(id)`, and `dispose()` |
 | `src/ui-types.ts` | Session controller, client store, UI slots, locale, and attachment type outlets listed in the file header | Type-only contracts consumed by the standalone Trajectory host; fields are copied from the pinned source and host-bound declarations are reduced only to the members the retained UI reads |
-| `src/event-types.ts` | Agent, tools, compaction, retry, commands, and todo event type outlets listed in the file header | The retained Trajectory event-map augmentations, with their module target changed to the public Perix Session types path |
+| `src/event-types.ts` | Agent, tools, compaction, retry, commands, and todo event type outlets listed in the file header | The retained Trajectory event-map augmentations, with their module target changed to the public Runfold Session types path |
 
 Core and UI source imports under `../packages/` are rewritten only through the
 per-file mappings enforced by `../../../../scripts/verify-upstream-identity.mjs`.
 They resolve directly to these modules, the retained implementation, or the
-public `@perix/event-sdk` type path. Original DSH module names remain only in
+public `@runfold/event` type path. Original DSH module names remain only in
 unchanged upstream tests, audit-only manifests, provenance text, and test
 aliases; the UI store and primitive runtime closure now resolves to retained
 local source as well.

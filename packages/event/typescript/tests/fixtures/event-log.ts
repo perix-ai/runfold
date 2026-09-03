@@ -1,4 +1,4 @@
-import type { SessionEvent } from '@perix/event-sdk/session/types'
+import type { SessionEvent } from '@runfold/event/session/types'
 
 const START_TIME = 1_725_000_000_000
 const EVENTS_PER_TURN = 10
@@ -30,7 +30,7 @@ export function eventLog(requestedEvents = 20): readonly SessionEvent[] {
   for (let turn = 1; turn <= turns; turn++) {
     append('turn/start', { turn })
     append('user/message', {
-      id: `perix-user-${turn}`,
+      id: `runfold-user-${turn}`,
       role: 'user',
       content: [{ type: 'text', text: turn === 1 ? 'Inspect the Event boundary.' : `Continue pass ${turn}.` }],
       source: { kind: 'user' },
@@ -39,8 +39,8 @@ export function eventLog(requestedEvents = 20): readonly SessionEvent[] {
     append('request/header', {
       reason: turn === 1 ? 'initial' : 'series',
       header: {
-        config: { provider: 'perix-test', model: 'event-test-model' },
-        system: 'Exercise the Perix Event system.',
+        config: { provider: 'runfold-test', model: 'event-test-model' },
+        system: 'Exercise the Runfold Event system.',
         tools: [],
       },
     })
@@ -63,10 +63,10 @@ export function eventLog(requestedEvents = 20): readonly SessionEvent[] {
       turn,
       step: 1,
       message: {
-        id: `perix-assistant-${turn}`,
+        id: `runfold-assistant-${turn}`,
         role: 'assistant',
         content: [{ type: 'text', text: 'The Event boundary is intact.' }],
-        source: { kind: 'model', provider: 'perix-test', model: 'event-test-model' },
+        source: { kind: 'model', provider: 'runfold-test', model: 'event-test-model' },
       },
       usage: { inputTokens: 100 + turn, outputTokens: 20, reasoningTokens: 8 },
     }, { surfaceOp: 'append', sourceEventSeqs: [reasoning, text] })

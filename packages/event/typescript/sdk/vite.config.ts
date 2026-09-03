@@ -3,13 +3,13 @@ import { defineConfig } from 'vite'
 
 const source = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 const bundledPackages = [
-  '@perix/event-sdk/runtime',
+  '@runfold/event/runtime',
 ]
 
 export default defineConfig({
   resolve: {
     alias: [
-      { find: /^@perix\/event-sdk\/runtime$/, replacement: source('../runtime/src/host.ts') },
+      { find: /^@runfold\/event\/runtime$/, replacement: source('../runtime/src/host.ts') },
     ],
   },
   build: {

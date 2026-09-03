@@ -1,7 +1,7 @@
 {
-  "name": "@perix/event-sdk",
+  "name": "@runfold/event",
   "version": "0.1.0",
-  "description": "Perix TypeScript Event SDK extracted from DeepSeek Harness",
+  "description": "Runfold TypeScript Event SDK extracted from DeepSeek Harness",
   "type": "module",
   "main": "./lib/index.js",
   "types": "./lib/types/sdk/src/index.d.ts",

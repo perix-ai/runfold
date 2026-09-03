@@ -4,10 +4,10 @@ import {
   Session,
   SessionForkError,
   SessionId,
-} from '@perix/event-sdk'
-import type { EventRuntime } from '@perix/event-sdk'
-import type { SessionEvent } from '@perix/event-sdk/session/types'
-import { createAssistantMessage, createUserMessage } from '@perix/event-sdk/messages'
+} from '@runfold/event'
+import type { EventRuntime } from '@runfold/event'
+import type { SessionEvent } from '@runfold/event/session/types'
+import { createAssistantMessage, createUserMessage } from '@runfold/event/messages'
 
 const runtimes: EventRuntime[] = []
 
@@ -26,14 +26,14 @@ function appendTurn(session: Session, turn = 1): void {
   session.append('step/start', { turn, step: 1 })
   session.append('request/header', {
     reason: 'initial',
-    header: { config: { provider: 'perix-test', model: 'event-test-model' } },
+    header: { config: { provider: 'runfold-test', model: 'event-test-model' } },
   })
   session.append('assistant/message', {
     turn,
     step: 1,
     message: createAssistantMessage({
       content: [{ type: 'text', text: `answer-${turn}` }],
-      source: { provider: 'perix-test', model: 'event-test-model' },
+      source: { provider: 'runfold-test', model: 'event-test-model' },
     }),
   }, { surfaceOp: 'append', sourceEventSeqs: [] })
   session.append('step/end', { turn, step: 1 })
@@ -44,7 +44,7 @@ afterEach(async () => {
   for (const runtime of runtimes.splice(0)) await runtime.dispose()
 })
 
-describe('Perix Event session lifecycle', () => {
+describe('Runfold Event session lifecycle', () => {
   it('records contiguous immutable events and derives model history', async () => {
     const context = eventContext()
     const session = context.sessions.create(SessionId('lifecycle'), { meta: { cwd: '/workspace' } })
@@ -54,7 +54,7 @@ describe('Perix Event session lifecycle', () => {
     expect(session.events.every(event => Object.isFrozen(event))).toBe(true)
     expect(session.deriveMessages().map(message => message.role)).toEqual(['user', 'assistant'])
     expect(session.requestHeader()?.config).toEqual({
-      provider: 'perix-test',
+      provider: 'runfold-test',
       model: 'event-test-model',
     })
   })

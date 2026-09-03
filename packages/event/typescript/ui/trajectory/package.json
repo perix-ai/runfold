@@ -1,5 +1,5 @@
 {
-  "name": "@perix/event-ui",
+  "name": "@runfold/trajectory-ui",
   "version": "0.1.0",
   "type": "module",
   "main": "./lib/index.js",
@@ -27,7 +27,7 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
-    "@perix/event-sdk": "0.1.0"
+    "@runfold/event": "0.1.0"
   },
   "devDependencies": {
     "@shikijs/langs": "^4.3.1",

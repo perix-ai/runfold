@@ -17,8 +17,8 @@
 > 最终移除了保留测试中的 DSH
 > module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
 >
-> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**，并计划执行
-> R45–R49。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
+> 后续状态（2026-09-03）：已确定将独立项目命名为 **Runfold**；R45 已完成，
+> R46–R49 待执行。迁移仅改变项目身份、公共包/import、Schema 标识与下游展示名称；
 > 不改变 Event 数据模型、restore/resume/fork 行为、Trajectory 交互或 DSH 快照。
 
 ## 任务生命周期
@@ -732,7 +732,7 @@
 
 ## 8. Runfold 项目身份迁移
 
-- [ ] **R45** · 难度 中 · 风险 中 · 位置根 `package.json`、
+- [x] **R45** · 难度 中 · 风险 中 · 位置根 `package.json`、
   `packages/event/typescript/`、`apps/event/typescript/trajectory-demo/`
   - **问题**：TypeScript 公共产物、import 和开发宿主仍使用 `@perix/*`，使独立
     开源组件把维护组织名称泄漏为使用方代码命名空间；`event-sdk` 也容易被误解为
@@ -742,6 +742,16 @@
     import、构建和测试预期，不重排保留源码、不改变行为。实施前确认所需 npm scope
     没有现实冲突，但不在本任务中发布包。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-03）：根 workspace、Event 实现/API、Trajectory
+    UI 与开发宿主分别改为 `runfold`、`@runfold/event`、
+    `@runfold/trajectory-ui` 和 `@runfold/trajectory-demo`；源码、类型声明、测试、
+    构建别名及空白消费者统一使用新 import。npm registry 对三个完整包名均返回
+    404；本任务未创建 scope 或发布包。Event 行为与目录结构未改。
+  - **验证**：上游身份门禁仍为 204 个保留文件、10 个必要差异、139 个映射；三个
+    workspace 构建通过；626 个 Event、182 个 UI runtime、94 个 Trajectory、15 个
+    SDK、33 个 UI、11 个 runtime、1 个系统和7个跨语言用例通过；临时空白项目从
+    tarball 安装 `@runfold/event` 与 `@runfold/trajectory-ui` 后通过类型检查和运行时
+    生命周期验证。
 
 - [ ] **R46** · 难度 中 · 风险 中 · 位置 `packages/event/python/`、
   `tests/event/cross-language/`

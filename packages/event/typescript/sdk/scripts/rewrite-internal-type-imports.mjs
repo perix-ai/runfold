@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const typesRoot = resolve(root, 'lib/types')
 const targets = new Map([
-  ['@perix/event-sdk/runtime', 'runtime/src/host.d.ts'],
+  ['@runfold/event/runtime', 'runtime/src/host.d.ts'],
 ])
 const upstreamProvenance = new Map([
   ['@module @deepseek-ai/dsh-session-persistence-jsonl', 'Upstream: packages/session/session-persistence-jsonl/src/index.ts @ dd6322d6'],

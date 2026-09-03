@@ -1,4 +1,4 @@
-# @perix/event-sdk
+# @runfold/event
 
 The installable TypeScript boundary for the retained, minimally adapted
 DeepSeek Harness Event, persistence, and JSONL persistence implementations in
@@ -8,28 +8,28 @@ The package contains no Event business logic. Its modules expose the
 corresponding DSH package surfaces while the build bundles the retained local
 DSH Event source—not registry copies—into the published package:
 
-- `@perix/event-sdk` and `@perix/event-sdk/session`
-- `@perix/event-sdk/session/types`
-- `@perix/event-sdk/session/chunk-rows`
-- `@perix/event-sdk/session/surface`
-- `@perix/event-sdk/persistence`
-- `@perix/event-sdk/persistence-jsonl`
-- `@perix/event-sdk/runtime` for `EventHost` (ownership scopes, lifecycle
+- `@runfold/event` and `@runfold/event/session`
+- `@runfold/event/session/types`
+- `@runfold/event/session/chunk-rows`
+- `@runfold/event/session/surface`
+- `@runfold/event/persistence`
+- `@runfold/event/persistence-jsonl`
+- `@runfold/event/runtime` for `EventHost` (ownership scopes, lifecycle
   events, composition slots); the root entry also exports
-  `createEventRuntime()` (Perix-owned; see `../runtime/README.md`)
-- `@perix/event-sdk/messages` for Event-compatible message constructors and
-  value types (Perix-owned; see `../runtime/README.md`)
+  `createEventRuntime()` (Runfold-owned; see `../runtime/README.md`)
+- `@runfold/event/messages` for Event-compatible message constructors and
+  value types (Runfold-owned; see `../runtime/README.md`)
 
 The upstream `*/invariant` companion modules are Cordis diagnostic plugins,
 not Event behavior, and are intentionally not exported.
 
 Consumers can therefore construct and host the Event system using only
-`@perix/*` import specifiers:
+`@runfold/*` import specifiers:
 
 ```ts
-import { createEventRuntime, SessionId } from '@perix/event-sdk'
-import JsonlSessionPersistence from '@perix/event-sdk/persistence-jsonl'
-import { createUserMessage } from '@perix/event-sdk/messages'
+import { createEventRuntime, SessionId } from '@runfold/event'
+import JsonlSessionPersistence from '@runfold/event/persistence-jsonl'
+import { createUserMessage } from '@runfold/event/messages'
 
 const runtime = createEventRuntime({
   persistence: host => new JsonlSessionPersistence(host, { root: './sessions', compression: 'none' }),

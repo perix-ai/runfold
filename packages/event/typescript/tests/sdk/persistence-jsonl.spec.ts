@@ -2,10 +2,10 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { createEventRuntime, Session, SessionId } from '@perix/event-sdk'
-import type { EventRuntime } from '@perix/event-sdk'
-import JsonlSessionPersistence from '@perix/event-sdk/persistence-jsonl'
-import { createUserMessage } from '@perix/event-sdk/messages'
+import { createEventRuntime, Session, SessionId } from '@runfold/event'
+import type { EventRuntime } from '@runfold/event'
+import JsonlSessionPersistence from '@runfold/event/persistence-jsonl'
+import { createUserMessage } from '@runfold/event/messages'
 
 const runtimes: EventRuntime[] = []
 const roots: string[] = []
@@ -23,7 +23,7 @@ function persistentContext(root: string): EventRuntime {
 }
 
 async function storageRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'perix-event-sdk-'))
+  const root = await mkdtemp(join(tmpdir(), 'runfold-event-sdk-'))
   roots.push(root)
   return root
 }
@@ -42,7 +42,7 @@ afterEach(async () => {
   for (const root of roots.splice(0)) await rm(root, { recursive: true, force: true })
 })
 
-describe('Perix Event JSONL persistence', () => {
+describe('Runfold Event JSONL persistence', () => {
   it('persists, lists, reads suffixes, and exposes the exact raw artifact', async () => {
     const root = await storageRoot()
     const context = persistentContext(root)

@@ -89,7 +89,7 @@ export interface CommandSourceMap {
 
 export type CommandSource = CommandSourceMap[keyof CommandSourceMap]
 
-declare module '@perix/event-sdk/session/types' {
+declare module '@runfold/event/session/types' {
   interface SessionEventMap {
     'agent/inbox/spliced': {
       target: InboxTarget

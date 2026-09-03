@@ -1,4 +1,4 @@
-import type { SessionEvent } from '@perix/event-sdk/session/types'
+import type { SessionEvent } from '@runfold/event/session/types'
 
 const START_TIME = 1_725_000_000_000
 const EVENTS_PER_TURN = 10
@@ -43,7 +43,7 @@ export function demoEvents(requestedEvents = 0): readonly SessionEvent[] {
     append('request/header', {
       reason: turn === 1 ? 'initial' : 'series',
       header: {
-        config: { provider: 'perix-test', model: 'event-test-model' },
+        config: { provider: 'runfold-test', model: 'event-test-model' },
         system: 'You are a careful repository engineer.',
         tools: [{
           name: 'search',
@@ -88,7 +88,7 @@ export function demoEvents(requestedEvents = 0): readonly SessionEvent[] {
           type: 'text',
           text: 'The event and persistence boundaries are separated.',
         }],
-        source: { kind: 'model', provider: 'perix-test', model: 'event-test-model' },
+        source: { kind: 'model', provider: 'runfold-test', model: 'event-test-model' },
       },
       usage: { inputTokens: 420 + turn, outputTokens: 72, reasoningTokens: 28 },
     }, { surfaceOp: 'append', sourceEventSeqs: [reasoning, text] })

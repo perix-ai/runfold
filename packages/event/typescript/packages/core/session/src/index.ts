@@ -6,7 +6,7 @@
  * @module @deepseek-ai/dsh-session
  */
 
-import type { EventHost } from '@perix/event-sdk/runtime'
+import type { EventHost } from '@runfold/event/runtime'
 import { isAbsolute } from 'node:path'
 import { brandString } from '../../../../runtime/src/brand.ts'
 import { deepFreeze, snapshotJsonValue } from '../../../../runtime/src/values.ts'
@@ -29,10 +29,10 @@ export { deriveEventMessage, foldSurface, isAppendSurfaceEvent, isReplacementSur
 export { canonicalHeader, foldRequestHeader, headerEquals } from './request-header.ts'
 export { KNOWN_SESSION_EVENT_TYPES } from './known-event-types.ts'
 
-// Perix host: the Cordis `Context`/`Events` augmentations become host slots and
+// Runfold host: the Cordis `Context`/`Events` augmentations become host slots and
 // events. Scope-filtered dispatch is not retained; every listener hears every
 // session, and the carrier passed as the listener `this` is the session itself.
-declare module '@perix/event-sdk/runtime' {
+declare module '@runfold/event/runtime' {
   interface EventHostServices {
     sessions: SessionStore
   }

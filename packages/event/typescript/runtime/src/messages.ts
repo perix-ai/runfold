@@ -1,7 +1,7 @@
 /**
  * Event-owned message vocabulary: the ids, content blocks, message shapes,
  * streaming chunks, call configuration, and constructors that Session events
- * persist and derive. This is the Perix replacement for the parts of
+ * persist and derive. This is the Runfold replacement for the parts of
  * `@deepseek-ai/dsh-llm` (and the `ImageAttachmentRef` shape from
  * `@deepseek-ai/dsh-attachment`) that the retained Event sources import.
  *

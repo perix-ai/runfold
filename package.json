@@ -1,5 +1,5 @@
 {
-  "name": "perix-runtime-data",
+  "name": "runfold",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "packages/event/typescript/ui/trajectory"
   ],
   "scripts": {
-    "build": "npm run build --workspace @perix/event-sdk && npm run build --workspace @perix/event-ui && npm run build --workspace @perix/event-trajectory-demo",
+    "build": "npm run build --workspace @runfold/event && npm run build --workspace @runfold/trajectory-ui && npm run build --workspace @runfold/trajectory-demo",
     "verify:upstream-identity": "node scripts/verify-upstream-identity.mjs",
     "test": "npm run test:upstream && npm run test:types && npm run test:runtime && npm run test:sdk && npm run test:ui && npm run test:python && npm run test:system && npm run test:conformance",
     "test:upstream": "npm run test:upstream:event && npm run test:upstream:ui-runtime && npm run test:upstream:trajectory",
@@ -26,7 +26,7 @@
     "test:python": "python3 -m unittest discover -s packages/event/python/tests -t packages/event/python -v",
     "test:python:package": "python3 packages/event/python/tests/package_consumer.py",
     "verify": "npm run verify:upstream-identity && npm run build && npm test && npm run test:package && npm run test:python:package",
-    "dev:event-ui": "npm run dev --workspace @perix/event-trajectory-demo"
+    "dev:event-ui": "npm run dev --workspace @runfold/trajectory-demo"
   },
   "engines": {
     "node": ">=22"

@@ -5,7 +5,7 @@
  * @module @deepseek-ai/dsh-session-persistence
  */
 
-import type { EventHost } from '@perix/event-sdk/runtime'
+import type { EventHost } from '@runfold/event/runtime'
 import { SessionPreparation } from '../../../core/session/src/index.ts'
 import type { Session, SessionEvent, SessionId, SessionHeader } from '../../../core/session/src/index.ts'
 import type { SessionPersistenceRevision } from './revision.ts'
@@ -78,7 +78,7 @@ export type {
   StoredSuffix,
 } from './coordinator.ts'
 
-declare module '@perix/event-sdk/runtime' {
+declare module '@runfold/event/runtime' {
   interface EventHostServices {
     sessionPersistence: SessionPersistence
   }

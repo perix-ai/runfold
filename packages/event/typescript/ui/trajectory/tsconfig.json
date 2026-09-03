@@ -11,10 +11,10 @@
     ],
     "baseUrl": "../..",
     "paths": {
-      "@perix/event-sdk/session/types": [
+      "@runfold/event/session/types": [
         "sdk/src/session-types.ts"
       ],
-      "@perix/event-sdk/runtime": [
+      "@runfold/event/runtime": [
         "runtime/src/host.ts"
       ]
     }
