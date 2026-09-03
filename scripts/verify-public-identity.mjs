@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+// Split the legacy name so this scanner does not flag its own source text.
 const legacyWord = ['per', 'ix'].join('')
 const legacyLower = legacyWord.toLowerCase()
 const projectMaintainer = `${legacyWord[0].toUpperCase()}${legacyWord.slice(1)}.ai`

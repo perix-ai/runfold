@@ -935,10 +935,13 @@
   - **结果**：已完成（2026-09-03）：文档地图登记 `evidence/`；布局规则覆盖验证脚本、下游集成产物、Demo 输出、验收证据，并固定 Demo 合成源码留在 `scripts/event/demos/`。
   - **验证**：文档内部链接与目录存在性检查通过；`git diff --check` 通过。
 
-- [ ] **R58** · 难度 易 · 风险 低 · 位置 `scripts/verify-public-identity.mjs:10`
+- [x] **R58** · 难度 易 · 风险 低 · 位置 `scripts/verify-public-identity.mjs:10`
   - **问题**：`['per', 'ix'].join('')` 的拆写是必要的（脚本扫描包括自身在内的全部文本文件），但没有注释，读者易误判为混淆或笔误。
   - **处理**：补一行注释说明原因。
   - **依赖**：无。
+
+  - **结果**：已完成（2026-09-03）：在拆分字符串前增加注释，说明这是为了避免身份扫描器误报自身源码。
+  - **验证**：`npm run verify:public-identity` 通过；`git diff --check` 通过。
 
 - [ ] **R59** · 难度 易 · 风险 中 · 位置 npm `@runfold` scope、PyPI `runfold-event`
   - **问题**：2026-09-03 实测，`@runfold/event`、`@runfold/trajectory-ui`、npm `runfold` 组织、PyPI `runfold-event` 与 `runfold` 全部未被占用。仓库已按这些名字准备发布元数据（R52），但名字本身尚未注册，首次发布前存在被抢注的风险。GitHub 组织 `runfold` 同样空闲，`perix-ai` 已存在。
