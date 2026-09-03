@@ -4,12 +4,13 @@
 > 与 [`architecture.md`](architecture.md) 的约束。完成标记必须以代码、测试或
 > 打包验证为依据；仅创建目录或 API 占位不算完成。
 
-> 总体状态（2026-09-02）：R01–R37 与第 7 节总验收全部完成；R38 正在补充
-> Nexent 20 Turn 长轨迹的冷恢复、fork 和详情面板全景验收。`npm run verify`
+> 总体状态（2026-09-02）：R01–R38 与第 7 节总验收全部完成。`npm run verify`
 > 全绿，SDK、UI、保留测试和构建配置均不依赖任何 DSH 包名解析。R33 已在与官方 tag
 > 逐文件一致的 Nexent v2.5.0 本地快照上完成真实进程、wheel 和轨迹 UI 验收；
-> R37 又完成了 Nexent 产品界面的读取、resume、fork 与浏览器验收。按用户约定，
-> 该 Nexent 分支仅用于本地实验，不推送远端。R36 最终移除了保留测试中的 DSH
+> R37 完成了 Nexent 产品界面的读取、resume、fork 与浏览器验收；R38 又用
+> 21 Turn 真实轨迹验证跨进程恢复、稳定边界 fork、父子独立续写和 DSH 右侧
+> Schema 详情。按用户约定，该 Nexent 分支仅用于本地实验，不推送远端。R36
+> 最终移除了保留测试中的 DSH
 > module specifier 和 14 条测试别名，当前身份门禁为 204/10/139。
 
 ## 任务生命周期
@@ -580,7 +581,7 @@
     fork 第 3 Turn 均通过，证据见任务书。主仓 `npm run verify` 通过 969 个
     Vitest、36 个 Python 测试、全部构建/类型检查及两种空白消费者安装。
 
-- [ ] **R38** · 难度 中 · 风险 低 · 位置 Nexent 本地实验分支、
+- [x] **R38** · 难度 中 · 风险 低 · 位置 Nexent 本地实验分支、
   `docs/event/evidence/r38/`
   - **问题**：R37 的真实浏览器轨迹只有 3 个 Turn，现有证据图没有展示 DSH
     右侧事件详情中的参数、结果、Schema 与计时，也未把 20 Turn 长轨迹的冷恢复
@@ -590,6 +591,14 @@
     恢复至少 20 个完整 Turn，验证稳定前缀 fork 与父子独立续写；在 Nexent 同页
     轨迹视图中完成长列表、右侧详情和 fork lineage 的全景浏览器验收并保存证据。
   - **依赖**：R37。
+  - **结果**：已完成（2026-09-02）：Nexent 本地提交 `d341740` 新增 20 Turn
+    跨进程冷恢复/fork 回归，并只补齐 Event v0 已有
+    `request/header.header.tools`；未修改 Event 协议或 DSH UI。fork 时 189 个
+    Event 前缀逐条相等，父子独立续写后各有 21 Turn、197 个 Event。
+  - **验证**：Nexent Python 540/540、前端 26/26、类型检查和生产构建通过；
+    1440×900 浏览器实测长时间线、详情五页签、真实 `add` Schema 及页面 fork
+    导航，四张证据与哈希见任务书。主仓 `npm run verify` 通过 969 个 Vitest、
+    36 个 Python 测试、全部构建/类型检查及两种空白消费者安装。
 
 ## 7. 总体验收
 

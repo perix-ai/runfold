@@ -83,11 +83,14 @@ after each verified commit instead of being accumulated into one large batch.
 ## Status
 
 The Event trajectory facility has completed its production acceptance and all
-recorded tasks through R37. The current full gate verifies 204 retained upstream
+recorded tasks through R38. The current full gate verifies 204 retained upstream
 files through 139 declared specifier mappings, runs 1005 behavior tests, and
 installs both language packages into blank consumers. R33 also proves the Python
 package in Nexent v2.5.0's real process and passes the resulting parent/fork
 trajectory through the TypeScript public restore API and retained UI. The
-Nexent branch is intentionally a local interoperability experiment with no
-remote; any upstream proposal requires separate coordination with the Nexent
-team. See [`docs/event/tasks.md`](docs/event/tasks.md) for the evidence.
+Nexent product integration now additionally passes a 21-Turn cross-process
+restore/fork test and renders the retained DSH detail panel, including the real
+Tool schema. The Nexent branch is intentionally a local interoperability
+experiment with no remote; any upstream proposal requires separate coordination
+with the Nexent team. See [`docs/event/tasks.md`](docs/event/tasks.md) for the
+evidence.
