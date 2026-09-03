@@ -79,8 +79,8 @@ Nexent 页面外围的 user、agent 和 conversation HTTP 数据来自确定性�
 | 恢复前父 Session JSONL | `f00e0b9ef7ae5e79b3e21d0e85946fb0f009b51b0eb477f676dc4599b37ba940` |
 | 最终父 Session JSONL | `5bd9cffa495667ae49b0b51623c5a6f668bace79ea2c2cf18f76972641664b74` |
 | 最终子 Session JSONL | `ac19f80cf285ca9607f51402b64fae43910647fae30086e1ccdd584f1aca8530` |
-| [`trajectory-restore-fork-demo.mp4`](trajectory-restore-fork-demo.mp4) | `d27fc35a58fcddade5be724a5ff971fc7482d119467fcec9a9a8377bee08f64c` |
-| [`cover.jpg`](cover.jpg) | `8d239e43655ca375ecc302e74fa2fd10ef97cfcfc9080a7e5046428f7e902f91` |
+| [`trajectory-restore-fork-demo.mp4`](trajectory-restore-fork-demo.mp4) | `3fab1f25459b0b3e6e7e4239d3dad2c2bd6489cc3b93fbff1d9570e55486508a` |
+| [`cover.jpg`](cover.jpg) | `eb08c4199c97c787d840600e7e4646458e3c5f9ac35b8e4176157594f513b2c5` |
 
 MP4 为 H.264 High / yuv420p、1440×900、24 fps；声音为 AAC-LC、48 kHz、
 单声道、约 118 kb/s。实测时长 `00:01:23.07`，大小约 2.81 MiB；平均音量
@@ -108,4 +108,5 @@ shasum -a 256 trajectory-restore-fork-demo.mp4 cover.jpg
 记录见 [`R39 任务书`](../../tasks/R39-nexent-trajectory-demo.md) 与
 [`R40 任务书`](../../tasks/R40-nexent-narrated-interaction-demo.md)；自然人声与
 点击反馈重制记录见
-[`R41 任务书`](../../tasks/R41-demo-natural-voice-clicks.md)。
+[`R41 任务书`](../../tasks/R41-demo-natural-voice-clicks.md)，标题精简记录见
+[`R42 任务书`](../../tasks/R42-demo-title-copy.md)。
