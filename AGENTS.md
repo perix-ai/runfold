@@ -19,6 +19,9 @@ These rules apply to every automated change in this repository.
   upstream snapshots to make an integration pass.
 - Put publishable demo outputs under `docs/<domain>/demos/` and acceptance
   screenshots or other review evidence under `docs/<domain>/evidence/`.
+- Give every publishable demo its own directory and README with an explicit
+  name, content summary, and date; register it in the directory-level demo
+  catalog in the same commit so later demos cannot be mixed together.
 - Keep unmodified upstream source snapshots under `third_party/`. Never edit a
   pinned snapshot to make a local build pass.
 - Preserve the retained DSH directory layout inside

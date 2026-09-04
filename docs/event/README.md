@@ -12,6 +12,7 @@
 | [`decisions.md`](decisions.md) | 决策记录 | 关键取舍的背景、决定与后果 |
 | [`tasks.md`](tasks.md) | 计划与进度 | 做到哪了，还剩什么，按什么顺序做 |
 | [`tasks/`](tasks/) | 任务书 | 交给他人或工具执行的自包含任务，文件名对应清单编号 |
+| [`demos/`](demos/) | Demo 目录与索引 | 每份可播放 Demo 的名称、内容、日期和发布文件 |
 | [`demos/nexent/`](demos/nexent/) | 可播放验收 | Nexent 完整轨迹、冷恢复与 Fork 的 UI Demo |
 | [`evidence/`](evidence/) | 验收证据 | R37/R38 的 Nexent 界面截图与轨迹验收证据 |
 | [`../../integrations/nexent/`](../../integrations/nexent/) | 下游接入产物 | 按 Nexent 版本保存可重放、可校验的 Event 产品接入补丁 |

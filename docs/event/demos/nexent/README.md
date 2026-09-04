@@ -1,5 +1,15 @@
 # Nexent Event 轨迹恢复与 Fork Demo
 
+> **名称**：Nexent Event trajectory restore and fork
+>
+> **内容**：Nexent v2.5.0 本地互操作实验中的轨迹查看、跨进程冷恢复/续写、聊天
+> Fork 和轨迹精确 Fork。
+>
+> **日期**：2026-09-03
+
+本 README 只描述本目录这一份 Demo；其他 Demo 必须使用独立目录、名称和日期，并
+登记到 [`../README.md`](../README.md) 中。
+
 [![Nexent Event 轨迹 Demo 封面](cover.jpg)](trajectory-restore-fork-demo.mp4)
 
 ▶ [直接播放或下载 MP4](trajectory-restore-fork-demo.mp4)

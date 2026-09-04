@@ -16,3 +16,22 @@ The scoped snapshot at `third_party/deepseek-harness/upstream/` is unmodified
 audit material from that revision. Runfold's retained-source map and every
 necessary local difference are documented under `packages/event/typescript/`
 and checked by the repository verification suite.
+
+## Demo and evidence assets
+
+The publishable Nexent demo under `docs/event/demos/nexent/` is a Runfold-made
+recording of a local Nexent v2.5.0 interoperability experiment. Nexent and
+Huawei Technologies Co., Ltd. are not endorsing, sponsoring, or certifying the
+demo. The Nexent source excerpts redistributed in the corresponding integration
+patches remain subject to the Nexent MIT license and attribution recorded in
+the integration materials; screenshots and edited presentation layers are
+Runfold demo materials.
+
+The demo's six narration MP3 files were generated on 2026-09-03 with the
+Microsoft Edge text-to-speech service using the `zh-CN-XiaoxiaoNeural` voice.
+The repository does not redistribute Edge TTS software, and this notice is not
+a statement that Microsoft grants a separate license for synthesized output.
+The assets are retained as clearly identified demo material only; reusers must
+review the current service terms before redistributing or commercially using
+the audio. The MP4 combines those narration files with Runfold-created
+subtitles and editing layers.

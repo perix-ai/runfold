@@ -924,10 +924,16 @@
   - **验证**：`npm run verify:integration-artifacts` 通过（9 个补丁、12 个校验项、2 个
     Demo 资产）；完整 `npm run verify` 通过；`git diff --check` 通过。
 
-- [ ] **R55** · 难度 易 · 风险 中 · 位置 `NOTICE.md`、`docs/event/demos/nexent/`、`docs/event/evidence/`
+- [x] **R55** · 难度 易 · 风险 中 · 位置 `NOTICE.md`、`docs/event/demos/nexent/`、`docs/event/evidence/`
   - **问题**：六段旁白 MP3 与合成 MP4 由 `edge-tts`（微软 Edge 朗读服务）生成并检入仓库，属于分发资产；根与各包 `NOTICE.md` 中检索 demo/mp3/mp4/tts/narration/audio 均无结果，与 `OPEN_SOURCE_POLICY.md`"第三方接收"要求不一致。R37/R38 的 Nexent 界面截图同样未登记来源与许可。
   - **处理**：在 `NOTICE.md` 增加 demo 资产来源与条款结论；若结论不明确，改用可自证许可的方案（本地 TTS、无旁白版本或字幕替代）。
   - **依赖**：无。**需你先确认条款口径再执行。**
+  - **结果**：已完成（2026-09-04）：按确认的保守口径登记 Edge TTS、Nexent/Huawei
+    来源、非背书边界与再分发注意事项；新增 `docs/event/demos/README.md` 目录索引，
+    并为现有 Demo 明确名称、内容和日期。后续 Demo 的同目录 README、索引登记和日期
+    要求已写入 `AGENTS.md`。
+  - **验证**：`npm run verify:public-identity`、`git diff --check` 通过；Demo 索引、
+    README 和 NOTICE 链接目标存在。
 
 - [x] **R56** · 难度 易 · 风险 低 · 位置 `vitest.config.ts`、`packages/event/typescript/TESTING.md`
   - **问题**：`jsonl.spec.ts` 与 `zstd.spec.ts` 的协调器用例依赖固定的 vitest 默认 5000 ms 超时。复核时与其他任务并行运行，两个用例超时失败（单例报告约 459 秒）；串行重跑 626/626 通过、总耗时 3.95 秒。CI 并行或共享 runner 上会间歇性失败。
