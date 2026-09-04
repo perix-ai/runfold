@@ -1121,7 +1121,7 @@
     [run 33831882115](https://github.com/perix-ai/runfold/actions/runs/33831882115)
     在 Ubuntu/Node 22/Python 3.11 上用 2 分 37 秒完成并通过完整验证。
 
-- [ ] **R73** · 难度 易 · 风险 中 · 位置 `.github/workflows/verify.yml`
+- [x] **R73** · 难度 易 · 风险 中 · 位置 `.github/workflows/verify.yml`
   - **问题**：R72 的绿色运行仍产生弃用注解：`actions/checkout@v4`、
     `actions/setup-node@v4`、`actions/setup-python@v5` 声明 Node 20，GitHub-hosted
     runner 正在临时强制使用 Node 24。
@@ -1129,6 +1129,12 @@
     核查结果，升级为 `checkout@v7`、`setup-node@v7`、`setup-python@v7`；三者均
     原生使用 `node24`，保留现有输入与缓存行为。
   - **依赖**：R61、R72。
+  - **结果**：已完成（2026-09-03）：三个官方 Action 均升级到 v7 主版本，
+    checkout 的完整历史、Node 22 npm cache 与 Python 3.11 输入保持不变。
+  - **验证**：GitHub Actions
+    [run 33832197614](https://github.com/perix-ai/runfold/actions/runs/33832197614)
+    用 2 分 16 秒完成并通过完整验证；三个 v7 初始化步骤全部成功，check-run
+    annotations API 返回空数组，不再有 Node 20 弃用注解。
 
 ## 执行顺序
 
