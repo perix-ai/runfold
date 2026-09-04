@@ -31,6 +31,7 @@ const plainIdentityDocuments = new Set([
   'packages/event/python/README.md',
 ])
 const publicMetadataDocuments = new Set([
+  'CHANGELOG.md',
   'packages/event/python/pyproject.toml',
   'packages/event/typescript/sdk/package.json',
   'packages/event/typescript/ui/trajectory/package.json',

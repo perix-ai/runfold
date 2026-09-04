@@ -1006,10 +1006,15 @@
   - **验证**：两个文件存在，Contributor Covenant 2.1 来源链接存在，贡献指南链接
     目标存在；`git diff --check` 通过。
 
-- [ ] **R63** · 难度 易 · 风险 低 · 位置 新增 `CHANGELOG.md`
+- [x] **R63** · 难度 易 · 风险 低 · 位置 新增 `CHANGELOG.md`
   - **问题**：即将发布 0.1.0 但无变更记录，使用方无法判断版本差异。
   - **处理**：Keep a Changelog 格式，首条为 0.1.0，概括 Event 能力边界与已知限制。
   - **依赖**：R59。
+  - **结果**：已完成（2026-09-03）：新增 Keep a Changelog 格式的 `CHANGELOG.md`，
+    记录 0.1.0 的 TypeScript/Python 包、Trajectory UI、Nexent 集成与 Demo，并明确
+    Event v0 的能力边界和已知限制；README 已加入入口链接。
+  - **验证**：CHANGELOG 链接目标存在，版本、日期和 0.1.0 发布记录链接已登记；
+    `git diff --check` 通过。
 
 - [ ] **R64** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/package.json`
   - **问题**：`@runfold/event` 与 `runfold-event` 都有 `description`，只有 `@runfold/trajectory-ui` 没有；npm 包页面与搜索结果会留空。

@@ -56,6 +56,7 @@ runfold/
 | Progress and open work | [`docs/event/tasks.md`](docs/event/tasks.md) |
 | Who owns which material | [`COPYRIGHT.md`](COPYRIGHT.md) and [`NOTICE.md`](NOTICE.md) |
 | How Runfold is distributed and released | [`OPEN_SOURCE_POLICY.md`](OPEN_SOURCE_POLICY.md) |
+| What changed in each release | [`CHANGELOG.md`](CHANGELOG.md) |
 | How contributions are licensed | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Watch the Nexent trajectory restore/fork UI demo | [`docs/event/demos/nexent/`](docs/event/demos/nexent/) |
 | Apply the validated Nexent product integration | [`integrations/nexent/`](integrations/nexent/) |
