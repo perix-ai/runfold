@@ -1105,6 +1105,16 @@
     约 16 秒完成并输出 `Runfold Event package consumer verification passed`；
     `git diff --check` 通过。
 
+- [ ] **R72** · 难度 易 · 风险 高 · 位置 `.github/workflows/verify.yml`
+  - **问题**：CI 固定 Python 3.11，但只执行 `npm ci`，没有安装 Python 包声明的
+    `zstd` extra；跨语言门禁不跳过 Zstandard 互操作，因此 main 上连续失败并报
+    `ZstdUnavailableError`。本机 Python 3.14 使用标准库 `compression.zstd`，
+    所以本地完整门禁无法暴露这个 Python 3.10–3.13 环境缺口。
+  - **处理**：CI 在完整验证前从本仓 Python package 安装
+    `./packages/event/python[zstd]`，由 `pyproject.toml` 作为依赖版本的唯一来源；
+    不放宽或跳过 Zstandard 测试。
+  - **依赖**：R35、R61。
+
 ## 执行顺序
 
 按"容易改、风险小"优先，跨章节排列。
@@ -1145,6 +1155,7 @@
 | 31 | R60 → R62 → R63 → R66；R64 → R65；R61；R68 | 公开仓库的法律归属与开源就绪（见 `tasks/R60-R68-open-source-readiness.md`）；R67 已决策无需改动 | 批次 30 |
 | 32 | R70 | 同步 R60 修改后过期的 Nexent 集成 README 校验值 | R60 |
 | 33 | R71 | 去除 TypeScript 空白消费者安装中的无关 audit/fund 网络收尾 | R54 |
+| 34 | R72 | 为 Python 3.11 CI 安装声明的 Zstandard 测试依赖 | R35、R61 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
