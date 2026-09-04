@@ -37,6 +37,11 @@ This directory is therefore an integration artifact, not a second source of
 truth for Event. Event implementation and packages remain under
 [`packages/event/`](../../../packages/event/).
 
+The patch context includes portions of Nexent source. The pinned Nexent MIT
+license and Huawei Technologies Co., Ltd. copyright notice are preserved in
+[`LICENSE`](LICENSE). This integration is not an official Nexent release and
+does not imply endorsement by Nexent or Huawei.
+
 ## Verify the artifact
 
 Run from this directory:

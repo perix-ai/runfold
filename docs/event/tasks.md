@@ -975,10 +975,15 @@
 `OPEN_SOURCE_POLICY.md` 齐备，DeepSeek Harness 归属完整。下列缺口逐条证据见
 [`tasks/R60-R68-open-source-readiness.md`](tasks/R60-R68-open-source-readiness.md)。
 
-- [ ] **R60** · 难度 易 · 风险 高 · 位置 `NOTICE.md`、`integrations/nexent/`、`scripts/verify-public-identity.mjs`
+- [x] **R60** · 难度 易 · 风险 高 · 位置 `NOTICE.md`、`integrations/nexent/`、`scripts/verify-public-identity.mjs`
   - **问题**：`integrations/nexent/v2.5.0/patches/` 的 0001、0002、0005 三个补丁各含 600–1700 行 Nexent 源码的上下文与修改行。Nexent 是 MIT，版权为 `(c) 2025 Huawei Technologies Co., Ltd.`。`NOTICE.md`、`LICENSE`、`COPYRIGHT.md`、`OPEN_SOURCE_POLICY.md` 检索 `nexent`/`huawei` 均无结果。公开再分发 MIT 代码的实质片段却未携带其版权与许可声明。
   - **处理**：`NOTICE.md` 增加 Nexent/Huawei 归属与"未提交上游、未获背书"的免责；`integrations/nexent/` 放置 Nexent MIT 许可证副本；身份校验增加与 DeepSeek 同级的断言。
   - **依赖**：无；可与 R55 合并为一次 NOTICE 修订。
+  - **结果**：已完成（2026-09-03）：在根 NOTICE 中登记 Nexent/Huawei 归属和非背书
+    边界，在 `integrations/nexent/v2.5.0/LICENSE` 保留官方 MIT 许可证，并在集成
+    README 中链接说明。
+  - **验证**：`verify-public-identity` 明确检查 Nexent LICENSE、Huawei 版权行和
+    MIT 授权文本；公开身份校验与 `git diff --check` 通过。
 
 - [ ] **R61** · 难度 中 · 风险 中 · 位置 新增 `.github/`
   - **问题**：仓库已公开且 `CONTRIBUTING.md` 欢迎 PR，但无 `.github/` 目录：无 CI workflow、无 issue/PR 模板、无 CODEOWNERS。`npm run verify` 只在维护者本机跑过。R56 把测试超时提到 20 秒的理由是"共享 CI runner"，而 CI 并不存在。

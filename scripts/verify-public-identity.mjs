@@ -209,6 +209,16 @@ for (const path of [
   assert.ok(license.includes(`Copyright (c) 2026 ${copyrightHolder}`), path)
   assert.ok(license.includes('Copyright (c) 2026 DeepSeek'), path)
 }
+const nexentLicense = 'integrations/nexent/v2.5.0/LICENSE'
+assert.ok(existsSync(resolve(repository, nexentLicense)), nexentLicense)
+assert.match(
+  readFileSync(resolve(repository, nexentLicense), 'utf8'),
+  /^Copyright \(c\) 2025 Huawei Technologies Co\., Ltd\. All rights reserved\.$/m,
+)
+assert.match(
+  readFileSync(resolve(repository, nexentLicense), 'utf8'),
+  /Permission is hereby granted, free of charge, to any person obtaining a copy/,
+)
 for (const path of [
   'NOTICE.md',
   'packages/event/python/NOTICE.md',
