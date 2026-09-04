@@ -1033,10 +1033,14 @@
   - **验证**：`verify-public-identity` 与 `git diff --check` 通过；脚本自身不再含
     硬编码公开仓库 URL。
 
-- [ ] **R66** · 难度 易 · 风险 低 · 位置 GitHub About
+- [x] **R66** · 难度 易 · 风险 低 · 位置 GitHub About
   - **问题**：R51 已设 description 与 topics，homepage 字段仍为空。
   - **处理**：指向文档入口。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-03）：将 GitHub `perix-ai/runfold` About homepage
+    设置为 `https://github.com/perix-ai/runfold/tree/main/docs/event`。
+  - **验证**：GitHub API 返回该 homepage、原 description 和 11 个 topics 均保留；
+    文档入口可访问。
 
 - [x] **R67** · 难度 易 · 风险 低 · 位置 `docs/event/demos/`、`integrations/nexent/`
   - **问题**：已跟踪的最大文件是 2.8 MB 的 demo MP4 与 2.0 MB 的补丁 0003（内含 vendored tarball），`integrations/nexent` 合计 2.3 MB。每次 clone 都会拉取，重建会不断产生新 blob。
