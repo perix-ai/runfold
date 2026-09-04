@@ -1121,6 +1121,15 @@
     [run 33831882115](https://github.com/perix-ai/runfold/actions/runs/33831882115)
     在 Ubuntu/Node 22/Python 3.11 上用 2 分 37 秒完成并通过完整验证。
 
+- [ ] **R73** · 难度 易 · 风险 中 · 位置 `.github/workflows/verify.yml`
+  - **问题**：R72 的绿色运行仍产生弃用注解：`actions/checkout@v4`、
+    `actions/setup-node@v4`、`actions/setup-python@v5` 声明 Node 20，GitHub-hosted
+    runner 正在临时强制使用 Node 24。
+  - **处理**：按 2026-09-03 三个 GitHub 官方仓库的正式 release 与 `action.yml`
+    核查结果，升级为 `checkout@v7`、`setup-node@v7`、`setup-python@v7`；三者均
+    原生使用 `node24`，保留现有输入与缓存行为。
+  - **依赖**：R61、R72。
+
 ## 执行顺序
 
 按"容易改、风险小"优先，跨章节排列。
@@ -1162,6 +1171,7 @@
 | 32 | R70 | 同步 R60 修改后过期的 Nexent 集成 README 校验值 | R60 |
 | 33 | R71 | 去除 TypeScript 空白消费者安装中的无关 audit/fund 网络收尾 | R54 |
 | 34 | R72 | 为 Python 3.11 CI 安装声明的 Zstandard 测试依赖 | R35、R61 |
+| 35 | R73 | 升级 GitHub 官方 Actions，消除 Node 20 弃用兼容层 | R61、R72 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
