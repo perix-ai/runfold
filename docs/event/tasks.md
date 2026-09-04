@@ -985,10 +985,16 @@
   - **验证**：`verify-public-identity` 明确检查 Nexent LICENSE、Huawei 版权行和
     MIT 授权文本；公开身份校验与 `git diff --check` 通过。
 
-- [ ] **R61** · 难度 中 · 风险 中 · 位置 新增 `.github/`
+- [x] **R61** · 难度 中 · 风险 中 · 位置 新增 `.github/`
   - **问题**：仓库已公开且 `CONTRIBUTING.md` 欢迎 PR，但无 `.github/` 目录：无 CI workflow、无 issue/PR 模板、无 CODEOWNERS。`npm run verify` 只在维护者本机跑过。R56 把测试超时提到 20 秒的理由是"共享 CI runner"，而 CI 并不存在。
   - **处理**：新增 `verify.yml`（push/PR 上跑 `npm ci && npm run verify`，Node 22 + Python 3.11）、issue/PR 模板（要求填写对应 tasks.md 条目）、CODEOWNERS（覆盖 `third_party/`、`scripts/`、保留源码树）。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-03）：新增 Node 22/Python 3.11 的 GitHub Actions
+    `verify.yml`，在 push 和 pull request 上执行 `npm ci` 与完整 `npm run verify`；
+    新增 Bug/Feature issue 模板、PR 模板和覆盖默认、`third_party/`、`scripts/`、
+    保留源码树的 CODEOWNERS。
+  - **验证**：YAML、模板和 CODEOWNERS 文件存在；`git diff --check` 通过；本地完整
+    `npm run verify` 已在 R54 验证通过。
 
 - [ ] **R62** · 难度 易 · 风险 中 · 位置 新增 `SECURITY.md`、`CODE_OF_CONDUCT.md`
   - **问题**：无私下安全披露渠道，安全问题只能公开提 issue；无行为准则。GitHub 社区标准清单两项均缺。

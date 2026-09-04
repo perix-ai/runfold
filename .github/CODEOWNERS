@@ -1,0 +1,7 @@
+# Default owner for the Runfold repository.
+* @heikiscott
+
+# Changes in these areas require the maintainer's review.
+/third_party/ @heikiscott
+/scripts/ @heikiscott
+/packages/event/typescript/packages/ @heikiscott
