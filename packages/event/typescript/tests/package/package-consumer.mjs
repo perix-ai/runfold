@@ -137,6 +137,8 @@ await context.dispose()
   run('npm', [
     'install',
     '--no-package-lock',
+    '--no-audit',
+    '--no-fund',
     '--legacy-peer-deps',
     sdkTarball,
     uiTarball,

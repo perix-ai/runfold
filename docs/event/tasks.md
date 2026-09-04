@@ -1082,6 +1082,21 @@
   - **验证**：`verify:integration-artifacts` 通过 9 个补丁、12 个校验值和 2 个
     Demo 资产；在集成目录执行 `shasum -a 256 -c SHA256SUMS` 的 12 项全部通过。
 
+- [x] **R71** · 难度 易 · 风险 中 · 位置
+  `packages/event/typescript/tests/package/package-consumer.mjs`
+  - **问题**：TypeScript 空白消费者为每次验收创建一次性 npm cache，却在本地
+    tarball 安装后继续执行远端 audit/fund 收尾。本次两轮完整门禁中，所有依赖
+    下载和 `koffi` 安装均已成功，npm 仍保持多条 registry HTTPS 连接且超过 5
+    分钟不退出，使发布物门禁受无关网络服务影响。
+  - **处理**：空白消费者的 `npm install` 增加 `--no-audit` 与 `--no-fund`；安装
+    依赖、严格类型检查、运行时执行、导出/许可证/命名空间扫描保持不变。
+  - **依赖**：R54。
+  - **结果**：已完成（2026-09-03）：临时消费者安装不再等待与发布物验收无关的
+    audit/fund 请求，包内容与消费验证逻辑未变。
+  - **验证**：在允许 registry 网络的全新临时目录执行 `npm run test:package`，
+    约 16 秒完成并输出 `Runfold Event package consumer verification passed`；
+    `git diff --check` 通过。
+
 ## 执行顺序
 
 按"容易改、风险小"优先，跨章节排列。
@@ -1121,6 +1136,7 @@
 | 30 | R52, R56, R57, R58 → R53 → R54；R59 在首次发布前；R55 待条款确认 | 发布元数据、产物时效与治理缺口（见 `tasks/R52-R59-release-governance.md`） | R36–R51 |
 | 31 | R60 → R62 → R63 → R66；R64 → R65；R61；R68 待约定 | 公开仓库的法律归属与开源就绪（见 `tasks/R60-R68-open-source-readiness.md`）；R67 已决策无需改动 | 批次 30 |
 | 32 | R70 | 同步 R60 修改后过期的 Nexent 集成 README 校验值 | R60 |
+| 33 | R71 | 去除 TypeScript 空白消费者安装中的无关 audit/fund 网络收尾 | R54 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
