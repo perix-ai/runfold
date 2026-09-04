@@ -1105,7 +1105,7 @@
     约 16 秒完成并输出 `Runfold Event package consumer verification passed`；
     `git diff --check` 通过。
 
-- [ ] **R72** · 难度 易 · 风险 高 · 位置 `.github/workflows/verify.yml`
+- [x] **R72** · 难度 易 · 风险 高 · 位置 `.github/workflows/verify.yml`
   - **问题**：CI 固定 Python 3.11，但只执行 `npm ci`，没有安装 Python 包声明的
     `zstd` extra；跨语言门禁不跳过 Zstandard 互操作，因此 main 上连续失败并报
     `ZstdUnavailableError`。本机 Python 3.14 使用标准库 `compression.zstd`，
@@ -1114,6 +1114,12 @@
     `./packages/event/python[zstd]`，由 `pyproject.toml` 作为依赖版本的唯一来源；
     不放宽或跳过 Zstandard 测试。
   - **依赖**：R35、R61。
+  - **结果**：已完成（2026-09-03）：CI 的 Python 3.11 环境现在安装本仓声明的
+    `zstd` extra，仍执行完整 Zstandard 互操作门禁。
+  - **验证**：本机隔离 Python 3.11 环境安装 `runfold-event[zstd]` 后跨语言测试
+    7/7 通过；GitHub Actions
+    [run 33831882115](https://github.com/perix-ai/runfold/actions/runs/33831882115)
+    在 Ubuntu/Node 22/Python 3.11 上用 2 分 37 秒完成并通过完整验证。
 
 ## 执行顺序
 
