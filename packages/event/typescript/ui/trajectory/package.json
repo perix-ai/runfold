@@ -1,5 +1,6 @@
 {
   "name": "@runfold/trajectory-ui",
+  "description": "Standalone React UI for rendering Runfold Event trajectories",
   "version": "0.1.0",
   "author": "Heiki Scott",
   "repository": {

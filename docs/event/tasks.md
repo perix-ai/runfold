@@ -1016,15 +1016,22 @@
   - **验证**：CHANGELOG 链接目标存在，版本、日期和 0.1.0 发布记录链接已登记；
     `git diff --check` 通过。
 
-- [ ] **R64** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/package.json`
+- [x] **R64** · 难度 易 · 风险 低 · 位置 `packages/event/typescript/ui/trajectory/package.json`
   - **问题**：`@runfold/event` 与 `runfold-event` 都有 `description`，只有 `@runfold/trajectory-ui` 没有；npm 包页面与搜索结果会留空。
   - **处理**：补描述，并在身份校验中断言其存在且非空。
   - **依赖**：R52。
+  - **结果**：已完成（2026-09-03）：为 `@runfold/trajectory-ui` 增加独立 React
+    Trajectory UI 的包描述，并由公开身份校验断言其存在。
+  - **验证**：`verify-public-identity` 与 `git diff --check` 通过。
 
-- [ ] **R65** · 难度 易 · 风险 低 · 位置 `scripts/verify-public-identity.mjs`
+- [x] **R65** · 难度 易 · 风险 低 · 位置 `scripts/verify-public-identity.mjs`
   - **问题**：文件顶部用 `['per', 'ix'].join('')` 构造旧名以避免自检命中（R58 已注释说明），但第 80、84、137、157 行直接写了 `github.com/perix-ai/runfold` 字面量，并为脚本自身加了白名单分支。同一文件既隐藏又拼写同一个词，白名单豁免面也被扩大。
   - **处理**：四处改用已有的 `publicRepository` 常量，随后删除脚本自身的白名单分支。
   - **依赖**：R52、R58。
+  - **结果**：已完成（2026-09-03）：所有公开仓库 URL 断言改用已有的
+    `publicRepository` 常量，并删除脚本自身 URL 白名单分支。
+  - **验证**：`verify-public-identity` 与 `git diff --check` 通过；脚本自身不再含
+    硬编码公开仓库 URL。
 
 - [ ] **R66** · 难度 易 · 风险 低 · 位置 GitHub About
   - **问题**：R51 已设 description 与 topics，homepage 字段仍为空。

@@ -78,11 +78,7 @@ function isAllowedReference(path, line) {
   const value = line.toLowerCase()
   if (isLegalNotice(path)) return true
   if (plainIdentityDocuments.has(path)) return true
-  if (publicMetadataDocuments.has(path) && value.includes('github.com/perix-ai/runfold')) {
-    return true
-  }
-  if (path === 'scripts/verify-public-identity.mjs'
-    && value.includes('github.com/perix-ai/runfold')) {
+  if (publicMetadataDocuments.has(path) && value.includes(publicRepository)) {
     return true
   }
   if (path === 'tests/event/cross-language/fixtures/nexent-r33/README.md') {
@@ -135,7 +131,7 @@ assert.equal(eventManifest.name, '@runfold/event')
 assert.equal(eventManifest.author, copyrightHolder)
 assert.deepEqual(eventManifest.repository, {
   type: 'git',
-  url: 'https://github.com/perix-ai/runfold.git',
+  url: `${publicRepository}.git`,
   directory: 'packages/event/typescript/sdk',
 })
 assert.equal(eventManifest.homepage, publicHomepage)
@@ -152,10 +148,14 @@ assert.equal(
   trajectoryManifest.name,
   '@runfold/trajectory-ui',
 )
+assert.equal(
+  trajectoryManifest.description,
+  'Standalone React UI for rendering Runfold Event trajectories',
+)
 assert.equal(trajectoryManifest.author, copyrightHolder)
 assert.deepEqual(trajectoryManifest.repository, {
   type: 'git',
-  url: 'https://github.com/perix-ai/runfold.git',
+  url: `${publicRepository}.git`,
   directory: 'packages/event/typescript/ui/trajectory',
 })
 assert.equal(trajectoryManifest.homepage, publicHomepage)
