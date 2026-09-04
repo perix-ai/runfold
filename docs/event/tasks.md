@@ -928,7 +928,7 @@
   - **问题**：六段旁白 MP3 与合成 MP4 由 `edge-tts`（微软 Edge 朗读服务）生成并检入仓库，属于分发资产；根与各包 `NOTICE.md` 中检索 demo/mp3/mp4/tts/narration/audio 均无结果，与 `OPEN_SOURCE_POLICY.md`"第三方接收"要求不一致。R37/R38 的 Nexent 界面截图同样未登记来源与许可。
   - **处理**：在 `NOTICE.md` 增加 demo 资产来源与条款结论；若结论不明确，改用可自证许可的方案（本地 TTS、无旁白版本或字幕替代）。
   - **依赖**：无。**需你先确认条款口径再执行。**
-  - **结果**：已完成（2026-09-04）：按确认的保守口径登记 Edge TTS、Nexent/Huawei
+  - **结果**：已完成（2026-09-03）：按确认的保守口径登记 Edge TTS、Nexent/Huawei
     来源、非背书边界与再分发注意事项；新增 `docs/event/demos/README.md` 目录索引，
     并为现有 Demo 明确名称、内容和日期。后续 Demo 的同目录 README、索引登记和日期
     要求已写入 `AGENTS.md`。
