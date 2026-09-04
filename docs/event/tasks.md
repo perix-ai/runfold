@@ -957,10 +957,16 @@
   - **结果**：已完成（2026-09-03）：在拆分字符串前增加注释，说明这是为了避免身份扫描器误报自身源码。
   - **验证**：`npm run verify:public-identity` 通过；`git diff --check` 通过。
 
-- [ ] **R59** · 难度 易 · 风险 中 · 位置 npm `@runfold` scope、PyPI `runfold-event`
+- [x] **R59** · 难度 易 · 风险 中 · 位置 npm `@runfold` scope、PyPI `runfold-event`
   - **问题**：2026-09-03 实测，`@runfold/event`、`@runfold/trajectory-ui`、npm `runfold` 组织、PyPI `runfold-event` 与 `runfold` 全部未被占用。仓库已按这些名字准备发布元数据（R52），但名字本身尚未注册，首次发布前存在被抢注的风险。GitHub 组织 `runfold` 同样空闲，`perix-ai` 已存在。
   - **处理**：在首次发布前注册 npm `@runfold` scope 与 PyPI `runfold-event`（可一并占位 PyPI `runfold`）。GitHub 组织按决策 D07 保持 `perix-ai`，不迁移也不新建。注册涉及账号凭据，由维护者本人执行；Codex 只准备发布清单与命令。
   - **依赖**：R52。
+  - **结果**：已完成（2026-09-04）：创建免费的 npm `runfold` 组织并公开发布
+    `@runfold/event@0.1.0` 与 `@runfold/trajectory-ui@0.1.0`；公开上传
+    `runfold-event==0.1.0` 到 PyPI。未注册占位包 `runfold`，避免超出当前发布范围。
+  - **验证**：npm registry 查询两个包均返回 `0.1.0`，组织成员关系为
+    `heikiscott - owner` 且包状态为 public；PyPI API 返回 `runfold-event`、版本
+    `0.1.0`、作者 `Heiki Scott`，仅有该版本发布。
 
 ## 10. 公开仓库的法律归属与开源就绪
 
