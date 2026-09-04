@@ -913,10 +913,16 @@
   - **结果**：已完成（2026-09-03）：从 Runfold `d79ae963500b961d17a48503bc76df416f414660` 重建两个 npm tarball，重写 Nexent 补丁 0003 并重放后续补丁；同步 manifest、SHA256SUMS 与版本绑定说明。
   - **验证**：9 个补丁从固定基线 `1b184cf` 干净重放，最终 tree 为 `31c9fc070c80b8ee33ba165a42474e5cb1a19806`；manifest 的逐补丁 bytes／SHA-256 与实际文件一致；集成 SHA256SUMS 全部通过；两个 vendored tarball 哈希通过，均含 DeepSeek 与 Heiki Scott 版权行，UI 包含 `THIRD_PARTY_NOTICES.md`；完整 `npm run verify` 与 `git diff --check` 通过。
 
-- [ ] **R54** · 难度 中 · 风险 低 · 位置 新增 `scripts/verify-integration-artifacts.mjs`、根 `package.json`
+- [x] **R54** · 难度 中 · 风险 低 · 位置 新增 `scripts/verify-integration-artifacts.mjs`、根 `package.json`
   - **问题**：`integrations/` 与 demo 资产不在任何门禁内。`SHA256SUMS` 与 manifest 哈希只在 R44 时人工核对过一次；复核时手动执行仍全部通过，但改动补丁或资产不会被 `npm run verify` 发现。
   - **处理**：新增校验脚本并纳入 `verify`，覆盖 `SHA256SUMS`、manifest 逐条 `bytes`/`sha256`、`series` 与 `patches/` 的一一对应，以及 demo README 登记的 MP4/封面哈希。补丁的可应用性需要 Nexent 基线，改为在 `integrations/nexent/README.md` 记录重放前置与最近一次结果。
   - **依赖**：R53。
+  - **结果**：已完成（2026-09-03）：新增 `scripts/verify-integration-artifacts.mjs`，校验
+    集成 manifest、补丁序列、逐文件字节数与 SHA-256、`SHA256SUMS` 覆盖范围，以及
+    Demo README 登记的 MP4/封面哈希，并接入根 `verify`；同时为 npm 11 的空白
+    消费者安装测试显式启用 `--legacy-peer-deps`，保留兼容 React peer 范围的验证。
+  - **验证**：`npm run verify:integration-artifacts` 通过（9 个补丁、12 个校验项、2 个
+    Demo 资产）；完整 `npm run verify` 通过；`git diff --check` 通过。
 
 - [ ] **R55** · 难度 易 · 风险 中 · 位置 `NOTICE.md`、`docs/event/demos/nexent/`、`docs/event/evidence/`
   - **问题**：六段旁白 MP3 与合成 MP4 由 `edge-tts`（微软 Edge 朗读服务）生成并检入仓库，属于分发资产；根与各包 `NOTICE.md` 中检索 demo/mp3/mp4/tts/narration/audio 均无结果，与 `OPEN_SOURCE_POLICY.md`"第三方接收"要求不一致。R37/R38 的 Nexent 界面截图同样未登记来源与许可。

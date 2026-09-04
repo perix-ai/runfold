@@ -137,6 +137,7 @@ await context.dispose()
   run('npm', [
     'install',
     '--no-package-lock',
+    '--legacy-peer-deps',
     sdkTarball,
     uiTarball,
     'react@18.3.1',
