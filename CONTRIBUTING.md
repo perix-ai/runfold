@@ -28,3 +28,7 @@ or a future company.
 See [`COPYRIGHT.md`](COPYRIGHT.md) for the current ownership boundary and
 [`OPEN_SOURCE_POLICY.md`](OPEN_SOURCE_POLICY.md) for distribution and release
 requirements.
+
+Security vulnerabilities should be reported privately according to
+[`SECURITY.md`](SECURITY.md). Community participation follows
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).

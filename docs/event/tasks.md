@@ -996,10 +996,15 @@
   - **验证**：YAML、模板和 CODEOWNERS 文件存在；`git diff --check` 通过；本地完整
     `npm run verify` 已在 R54 验证通过。
 
-- [ ] **R62** · 难度 易 · 风险 中 · 位置 新增 `SECURITY.md`、`CODE_OF_CONDUCT.md`
+- [x] **R62** · 难度 易 · 风险 中 · 位置 新增 `SECURITY.md`、`CODE_OF_CONDUCT.md`
   - **问题**：无私下安全披露渠道，安全问题只能公开提 issue；无行为准则。GitHub 社区标准清单两项均缺。
   - **处理**：`SECURITY.md` 写明支持版本、私下报告方式与响应预期；`CODE_OF_CONDUCT.md` 采用 Contributor Covenant 2.1；两者从 `CONTRIBUTING.md` 链接。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-03）：新增安全政策，提供 GitHub 私密漏洞报告优先、
+    维护者邮箱兜底的私下披露渠道、支持范围和响应预期；新增 Contributor Covenant
+    2.1 行为准则并从贡献指南链接。
+  - **验证**：两个文件存在，Contributor Covenant 2.1 来源链接存在，贡献指南链接
+    目标存在；`git diff --check` 通过。
 
 - [ ] **R63** · 难度 易 · 风险 低 · 位置 新增 `CHANGELOG.md`
   - **问题**：即将发布 0.1.0 但无变更记录，使用方无法判断版本差异。
