@@ -1048,10 +1048,18 @@
   - **依赖**：无。
   - **结果**：无需改动，本条作为决策记录保留。
 
-- [ ] **R68** · 难度 中 · 风险 低 · 位置 `docs/event/`
+- [x] **R68** · 难度 中 · 风险 低 · 位置 `docs/event/`
   - **问题**：对外文件是英文，但 `docs/event/` 下的需求、架构、规格、验证、决策、清单全部是中文。外部贡献者读不了规则文档，就无法按 `CONTRIBUTING.md` 的要求参与。
   - **处理**：**已决策（2026-09-03，用户）：中英双语，每份文档两个副本。** 采用保留源码已有的 `<name>.md` / `<name>.zh.md` 约定（上游 DSH 包即用此约定）。执行前需先定三件事，写进 `AGENTS.md`：(1) 冲突时以哪一份为准，建议英文为规范版、中文为翻译版，避免双向漂移；(2) 是否所有文档都双语，还是只覆盖 requirements、architecture、specification、testing、decisions 这五份规则文档，而 `tasks.md` 与 `tasks/` 因高频变动只保留单语；(3) 新增文档时两份必须同一提交内落地，并在 `verify:public-identity` 或独立脚本中断言配对存在、不缺不多。
   - **依赖**：无。
+  - **结果**：已完成（2026-09-03）：按用户确认的建议口径，以英文 `.md` 为
+    规范版、中文 `.zh.md` 为翻译版，配对 requirements、architecture、
+    specification、testing、decisions 五份治理文档；英文 README 提供双语入口，
+    高频 `tasks.md` 与 `tasks/` 保持中文。规则已写入 `AGENTS.md`。
+  - **验证**：新增 `verify:docs` 并纳入根 `verify`，断言精确五组配对、双向语言
+    链接、相对链接有效、工作区两份同时变化，且干净仓库中最近修改来自同一提交；
+    CI 使用完整 Git 历史。完整 `npm run verify` 通过 3 个构建、1005 个行为测试、
+    集成/身份门禁及 TypeScript/Python 空白消费者安装。
 
 
 ## 11. 工具链缺陷
@@ -1134,7 +1142,7 @@
 | 28 | R50 | 明确个人版权归属、开源分发与第三方 bundle notices | R48、R49 |
 | 29 | R51 | 同步 GitHub About 并验证外部贡献入口 | R49、R50 |
 | 30 | R52, R56, R57, R58 → R53 → R54；R59 在首次发布前；R55 待条款确认 | 发布元数据、产物时效与治理缺口（见 `tasks/R52-R59-release-governance.md`） | R36–R51 |
-| 31 | R60 → R62 → R63 → R66；R64 → R65；R61；R68 待约定 | 公开仓库的法律归属与开源就绪（见 `tasks/R60-R68-open-source-readiness.md`）；R67 已决策无需改动 | 批次 30 |
+| 31 | R60 → R62 → R63 → R66；R64 → R65；R61；R68 | 公开仓库的法律归属与开源就绪（见 `tasks/R60-R68-open-source-readiness.md`）；R67 已决策无需改动 | 批次 30 |
 | 32 | R70 | 同步 R60 修改后过期的 Nexent 集成 README 校验值 | R60 |
 | 33 | R71 | 去除 TypeScript 空白消费者安装中的无关 audit/fund 网络收尾 | R54 |
 

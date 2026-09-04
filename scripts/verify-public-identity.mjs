@@ -28,6 +28,7 @@ const plainIdentityDocuments = new Set([
   'OPEN_SOURCE_POLICY.md',
   'README.md',
   'docs/event/decisions.md',
+  'docs/event/decisions.zh.md',
   'packages/event/python/README.md',
 ])
 const publicMetadataDocuments = new Set([

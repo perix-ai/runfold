@@ -1,30 +1,37 @@
-# Event 轨迹设施文档
+# Event trajectory infrastructure documentation
 
-本目录是 Event 设施的全部设计与管理文档。本文件只是地图，不含任何规则或
-逻辑；规则以各文档为准，冲突时先改文档再改实现。
+This directory is the map for the Event infrastructure's design and project
+records. It contains no independent rules or logic; the linked documents are
+authoritative, and conflicts must be resolved in documentation before the
+implementation changes.
 
-| 文档 | 类型 | 回答的问题 |
+The five governing documents use paired language files. English `<name>.md` is
+canonical and Chinese `<name>.zh.md` is its translation. Operational
+`tasks.md` and `tasks/` records remain Chinese-only because they change
+frequently.
+
+| Document | Language | Purpose |
 | --- | --- | --- |
-| [`requirements.md`](requirements.md) | 需求说明书 | 要做什么，做到什么程度算完成 |
-| [`architecture.md`](architecture.md) | 技术架构文档 | 由哪些部分组成，边界在哪里，按什么原则处理上游代码与依赖 |
-| [`specification.md`](specification.md) | 接口与数据规格 | TypeScript 与 Python 共同遵守的 v0 逻辑接口、磁盘格式与一致性验收 |
-| [`testing.md`](testing.md) | 验证策略 | 用什么证明需求被满足、行为没有退化 |
-| [`decisions.md`](decisions.md) | 决策记录 | 关键取舍的背景、决定与后果 |
-| [`tasks.md`](tasks.md) | 计划与进度 | 做到哪了，还剩什么，按什么顺序做 |
-| [`tasks/`](tasks/) | 任务书 | 交给他人或工具执行的自包含任务，文件名对应清单编号 |
-| [`demos/`](demos/) | Demo 目录与索引 | 每份可播放 Demo 的名称、内容、日期和发布文件 |
-| [`demos/nexent/`](demos/nexent/) | 可播放验收 | Nexent 完整轨迹、冷恢复与 Fork 的 UI Demo |
-| [`evidence/`](evidence/) | 验收证据 | R37/R38 的 Nexent 界面截图与轨迹验收证据 |
-| [`../../integrations/nexent/`](../../integrations/nexent/) | 下游接入产物 | 按 Nexent 版本保存可重放、可校验的 Event 产品接入补丁 |
+| Requirements | [`English`](requirements.md) · [`中文`](requirements.zh.md) | What must be built and what qualifies as complete |
+| Architecture | [`English`](architecture.md) · [`中文`](architecture.zh.md) | Components, boundaries, and rules for upstream code and dependencies |
+| Specification | [`English`](specification.md) · [`中文`](specification.zh.md) | Shared TypeScript/Python v0 interfaces, disk format, and conformance criteria |
+| Testing | [`English`](testing.md) · [`中文`](testing.zh.md) | Evidence that requirements are met without behavioral regression |
+| Decisions | [`English`](decisions.md) · [`中文`](decisions.zh.md) | Context, decisions, and consequences for key tradeoffs |
+| [`tasks.md`](tasks.md) | Chinese | Plan, progress, and execution order |
+| [`tasks/`](tasks/) | Chinese | Self-contained briefs keyed by checklist identifier |
+| [`demos/`](demos/) | English | Demo catalog with each demo's name, content, date, and published files |
+| [`demos/nexent/`](demos/nexent/) | Chinese | Playable Nexent trajectory, cold-restore, and fork acceptance demo |
+| [`evidence/`](evidence/) | Assets | Nexent screenshots and trajectory acceptance evidence for R37/R38 |
+| [`../../integrations/nexent/`](../../integrations/nexent/) | English | Replayable, verifiable Event integration patches by Nexent version |
 
-建议阅读顺序：`requirements.md` → `architecture.md` → `specification.md` →
-`tasks.md`。
+Recommended reading order: `requirements.md` → `architecture.md` →
+`specification.md` → `tasks.md` (Chinese operational record).
 
-代码级文档在各自目录：
+Code-level documentation lives alongside each implementation:
 [`packages/event/typescript/README.md`](../../packages/event/typescript/README.md)
-（来源映射与必要偏离）、
+(source mapping and necessary deviations),
 [`packages/event/typescript/TESTING.md`](../../packages/event/typescript/TESTING.md)
-（测试矩阵）、
-[`packages/event/python/README.md`](../../packages/event/python/README.md)、
+(test matrix),
+[`packages/event/python/README.md`](../../packages/event/python/README.md), and
 [`third_party/deepseek-harness/README.md`](../../third_party/deepseek-harness/README.md)
-（上游快照）。
+(upstream snapshot).

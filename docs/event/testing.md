@@ -1,54 +1,68 @@
-# Event 轨迹设施验证策略
+# Event trajectory infrastructure verification strategy
 
-> 文档类型：验证策略。回答"用什么证明需求被满足、行为没有退化"。具体的
-> 测试文件矩阵与命令见
-> [`packages/event/typescript/TESTING.md`](../../packages/event/typescript/TESTING.md)。
+> Language: English | [中文](testing.zh.md)
+>
+> Document type: verification strategy. This document explains how the project
+> proves that requirements are met without behavioral regression. See
+> [`packages/event/typescript/TESTING.md`](../../packages/event/typescript/TESTING.md)
+> for the test-file matrix and commands.
 
-## 1. 原则
+## 1. Principle
 
-测试是抽离本身的一部分，不是最后补充。任何为去除 DSH 依赖而改写的代码，
-都要先由保留下来的上游测试锁定行为，再增加面向新公共接口和跨语言契约的
-测试。
+Testing is part of the extraction itself, not a final addition. Any code
+rewritten to remove a DSH dependency must first have its behavior locked by the
+retained upstream tests, then gain tests for the new public interface and
+cross-language contract.
 
-## 2. 验证层次
+## 2. Verification layers
 
-| 层次 | 证明什么 | 位置 |
+| Layer | What it proves | Location |
 | --- | --- | --- |
-| 上游一致性 | 保留源码除登记的宿主接缝外与固定 commit 逐字节一致 | `scripts/verify-upstream-identity.mjs`，`npm run verify` 首步 |
-| 公共项目身份 | 当前源码、配置、文档和 Nexent 补丁不重新引入旧技术命名；维护权利、历史来源和负向测试仅按文件白名单保留 | `scripts/verify-public-identity.mjs` |
-| 上游行为基线 | DSH 的 Event、持久化、Trajectory 回归测试在裁剪版上原样通过 | `packages/event/typescript/packages/**/tests`，经 `test-support/` 垫片运行 |
-| 宿主生命周期 | `EventHost` 对保留代码使用的 Cordis 生命周期子集等价，覆盖事件、effect、scope、释放和服务绑定 | `packages/event/typescript/tests/runtime/` |
-| 单语言实现 | TypeScript 与 Python 各自的单元、集成、持久化、异常输入测试 | `packages/event/<language>/tests/` |
-| 跨语言契约 | 共享夹具的接受/拒绝结果、repair 结果、事件类型清单一致；TS 写/Python 读写，Python 写/TS 读写，双向 restore/resume/fork；真实 Nexent 父子轨迹通过 TS 公共 restore 与 UI | `conformance/event/v0/`，`tests/event/cross-language/` |
-| UI | 与 DSH 视图行为对照（上游 views 用例的独立宿主移植），Python 生成的轨迹可渲染，大规模历史可渲染 | `packages/event/typescript/tests/ui/` |
-| 发布产物 | TS 包安装到空白项目；Python 在隔离 builder 生成 wheel，再由第二个空白环境以 `--no-index` 只安装该 artifact；严格类型边界、公开运行时和无 DSH 引用均通过 | `packages/event/typescript/tests/package/`，`packages/event/python/tests/package_consumer.py` |
+| Documentation pairing | The five governing documents have canonical English and Chinese translation copies, valid language links, no orphan file, and matching last-change commits | `scripts/verify-doc-pairs.mjs` |
+| Upstream identity | Retained source is byte-for-byte identical to the fixed commit except for registered host seams | `scripts/verify-upstream-identity.mjs`, the first upstream check in `npm run verify` |
+| Public project identity | Current source, configuration, documentation, and Nexent patches do not reintroduce the legacy technical identity; maintainer ownership, historical provenance, and negative tests remain only through file-level allowances | `scripts/verify-public-identity.mjs` |
+| Upstream behavioral baseline | DSH Event, persistence, and Trajectory regression tests pass unchanged against the extracted implementation | `packages/event/typescript/packages/**/tests`, run through `test-support/` shims |
+| Host lifecycle | `EventHost` is equivalent for the Cordis lifecycle subset used by retained code, including events, effects, scopes, disposal, and service binding | `packages/event/typescript/tests/runtime/` |
+| Single-language implementation | TypeScript and Python each pass unit, integration, persistence, and invalid-input tests | `packages/event/<language>/tests/` |
+| Cross-language contract | Shared fixtures have identical accept/reject outcomes, repair results, and Event type lists; TS writes/Python reads and writes, Python writes/TS reads and writes; restore/resume/fork work in both directions; real Nexent parent/child trajectories pass TS public restore and UI acceptance | `conformance/event/v0/`, `tests/event/cross-language/` |
+| UI | DSH view behavior is preserved through upstream view cases ported to an independent host; Python-generated and large trajectories render | `packages/event/typescript/tests/ui/` |
+| Published artifacts | TS packages install into a blank project; Python builds a wheel in an isolated builder and installs only that artifact into a second blank environment with `--no-index`; strict type boundaries, public runtime behavior, and absence of DSH references all pass | `packages/event/typescript/tests/package/`, `packages/event/python/tests/package_consumer.py` |
 
-## 3. 必须覆盖的场景
+## 3. Required scenarios
 
-- 正常退出、截断/损坏日志修复、序号冲突、并发 Session；
-- 明文与 Zstandard 两种物理格式，packed chunk 行的写入与展开；
-- restore 后继续追加；末尾已有 `session/end-seed` 的重复打开幂等，而带新 live
-  后缀的下一次 restore 追加一个新边界；fork 只接受稳定前缀；
-- TS 写/Python 读写，Python 写/TS 读写；
-- UI 对 Python 生成轨迹与 20,000 级 Event 历史的渲染。
+- Clean shutdown, truncated or damaged log repair, sequence conflict, and
+  concurrent Sessions;
+- Plain-text and Zstandard physical formats, including packed chunk-row writes
+  and expansion;
+- Append after restore; idempotent reopening when the log already ends with
+  `session/end-seed`; one new boundary on the next restore after a new live
+  suffix; fork limited to stable prefixes;
+- TypeScript writes/Python reads and writes, and Python writes/TypeScript reads
+  and writes;
+- UI rendering for Python-generated trajectories and histories on the order of
+  20,000 Events.
 
-## 4. 已知缺口
+## 4. Known gaps
 
-未纳入抽离树的上游测试及其理由记录在
-[`packages/event/typescript/TESTING.md`](../../packages/event/typescript/TESTING.md)
-的 "Known gaps" 一节；每一项要么已由独立宿主下的等价测试覆盖，要么测试的是
-Event 组件不具备的 shell 机制。
+Upstream tests excluded from the extraction tree and their rationale are listed
+under "Known gaps" in
+[`packages/event/typescript/TESTING.md`](../../packages/event/typescript/TESTING.md).
+Each item is either covered by an equivalent test under the independent host or
+tests a shell mechanism that the Event component does not provide.
 
-## 5. 入口
+## 5. Entry point
 
-当前完整门禁校验 204 个保留文件、10 个必要差异和 139 个声明映射，并运行
-1005 个行为测试（626 Event、182 UI runtime、94 Trajectory、11 EventHost、
-15 SDK、33 UI、36 Python、1 系统、7 跨语言），随后安装 TypeScript 与 Python
-空白消费者。构建后还会扫描 Runfold 公共身份，并由两个空白消费者检查发布包
-名称、内容及随包许可证。
+The complete gate first checks all five bilingual documentation pairs, then
+verifies 204 retained files, 10 necessary differences, and 139 declaration
+mappings. It runs 1,005 behavioral tests (626 Event, 182 UI runtime, 94
+Trajectory, 11 EventHost, 15 SDK, 33 UI, 36 Python, 1 system, and 7
+cross-language), then installs blank TypeScript and Python consumers. After
+building, it scans Runfold's public identity; both blank consumers also verify
+package names, contents, and bundled licenses.
 
 ```bash
 npm run verify
 ```
 
-按层次单独运行的命令见 `package.json` 的 `scripts` 与 TESTING.md。
+See the `scripts` section of `package.json` and TESTING.md for commands that run
+individual layers.

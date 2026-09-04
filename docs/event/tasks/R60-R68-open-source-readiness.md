@@ -2,7 +2,7 @@
 
 > 对应清单：[`../tasks.md`](../tasks.md) 第 10 节 R60–R68。
 > 工具链缺陷 R69 在第 11 节，优先级高于本文全部条目。
-> 来源：2026-09-03 对"仓库已公开"状态的复核。执行者：Codex。状态：待执行。
+> 来源：2026-09-03 对"仓库已公开"状态的复核。执行者：Codex。状态：已完成。
 >
 > 背景：`github.com/perix-ai/runfold` 已是 public 仓库（MIT，11 个 topics）。
 > 下列缺口按"已公开"而不是"准备公开"来评估。
@@ -160,7 +160,7 @@ vendored tarball），`integrations/nexent` 合计 2.3 MB。
 `SHA256SUMS` 与 R54 的产物校验都依赖文件在库内，外置会让校验链路变复杂。
 若后续单个资产超过约 10 MB 或 `integrations/` 总量显著增长，再重新评估。
 
-## R68 · 文档语言：中英双语【已决策口径，待执行】
+## R68 · 文档语言：中英双语【已完成】
 
 `README.md`、`CONTRIBUTING.md`、`NOTICE.md`、`LICENSE` 等对外文件是英文，而
 `docs/event/` 下的需求、架构、规格、验证、决策、清单全部是中文。外部贡献者
@@ -180,6 +180,19 @@ vendored tarball），`integrations/nexent` 合计 2.3 MB。
    改动极频繁，双语会让每次记录成本翻倍，建议保持单语并在 README 说明。
 3. **配对不失效。** 新增或修改文档时两份必须在同一提交内落地；在
    `verify:public-identity` 或独立脚本中断言配对存在、无孤儿、无多余。
+
+**最终口径与结果（2026-09-03）**
+
+用户确认采用上述三项建议：英文 `<name>.md` 为规范版，中文
+`<name>.zh.md` 为翻译版；只配对 requirements、architecture、specification、
+testing、decisions 五份治理文档，`tasks.md` 与 `tasks/` 保持中文；新增或修改
+配对文档必须在同一提交内完成。五份英文规范版已经人工按原文结构、标识符和约束
+逐项校对，中文原文移为对应 `.zh.md`，英文索引 README 提供双语入口。
+
+`scripts/verify-doc-pairs.mjs` 断言精确配对、双向语言链接、相对链接、工作区同步
+变化和最近修改提交一致；`verify:docs` 已接入根 `npm run verify`，GitHub Actions
+使用完整历史支持提交一致性检查。最终完整门禁通过 3 个构建、1005 个行为测试、
+集成与身份校验，以及 TypeScript/Python 空白消费者安装。
 
 **实施顺序**
 

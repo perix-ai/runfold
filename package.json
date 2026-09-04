@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspace @runfold/event && npm run build --workspace @runfold/trajectory-ui && npm run build --workspace @runfold/trajectory-demo",
+    "verify:docs": "node scripts/verify-doc-pairs.mjs",
     "verify:integration-artifacts": "node scripts/verify-integration-artifacts.mjs",
     "verify:upstream-identity": "node scripts/verify-upstream-identity.mjs",
     "verify:public-identity": "node scripts/verify-public-identity.mjs",
@@ -29,7 +30,7 @@
     "test:package": "node packages/event/typescript/tests/package/package-consumer.mjs",
     "test:python": "python3 -m unittest discover -s packages/event/python/tests -t packages/event/python -v",
     "test:python:package": "python3 packages/event/python/tests/package_consumer.py",
-    "verify": "npm run verify:upstream-identity && npm run verify:integration-artifacts && npm run build && npm run verify:public-identity && npm test && npm run test:package && npm run test:python:package",
+    "verify": "npm run verify:docs && npm run verify:upstream-identity && npm run verify:integration-artifacts && npm run build && npm run verify:public-identity && npm test && npm run test:package && npm run test:python:package",
     "dev:event-ui": "npm run dev --workspace @runfold/trajectory-demo"
   },
   "engines": {

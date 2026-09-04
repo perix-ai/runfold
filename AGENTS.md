@@ -28,6 +28,19 @@ These rules apply to every automated change in this repository.
   `packages/event/typescript/packages/`; the nested `packages/` directory is
   intentional provenance, not a general repository convention.
 
+## Documentation languages
+
+- Treat the English `<name>.md` file as canonical and the Chinese
+  `<name>.zh.md` file as its translation for every governing document at the
+  top level of `docs/event/`.
+- The paired governing set is `requirements`, `architecture`, `specification`,
+  `testing`, and `decisions`. The English directory index `README.md` and the
+  high-churn Chinese operational records `tasks.md` and `tasks/` are explicitly
+  exempt from pairing.
+- Add or change both files in a documentation pair in the same commit. Keep
+  language-switch links in both copies, resolve conflicts in favor of the
+  English canonical copy, and run `npm run verify:docs` before completion.
+
 ## Change lifecycle
 
 1. Before implementing any code, test, configuration, or documentation change,
