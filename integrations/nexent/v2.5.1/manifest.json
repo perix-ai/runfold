@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 3,
+  "integration": "runfold-event-for-nexent",
+  "status": "local-interoperability-experiment",
+  "created": "2026-09-10",
+  "updated": "2026-09-10",
+  "upstream": {
+    "repository": "https://github.com/ModelEngine-Group/nexent",
+    "version": "v2.5.1",
+    "tagCommit": "b089f87cb61f0bf43f819bccbe8c0b96ece87213",
+    "baselineTree": "793283e9a98bd8096a756ed811b86d5963480afe"
+  },
+  "result": {
+    "sourceHead": "e97402a75c072bd111a54921e49de58bb907fbc6",
+    "expectedTree": "bf577a4cf588f27643f696909989a395948b483f",
+    "commitCount": 1,
+    "changedFiles": 39,
+    "insertions": 17218,
+    "deletions": 90
+  },
+  "acceptance": {
+    "command": "npm run accept:nexent:2.5.1",
+    "node": ">=22",
+    "pnpm": "10.28.2",
+    "frontendLockSha256": "b0f94bec1f48c80ec78ad083415910fa380d369d098f2517d1251e1538af0478",
+    "download": {
+      "url": "https://github.com/ModelEngine-Group/nexent/archive/refs/tags/v2.5.1.zip",
+      "bytes": 58171357,
+      "sha256": "18a61c2c3656bd8ddb37d788bbe46fe0891dce02fba1d9179eadc8ff4800ebe5",
+      "extractedDirectory": "nexent-2.5.1",
+      "baselineTree": "2471be6e0b959d5b280ef71ed1f0c758b2d4d44c",
+      "expectedTree": "86ec79376420e4e03cb52cdd6d57c02a08722bae"
+    },
+    "quick": {
+      "frontendTests": 27,
+      "uiBackend": "repository fixture",
+      "externalServicesRequired": false
+    },
+    "full": {
+      "python": "3.11",
+      "pythonTests": 540,
+      "productionBuild": true,
+      "externalServicesRequired": false,
+      "excludeNewer": "2026-09-09T23:59:59Z",
+      "packages": [
+        "pytest==9.1.1",
+        "pytest-asyncio==1.4.0",
+        "pydantic[email]==2.13.5",
+        "fastapi==0.141.1",
+        "python-dotenv==1.2.3",
+        "runfold-event==0.1.0",
+        "smolagents==1.23.0",
+        "httpx==0.28.1"
+      ]
+    }
+  },
+  "eventDependencies": {
+    "python": {
+      "distribution": "runfold-event",
+      "version": "0.1.0",
+      "sourceRevision": "cb5916e02409e8c83e02ee4f99699c1be9c9fb40"
+    },
+    "typescript": {
+      "sourceRevision": "d79ae963500b961d17a48503bc76df416f414660",
+      "packages": [
+        {
+          "file": "frontend/vendor/runfold-event-0.1.0.tgz",
+          "name": "@runfold/event",
+          "version": "0.1.0",
+          "sha256": "8fb83f99ab884c429e6d6d8207fb3a056981c57f92f7bcafa2277ed6a3cd7f28"
+        },
+        {
+          "file": "frontend/vendor/runfold-trajectory-ui-0.1.0.tgz",
+          "name": "@runfold/trajectory-ui",
+          "version": "0.1.0",
+          "sha256": "dc48628a770b5edfde3f6eca0156def90d069372f2efbeaec059d434e3580eb1"
+        }
+      ]
+    }
+  },
+  "patchFormat": {
+    "generator": "git format-patch",
+    "options": [
+      "--binary",
+      "--full-index",
+      "--no-signature"
+    ],
+    "seriesFile": "series"
+  },
+  "patches": [
+    {
+      "index": 1,
+      "file": "patches/0001-feat-event-integrate-Runfold-trajectory-support.patch",
+      "sourceCommit": "e97402a75c072bd111a54921e49de58bb907fbc6",
+      "sourceTree": "bf577a4cf588f27643f696909989a395948b483f",
+      "subject": "feat(event): integrate Runfold trajectory support",
+      "bytes": 2824735,
+      "sha256": "97299b603e028cf8e7caddd51457687928a8f37ad19d9dca4adabf2dfb9ed261"
+    }
+  ]
+}

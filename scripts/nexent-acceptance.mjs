@@ -11,10 +11,35 @@ import { pipeline } from 'node:stream/promises'
 import { fileURLToPath } from 'node:url'
 
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const integration = join(repository, 'integrations/nexent/v2.5.0')
-const manifest = JSON.parse(readFileSync(join(integration, 'manifest.json'), 'utf8'))
-const defaultSource = join(repository, 'build/nexent-v2.5.0-acceptance')
-let reportedSource = defaultSource
+const integrationsRoot = join(repository, 'integrations/nexent')
+const defaultVersion = '2.5.0'
+let nexentVersion = defaultVersion
+let integration
+let manifest
+let defaultSource
+let reportedSource
+
+function availableVersions() {
+  return readdirSync(integrationsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && /^v\d/.test(entry.name))
+    .map((entry) => entry.name.slice(1))
+    .sort()
+}
+
+function configureVersion(version) {
+  const directory = join(integrationsRoot, `v${version}`)
+  const manifestPath = join(directory, 'manifest.json')
+  if (!/^\d+\.\d+\.\d+$/.test(version) || !existsSync(manifestPath)) {
+    throw new Error(`不支持的 Nexent 版本 ${version}；可用版本：${availableVersions().join('、')}`)
+  }
+  nexentVersion = version
+  integration = directory
+  manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+  defaultSource = join(repository, `build/nexent-v${version}-acceptance`)
+  reportedSource = defaultSource
+}
+
+configureVersion(defaultVersion)
 const fixtureRoot = join(
   repository,
   'tests/event/cross-language/fixtures/nexent-r33/--workspace-nexent-acceptance--',
@@ -67,17 +92,26 @@ if sdk_root:
 `
 
 function usage() {
-  console.log(`Nexent v2.5.0 Event 验收
+  console.log(`Nexent Event 验收
 
 用法：
-  npm run accept:nexent       快速检查并打开 fixture-backed Event UI
-  npm run accept:nexent:full  额外运行 Python 回归和生产构建
+  npm run accept:nexent              快速检查并打开 fixture-backed Event UI（v${defaultVersion}）
+  npm run accept:nexent:full         额外运行 Python 回归和生产构建（v${defaultVersion}）
+  npm run accept:nexent:2.5.1        对 Nexent v2.5.1 执行相同的快速验收
+  npm run accept:nexent:2.5.1:full   对 Nexent v2.5.1 执行相同的完整回归
+  node scripts/nexent-acceptance.mjs --nexent <version> [--full] [--no-ui]
 
-脚本直接下载固定归档，只使用 build/nexent-v2.5.0-acceptance，
-不启动 Docker 或真实服务。`)
+可用版本：${availableVersions().join('、')}。脚本直接下载固定归档，只使用
+build/nexent-v<version>-acceptance，不启动 Docker 或真实服务。`)
 }
 
 function parseOptions(argv) {
+  const versionIndex = argv.indexOf('--nexent')
+  if (versionIndex !== -1) {
+    const value = argv[versionIndex + 1]
+    if (!value || value.startsWith('--')) throw new Error('--nexent 需要一个版本号，例如 2.5.1')
+    configureVersion(value)
+  }
   const options = {
     full: false,
     ui: true,
@@ -86,7 +120,8 @@ function parseOptions(argv) {
   }
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index]
-    if (argument === '--full') options.full = true
+    if (argument === '--nexent') index += 1
+    else if (argument === '--full') options.full = true
     else if (argument === '--no-ui') options.ui = false
     else if (argument === '--no-open') options.open = false
     else if (argument === '--source') {
@@ -251,8 +286,8 @@ async function downloadArchive(destination) {
 
 async function downloadSource(source) {
   const parent = dirname(source)
-  const archive = join(parent, '.nexent-v2.5.0.zip')
-  const extraction = join(parent, '.nexent-v2.5.0-extract')
+  const archive = join(parent, `.nexent-v${nexentVersion}.zip`)
+  const extraction = join(parent, `.nexent-v${nexentVersion}-extract`)
   await mkdir(parent, { recursive: true })
   await rm(extraction, { recursive: true, force: true })
   try {
@@ -271,7 +306,7 @@ async function downloadSource(source) {
   capture('git', ['config', 'user.name', 'Runfold Acceptance'], { cwd: source })
   capture('git', ['config', 'user.email', 'acceptance@runfold.local'], { cwd: source })
   capture('git', ['add', '--force', '.'], { cwd: source })
-  capture('git', ['commit', '--quiet', '-m', 'snapshot: Nexent v2.5.0 archive'], { cwd: source })
+  capture('git', ['commit', '--quiet', '-m', `snapshot: Nexent ${manifest.upstream.version} archive`], { cwd: source })
   const tree = sourceTree(source)
   if (tree !== manifest.acceptance.download.baselineTree) {
     throw new Error(`下载归档的基线 tree 不匹配：${tree}`)
@@ -280,7 +315,7 @@ async function downloadSource(source) {
 
 async function prepareSource(source, patch) {
   if (!existsSync(source)) {
-    console.log('\n[1/4 下载 Nexent v2.5.0]')
+    console.log(`\n[1/4 下载 Nexent ${manifest.upstream.version}]`)
     await downloadSource(source)
   }
 
@@ -299,7 +334,7 @@ async function prepareSource(source, patch) {
   if (tree === manifest.upstream.baselineTree) {
     const head = capture('git', ['rev-parse', 'HEAD'], { cwd: source })
     if (head !== manifest.upstream.tagCommit) {
-      throw new Error(`Nexent HEAD 不是 v2.5.0 的固定提交：${head}`)
+      throw new Error(`Nexent HEAD 不是 ${manifest.upstream.version} 的固定提交：${head}`)
     }
     expectedTree = manifest.result.expectedTree
   } else if (tree === download.baselineTree) {
@@ -360,7 +395,7 @@ function runFrontendChecks(source) {
     .map((file) => join(frontend, 'tests', file))
   run(process.execPath, ['--test', ...testFiles], {
     cwd: frontend,
-    label: '4/4 运行 27 个前端测试',
+    label: `4/4 运行 ${manifest.acceptance.quick.frontendTests} 个前端测试`,
   })
   run(
     process.execPath,
@@ -564,7 +599,7 @@ function makeFixtureHandler(state) {
       if (path === '/api/tenant_config/deployment_version') {
         send(response, {
           deployment_version: 'speed',
-          app_version: 'v2.5.0-runfold-acceptance',
+          app_version: `${manifest.upstream.version}-runfold-acceptance`,
           enable_aidp_knowledge: false,
           status: 'success',
         })

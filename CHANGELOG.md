@@ -5,6 +5,14 @@ All notable changes to Runfold are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Nexent v2.5.1 interoperability patch alongside v2.5.0: the same Event
+  integration regenerated on the official v2.5.1 tag, with
+  `npm run accept:nexent:2.5.1` and version-aware artifact verification.
+
 ## [0.1.0] - 2026-09-03
 
 ### Added
