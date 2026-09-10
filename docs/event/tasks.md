@@ -1184,6 +1184,33 @@
     `nexent-real`、继承事件 21，刷新后仍恢复同一 child Session。根仓 `npm run
     verify`（含 1005 项行为测试、双语言文档、身份/产物门禁和 TypeScript/Python
     包消费者）通过。
+- [x] **R76** · 难度 中 · 风险 中 · 位置 `integrations/nexent/v2.5.1/`、
+  `scripts/`、`package.json`
+  - **问题**：Nexent 官方已发布 v2.5.1，但集成目录、验收脚本和产物门禁都只
+    认识 v2.5.0；把补丁移植到新基线需要人工重做下载、校验、冲突解决和验收。
+  - **处理**：与 `v2.5.0/` 并列新增 `v2.5.1/`，保留同一套 manifest、series、
+    SHA256SUMS、LICENSE 和单一补丁格式；补丁基于官方 v2.5.1 tag commit 重新生成，
+    解决上游欢迎页 `suggestions` 属性与 Event 视图切换的唯一冲突。验收脚本和
+    产物门禁改为按 `--nexent <version>` 或版本清单读取，默认路径与输出保持
+    v2.5.0 不变；README 给出 v2.5.1 的定位说明与相同的四步人工检查。
+  - **依赖**：R75；不修改 v2.5.0 目录内容，不改动 Event 包与夹具。
+  - **结果**：已完成（2026-09-10）：新增 `integrations/nexent/v2.5.1/`，补丁自
+    官方 tag commit `b089f87c` 上的结果提交 `e97402a7` 导出（39 文件，
+    +17,218/−90），上游 2.5.0→2.5.1 共 17 个文件改动，与补丁重叠 4 个，仅
+    `thread.tsx` 一处冲突（欢迎页 `suggestions` 属性）已合并保留。验收脚本新增
+    `--nexent <version>`，`package.json` 新增 `accept:nexent:2.5.1[:full]`；
+    产物门禁改为按版本表逐个校验 manifest、series、SHA256SUMS、README 与目录
+    索引，身份门禁覆盖两份 LICENSE。
+  - **验证**：Release ZIP `18a61c2c…`（58,171,357 字节）重建基线 tree
+    `2471be6e…`，补丁结果 tree `86ec7937…` 在两次独立重放中一致；tag 基线 tree
+    `793283e9…` → 结果 tree `bf577a4c…`。`npm run accept:nexent:2.5.1:full`
+    通过：27/27 frontend、TypeScript、540/540 Python、生产构建；
+    `npm run accept:nexent:2.5.1` 的 fixture UI 经无头 Chromium 实点：对话视图、
+    轨迹 8 行 Event 与详情、刷新恢复、选“第 2 轮 · Event 20”分叉进入
+    `conversation_id=3802` 显示父 Session `nexent-real`、继承事件 21，child 刷新
+    可恢复，聊天快捷 Fork 创建 3803，控制台零错误，页脚显示
+    `v2.5.1-runfold-acceptance`。默认 v2.5.0 路径 `--no-ui` 重跑无回归；
+    `verify:integration-artifacts`、`verify:public-identity`、`verify:docs` 通过。
 
 ## 执行顺序
 
@@ -1229,6 +1256,7 @@
 | 35 | R73 | 升级 GitHub 官方 Actions，消除 Node 20 弃用兼容层 | R61、R72 |
 | 36 | R74 | 校正 Nexent 官方基线，合并补丁并修复重放说明 | R44、R54、R70 |
 | 37 | R75 | 提供 Nexent 一键人工验收并清理历史入口 | R74 |
+| 38 | R76 | 并列新增 Nexent v2.5.1 集成补丁与验收入口 | R75 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 

@@ -118,4 +118,7 @@ with the Nexent team. A repository-local
 cold restore, detail tabs, and fork result. See
 [`docs/event/tasks.md`](docs/event/tasks.md) for the full evidence. The exact
 Nexent product changes are preserved separately as a
-[versioned, replay-tested patch series](integrations/nexent/v2.5.0/).
+[versioned, replay-tested patch series](integrations/nexent/v2.5.0/), and the
+same patch is ported to the official
+[Nexent v2.5.1 tag](integrations/nexent/v2.5.1/) with its own one-command
+acceptance.
