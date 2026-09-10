@@ -10,4 +10,4 @@ hashes, and be replay-tested against a clean baseline.
 
 | Consumer | Facility | Delivery form |
 | --- | --- | --- |
-| [`nexent/`](nexent/) | Event recording, restore/resume/fork, and Trajectory UI | Versioned Git patch series |
+| [`nexent/`](nexent/) | Event recording, restore/resume/fork, and Trajectory UI | One-command acceptance plus a versioned Git patch |

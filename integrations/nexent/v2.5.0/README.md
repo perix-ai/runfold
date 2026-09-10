@@ -1,151 +1,55 @@
-# Nexent v2.5.0 Event integration
+# Nexent v2.5.0 Event 人工验收
 
-This directory is the reproducible, reviewable delivery form of the Nexent
-changes that were validated locally in branch
-`codex/runfold-event-v2.5.0`. The consumer-facing artifact is one squashed Git
-mail patch generated directly against the official `v2.5.0` tag. The nine
-validated source commits remain listed as audit provenance in
-[`manifest.json`](manifest.json); the generated patch body has not been edited
-after export.
+## 同学只做这一件事
 
-The integration adds:
-
-- native Python Event recording around Nexent's real agent/model/tool flow;
-- persistent Session identity, single-writer protection, cold restore/resume,
-  repair, and stable-boundary fork;
-- tenant-authorized trajectory read and fork endpoints;
-- direct embedding of `@runfold/trajectory-ui` in the existing chat page while
-  preserving the original conversation view and Composer;
-- message-level and precise trajectory-level fork controls;
-- tool schemas in Event request headers so the retained DSH detail panel can
-  render Parameters, Result, Schema, and Timing;
-- backend, frontend, short-trajectory, long-trajectory, failure-path, and
-  cross-process tests.
-
-This remains a local Runfold interoperability experiment. It has not been
-submitted to, endorsed by, or deployed by the Nexent project.
-
-## Why one patch
-
-The file under [`patches/`](patches/) is a standard Git binary mail patch. It
-contains the complete validated backend, SDK, UI, documentation, tests, and two
-pinned frontend package tarballs, so a consumer performs one atomic `git am`
-instead of coordinating nine dependent patches. The original logical commit
-subjects and trees remain in the manifest and in this repository's Git history.
-A Git bundle would unnecessarily redistribute the complete Nexent repository.
-
-This directory is therefore an integration artifact, not a second source of
-truth for Event. Event implementation and packages remain under
-[`packages/event/`](../../../packages/event/).
-
-The patch context includes portions of Nexent source. The pinned Nexent MIT
-license and Huawei Technologies Co., Ltd. copyright notice are preserved in
-[`LICENSE`](LICENSE). This integration is not an official Nexent release and
-does not imply endorsement by Nexent or Huawei.
-
-## Verify the artifact
-
-Run from this directory:
+准备 Git、Node.js 22+、系统自带的 `unzip` 和可访问 npm/GitHub 的网络，然后在
+Runfold 仓库根目录运行：
 
 ```bash
-shasum -a 256 -c SHA256SUMS
-test "$(find patches -type f -name '*.patch' | wc -l | tr -d ' ')" = 1
+npm run accept:nexent
 ```
 
-[`series`](series) records the only supported application order.
-[`manifest.json`](manifest.json) records the source commit and tree for every
-patch, the exact upstream baseline, dependency revisions, statistics, and the
-expected final tree.
+脚本会直接下载并校验约 55 MB 的 Nexent 固定归档，不执行 `git clone`；随后应用
+唯一补丁、按锁文件安装前端依赖、运行 27 个测试和 TypeScript 检查，最后打开带
+固定数据的 Event UI。页面打开后只需：
 
-## Apply to Nexent
+1. 确认原“对话”视图正常；
+2. 切到“轨迹”，确认 Event 时间线和详情可见；
+3. 刷新页面，确认原 Session 和 Event 仍能恢复读取；
+4. 选择一个已完成 Turn，点击“分叉”，确认跳到全新的 child Session，并显示
+   `parentSession` 和 `seedLength`。
 
-Start from the exact upstream commit behind Nexent `v2.5.0`. A clean clone is
-recommended:
+检查完在运行脚本的终端按 `Ctrl+C`。默认路径不需要 Python、Docker、数据库、
+Redis、MinIO、Nexent 后端或模型 API Key，也不会写入真实业务数据。
+Event 验收也不启用 memory/vector：Nexent 页面壳层虽会全局检查向量模型状态，
+fixture 只回答该状态检查以隐藏无关向导，不安装或连接任何向量服务。
+
+当前锁定的前端依赖共 1,067 个包。首次运行通常需要约 2–3 GB 可用空间；之后会
+复用 `build/nexent-v2.5.0-acceptance/`，无需重复设置环境。
+
+## 可选：完整回归
+
+只有修改了 Python/backend 或准备正式交付时，才需要额外安装 `uv` 并运行：
 
 ```bash
-git clone https://github.com/ModelEngine-Group/nexent.git
-cd nexent
-git switch --detach 86d75923dd549008d725d83db18a93d654c84fb0
-test "$(git rev-parse HEAD^{tree})" = 60986c8030381ca88e52f11023bac6642861ffdb
-git switch -c runfold/event-trajectory-v2.5.0
-integration_dir=/absolute/path/to/integrations/nexent/v2.5.0
-while IFS= read -r patch; do
-  git am --3way "$integration_dir/$patch" || exit
-done < "$integration_dir/series"
-test "$(git rev-parse HEAD^{tree})" = 196bcc22cc54d7c1ee638d6f28e0c5eeff514920
+npm run accept:nexent:full
 ```
 
-The full path in `integration_dir` is intentional: run the commands inside
-Nexent while the patches remain in this repository. If either tree assertion
-fails, stop instead of forcing the patch; the checked-out source is not the
-verified baseline or the replay is not identical.
+完整模式使用 Python 3.11，运行 540 个定向 Python 测试、相同的前端门禁和生产
+构建，建议准备约 3 GB 可用空间。它只声明 8 个直接测试依赖（当前解析为约 40
+个包），会复用已有环境，并隔离模型、向量、存储和文档处理等无关顶层导入。
+它仍不启动任何真实服务，也不需要 API Key；构建通过后会删除 `.next` 中间产物。
 
-The GitHub Release ZIP has SHA-256
-`a4be5bc01472dd12947b2dce21a4b74ee58735cbd4de8668d367695b866ce77f`.
-Re-importing that archive into a new Git repository normalizes 23 upstream
-tracked files from CRLF to LF because Nexent's `.gitattributes` declares
-`* text=auto eol=lf`. That reconstruction therefore has baseline tree
-`b442446293b6793498dac09be0b86f1dd0d340c5` and result tree
-`31c9fc070c80b8ee33ba165a42474e5cb1a19806`. The content difference from the
-official tag is line endings only, and the patch applies to both, but the
-official Git tag and its `60986c…` tree are the canonical baseline.
+## 如果失败
 
-The patch includes two frontend package tarballs built from the exact Runfold
-source revision `d79ae963500b961d17a48503bc76df416f414660`. Rebuild both
-packages whenever their published contents change, then regenerate the single
-delivery patch and its manifest entry so the source and result trees remain
-replayable. Their package-level hashes are recorded in the manifest and in
-Nexent's resulting `frontend/vendor/SHA256SUMS`. The Python dependency is
-`runfold-event==0.1.0`,
-validated from Runfold commit `cb5916e02409e8c83e02ee4f99699c1be9c9fb40`;
-the 2026-09-09 replay resolved that exact release from the package index. To
-validate an unpublished replacement, build and install its wheel before
-installing Nexent's `event` extra.
+终端会停在失败步骤并给出原因。所有下载和环境文件只在
+`build/nexent-v2.5.0-acceptance/` 这一个被 Git 忽略的目录中；需要完全重来时，
+保留有用内容后删除该目录再运行同一条命令即可。脚本不会在仓库中生成需要人工
+处理的额外日志或配置文件。
 
-## Validate the applied integration
+`manifest.json`、`series`、`SHA256SUMS` 和 `patches/` 是自动校验所需的机器文件，
+人工验收不用操作。旧补丁拆分、本地分支和重放过程保留在 Git 历史中，不再混入
+当前验收入口。
 
-Install the SDK Event/quality extras and the backend test dependencies, then run
-each Python file in its own process as required by Nexent's test isolation:
-
-```bash
-uv pip install -e './sdk[event,quality]' -e './backend[test]'
-python -m pytest test/sdk/core/agents/test_event_trajectory.py -q
-python -m pytest test/sdk/core/agents/test_core_agent.py -q
-python -m pytest test/sdk/core/agents/test_run_agent.py -q
-python -m pytest test/sdk/core/agents/test_nexent_agent.py -q
-python -m pytest test/sdk/core/agents/test_agent_model.py -q
-python -m pytest test/backend/services/test_event_trajectory_service.py -q
-python -m pytest test/backend/app/test_event_trajectory_app.py -q
-```
-
-Run the frontend checks from Nexent's `frontend/` directory:
-
-```bash
-shasum -a 256 -c vendor/SHA256SUMS
-pnpm test
-pnpm exec tsc --noEmit --incremental false
-pnpm build
-```
-
-Nexent v2.5.0 ignores `pnpm-lock.yaml`, so the two vendored Runfold tarballs are
-byte-pinned while Nexent's wider frontend dependency graph is resolved from its
-declared version ranges at install time. Keep the generated lockfile with local
-replay evidence when diagnosing a future dependency-resolution difference.
-
-The 2026-09-09 independent replay from the official tag applied the nine-patch
-source series and the single delivery patch successfully to identical result
-tree `196bcc…`. It produced 540/540 relevant Python tests and 27/27 frontend
-tests, followed by TypeScript checking, a production frontend build, and an
-interactive `/zh/newchat` Trajectory UI render. Detailed behavior and UI
-evidence remain in the Event task records:
-[`R33`](../../../docs/event/tasks/R33-nexent-acceptance.md),
-[`R37`](../../../docs/event/tasks/R37-nexent-trajectory-ui.md),
-[`R38`](../../../docs/event/tasks/R38-nexent-long-trajectory.md), and
-[`R40`](../../../docs/event/tasks/R40-nexent-narrated-interaction-demo.md).
-
-## Upgrade policy
-
-For another Nexent release, create `integrations/nexent/<version>/`, rebase or
-port the commits there, run the relevant matrix again, and record new base and
-result trees. Do not silently regenerate this `v2.5.0` series against a moving
-branch.
+这是 Runfold 的本地互操作实验，不是 Nexent 官方发布。补丁所含 Nexent 源码继续
+遵循本目录的 [`LICENSE`](LICENSE)。

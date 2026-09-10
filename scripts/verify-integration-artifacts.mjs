@@ -42,29 +42,43 @@ const manifest = JSON.parse(read(manifestPath))
 const checksums = parseChecksums(sumsPath)
 const objectId = /^[0-9a-f]{40}$/
 
-assert.equal(manifest.schemaVersion, 2, 'unsupported Nexent integration manifest schema')
+assert.equal(manifest.schemaVersion, 3, 'unsupported Nexent integration manifest schema')
 for (const [label, value] of [
   ['upstream tag commit', manifest.upstream.tagCommit],
   ['upstream baseline tree', manifest.upstream.baselineTree],
-  ['archive re-import baseline tree', manifest.upstream.archiveReimport.baselineTree],
-  ['archive re-import result tree', manifest.upstream.archiveReimport.expectedTree],
+  ['download baseline tree', manifest.acceptance.download.baselineTree],
+  ['download result tree', manifest.acceptance.download.expectedTree],
   ['result source head', manifest.result.sourceHead],
   ['result tree', manifest.result.expectedTree],
 ]) assert.match(value, objectId, `invalid ${label}`)
 
-const normalizedPaths = manifest.upstream.archiveReimport.normalizedPaths
-assert.equal(normalizedPaths.length, 23, 'unexpected CRLF-normalized Nexent path count')
-assert.equal(new Set(normalizedPaths).size, normalizedPaths.length, 'duplicate normalized Nexent path')
+assert.equal(manifest.acceptance.node, '>=22', 'unexpected Nexent acceptance Node version')
+assert.equal(manifest.acceptance.pnpm, '10.28.2', 'unexpected Nexent acceptance pnpm version')
+assert.match(manifest.acceptance.frontendLockSha256, /^[0-9a-f]{64}$/, 'invalid frontend lock hash')
+assert.match(manifest.acceptance.download.sha256, /^[0-9a-f]{64}$/, 'invalid Nexent download hash')
+assert.equal(manifest.acceptance.download.bytes, 58167456, 'unexpected Nexent download size')
+assert.equal(manifest.acceptance.quick.frontendTests, 27, 'unexpected frontend acceptance count')
+assert.equal(manifest.acceptance.quick.externalServicesRequired, false, 'quick acceptance must stay isolated')
+assert.equal(manifest.acceptance.full.pythonTests, 540, 'unexpected Python acceptance count')
+assert.equal(manifest.acceptance.full.externalServicesRequired, false, 'full acceptance must stay isolated')
 assert.equal(
-  manifest.upstream.archiveReimport.differenceFromTag,
-  'CRLF-to-LF normalization only',
-  'unexpected archive re-import difference',
+  manifest.acceptance.full.excludeNewer,
+  '2026-09-09T23:59:59Z',
+  'unexpected Python dependency snapshot cutoff',
 )
-assert.equal(manifest.squashProvenance.previousPatchCount, 9, 'unexpected source patch count')
-assert.equal(
-  manifest.squashProvenance.commits.length,
-  manifest.squashProvenance.previousPatchCount,
-  'squash provenance must retain every source commit',
+assert.deepEqual(
+  manifest.acceptance.full.packages,
+  [
+    'pytest==9.1.1',
+    'pytest-asyncio==1.4.0',
+    'pydantic[email]==2.13.5',
+    'fastapi==0.141.1',
+    'python-dotenv==1.2.3',
+    'runfold-event==0.1.0',
+    'smolagents==1.23.0',
+    'httpx==0.28.1',
+  ],
+  'unexpected Python acceptance package set',
 )
 
 for (const relativePath of [
@@ -73,6 +87,7 @@ for (const relativePath of [
   seriesPath,
   'integrations/nexent/README.md',
   'integrations/nexent/v2.5.0/README.md',
+  'scripts/nexent-acceptance.mjs',
   'docs/event/demos/nexent/README.md',
   'docs/event/demos/nexent/cover.jpg',
   'docs/event/demos/nexent/trajectory-restore-fork-demo.mp4',
@@ -128,6 +143,16 @@ for (const patch of manifest.patches) {
     subjectLine.replace(/^Subject: \[PATCH(?: \d+\/\d+)?\] /, ''),
     patch.subject,
     `subject mismatch: ${patch.file}`,
+  )
+  assert.match(
+    content,
+    /diff --git a\/frontend\/pnpm-lock\.yaml b\/frontend\/pnpm-lock\.yaml/,
+    'Nexent patch must carry the frozen frontend lockfile',
+  )
+  assert.match(
+    content,
+    /\+  "packageManager": "pnpm@10\.28\.2",/,
+    'Nexent patch must pin its package manager',
   )
 }
 assert.equal(

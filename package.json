@@ -14,6 +14,8 @@
     "build": "npm run build --workspace @runfold/event && npm run build --workspace @runfold/trajectory-ui && npm run build --workspace @runfold/trajectory-demo",
     "verify:docs": "node scripts/verify-doc-pairs.mjs",
     "verify:integration-artifacts": "node scripts/verify-integration-artifacts.mjs",
+    "accept:nexent": "node scripts/nexent-acceptance.mjs",
+    "accept:nexent:full": "node scripts/nexent-acceptance.mjs --full --no-ui",
     "verify:upstream-identity": "node scripts/verify-upstream-identity.mjs",
     "verify:public-identity": "node scripts/verify-public-identity.mjs",
     "test": "npm run test:upstream && npm run test:types && npm run test:runtime && npm run test:sdk && npm run test:ui && npm run test:python && npm run test:system && npm run test:conformance",

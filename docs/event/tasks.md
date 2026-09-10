@@ -1159,6 +1159,32 @@
     本仓 3 个构建、1005 个行为测试、双语言文档、身份/产物门禁及 TypeScript、
     Python 空白消费者验证均通过。
 
+- [x] **R75** · 难度 中 · 风险 中 · 位置 `scripts/`、
+  `integrations/nexent/v2.5.0/`
+  - **问题**：人工验收需要自行理解 clone、基线、补丁、Python extras、pnpm、
+    Nexent 多服务部署和 fixture backend 的边界，容易误装完整 Docker 环境或漏装
+    测试依赖；当前入口还混有旧 9 补丁、本地 branch/tree 等历史信息。
+  - **处理**：提供一个零第三方脚本入口，默认直接下载并校验固定 Release 归档、
+    应用单补丁、安装前端依赖、执行快速门禁并启动 fixture-backed Event UI；显式
+    验证恢复读取及创建带 lineage 的全新 child Session。`--full` 才安装 Python
+    3.11 测试环境并运行 540 个定向测试。README 只保留必要依赖、两条命令和故障
+    出口，删除当前验收不需要的历史中间信息，机器门禁继续校验唯一支持路径。
+  - **依赖**：R74；默认验收不启动 Docker、数据库、Redis、MinIO、真实模型或
+    Nexent 后端服务，不要求 API Key。
+  - **结果**：已完成（2026-09-09）：新增 `npm run accept:nexent` 单命令入口，
+    直接下载并校验约 55 MB 的官方 Release ZIP，在唯一忽略目录中应用一个补丁、
+    按锁文件安装前端并启动 fixture-backed Event UI；全局 memory/vector 向导仅由
+    fixture 回答状态检查，不安装或连接向量服务。完整模式改为 8 个直接依赖、当前
+    解析 40 个包的隔离测试环境，并在后续运行中精确同步复用，不再安装 Nexent
+    backend 声明的 260 个无关通用包。
+  - **验证**：全新 Release ZIP 重建基线和补丁结果 tree 分别精确匹配
+    `b442446…`、`48d2b09…`；27/27 frontend、TypeScript、540/540 Python 和
+    production build 通过，第二次完整模式依赖检查零下载。可见浏览器实点分叉创建
+    `conversation_id=3802` / `nexent-real-fork-3802`，显示父 Session
+    `nexent-real`、继承事件 21，刷新后仍恢复同一 child Session。根仓 `npm run
+    verify`（含 1005 项行为测试、双语言文档、身份/产物门禁和 TypeScript/Python
+    包消费者）通过。
+
 ## 执行顺序
 
 按"容易改、风险小"优先，跨章节排列。
@@ -1202,6 +1228,7 @@
 | 34 | R72 | 为 Python 3.11 CI 安装声明的 Zstandard 测试依赖 | R35、R61 |
 | 35 | R73 | 升级 GitHub 官方 Actions，消除 Node 20 弃用兼容层 | R61、R72 |
 | 36 | R74 | 校正 Nexent 官方基线，合并补丁并修复重放说明 | R44、R54、R70 |
+| 37 | R75 | 提供 Nexent 一键人工验收并清理历史入口 | R74 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
