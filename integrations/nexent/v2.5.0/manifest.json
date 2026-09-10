@@ -1,26 +1,55 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "integration": "runfold-event-for-nexent",
   "status": "local-interoperability-experiment",
   "created": "2026-09-02",
-  "updated": "2026-09-03",
+  "updated": "2026-09-09",
   "upstream": {
     "repository": "https://github.com/ModelEngine-Group/nexent",
     "version": "v2.5.0",
     "tagCommit": "86d75923dd549008d725d83db18a93d654c84fb0",
+    "baselineTree": "60986c8030381ca88e52f11023bac6642861ffdb",
     "releaseArchive": "https://github.com/ModelEngine-Group/nexent/archive/refs/tags/v2.5.0.zip",
     "releaseArchiveSha256": "a4be5bc01472dd12947b2dce21a4b74ee58735cbd4de8668d367695b866ce77f",
     "verifiedEntries": 2886,
     "verifiedFiles": 2463,
     "verifiedBytes": 85150229,
-    "localBaselineCommit": "1b184cf019fe2a539fe1c340afd526544492a90c",
-    "baselineTree": "b442446293b6793498dac09be0b86f1dd0d340c5"
+    "archiveReimport": {
+      "historicalLocalBaselineCommit": "1b184cf019fe2a539fe1c340afd526544492a90c",
+      "baselineTree": "b442446293b6793498dac09be0b86f1dd0d340c5",
+      "expectedTree": "31c9fc070c80b8ee33ba165a42474e5cb1a19806",
+      "differenceFromTag": "CRLF-to-LF normalization only",
+      "normalizedPaths": [
+        "backend/agents/agent_run_manager.py",
+        "backend/data_process/worker.py",
+        "pathology-ai/README.md",
+        "pathology-ai/agent-config.md",
+        "pathology-ai/architecture.md",
+        "pathology-ai/code-changes/docker/update_prompt_btn.sql",
+        "pathology-ai/code-changes/frontend/DiagnosisConfidenceCard.tsx",
+        "pathology-ai/code-changes/frontend/MedicalVisualizationPanel.tsx",
+        "pathology-ai/code-changes/frontend/PathologyImageGallery.tsx",
+        "pathology-ai/code-changes/frontend/SourceTag.tsx",
+        "pathology-ai/code-changes/frontend/index.ts",
+        "pathology-ai/code-changes/medical_extension/__init__.py",
+        "pathology-ai/code-changes/medical_extension/agent_templates.py",
+        "pathology-ai/code-changes/medical_extension/api.py",
+        "pathology-ai/code-changes/medical_extension/chain_of_diagnosis.py",
+        "pathology-ai/code-changes/medical_extension/confidence_evaluator.py",
+        "pathology-ai/code-changes/medical_extension/medical_prompts.py",
+        "pathology-ai/code-changes/medical_extension/test_medical.py",
+        "pathology-ai/custom-tools.md",
+        "pathology-ai/frontend-improvements.md",
+        "sdk/benchmark/manual_cases/cases/example_infra/case.json",
+        "sdk/benchmark/manual_cases/cases/example_infra/history.json",
+        "sdk/nexent/core/utils/token_estimation.py"
+      ]
+    }
   },
   "result": {
-    "sourceBranch": "codex/runfold-event-v2.5.0",
-    "sourceHead": "54ae0144a776334019166137d14f231ce76d904e",
-    "expectedTree": "31c9fc070c80b8ee33ba165a42474e5cb1a19806",
-    "commitCount": 9,
+    "sourceHead": "71928d1e49b60b050978015facf137d6b897f2ab",
+    "expectedTree": "196bcc22cc54d7c1ee638d6f28e0c5eeff514920",
+    "commitCount": 1,
     "changedFiles": 38,
     "insertions": 4375,
     "deletions": 86
@@ -58,87 +87,76 @@
     ],
     "seriesFile": "series"
   },
+  "squashProvenance": {
+    "previousSourceBranch": "codex/runfold-event-v2.5.0",
+    "previousSourceHead": "54ae0144a776334019166137d14f231ce76d904e",
+    "previousPatchCount": 9,
+    "commits": [
+      {
+        "index": 1,
+        "sourceCommit": "f79c8c88974244d4830a4679bc82fdd315cc828a",
+        "sourceTree": "a043f795e206ae81a2d807a2ded4d94099abd32c",
+        "subject": "feat(event): add Runfold trajectory experiment"
+      },
+      {
+        "index": 2,
+        "sourceCommit": "013ba9db65dabdb3c76e37ee70b3232ca3830cf3",
+        "sourceTree": "41f175874fba23c8ab13991a12b8d56508ac409d",
+        "subject": "feat(event): wire conversation trajectory backend"
+      },
+      {
+        "index": 3,
+        "sourceCommit": "b8bf0a992635cfc7e74c4fdbd47ed913055ecbf0",
+        "sourceTree": "48ab6606ca46e317821683d51f259d568ad607c5",
+        "subject": "build(event): vendor reproducible UI packages"
+      },
+      {
+        "index": 4,
+        "sourceCommit": "a2cc77ade6a9ff315a9a9cd67c4ded5ac9ad51c5",
+        "sourceTree": "b225afc31ec10f25db7f5e8a92dea41f39fafece",
+        "subject": "feat(event): add trajectory frontend client"
+      },
+      {
+        "index": 5,
+        "sourceCommit": "50da5b7b1e58d41d9fc0970a1ed4f85d9f8ea6e2",
+        "sourceTree": "e2f49b658a64987022a95fb235f48414f78856ca",
+        "subject": "feat(event): embed trajectory view in Nexent chat"
+      },
+      {
+        "index": 6,
+        "sourceCommit": "8c9be579a8db5b1a9c85d5095091228958aba89c",
+        "sourceTree": "48302081cef57e49a0dd5596e2d46952e441b332",
+        "subject": "docs(event): document trajectory UI verification"
+      },
+      {
+        "index": 7,
+        "sourceCommit": "8fddef9d76c94d1238e128b2c811a1cccf15fc47",
+        "sourceTree": "2ab5d1913c8d3b72777d9415816712d7069285e2",
+        "subject": "feat(event): verify long Nexent trajectories"
+      },
+      {
+        "index": 8,
+        "sourceCommit": "986c526f93982445b518f21fee14405405996bec",
+        "sourceTree": "1a3e94eec4c24266f294fd65efbcc8c5ee81faa6",
+        "subject": "feat(event): add dual Nexent fork controls"
+      },
+      {
+        "index": 9,
+        "sourceCommit": "54ae0144a776334019166137d14f231ce76d904e",
+        "sourceTree": "31c9fc070c80b8ee33ba165a42474e5cb1a19806",
+        "subject": "docs(event): clarify Runfold package installation"
+      }
+    ]
+  },
   "patches": [
     {
       "index": 1,
-      "file": "patches/0001-feat-event-add-Runfold-trajectory-experiment.patch",
-      "sourceCommit": "f79c8c88974244d4830a4679bc82fdd315cc828a",
-      "sourceTree": "a043f795e206ae81a2d807a2ded4d94099abd32c",
-      "subject": "feat(event): add Runfold trajectory experiment",
-      "bytes": 86393,
-      "sha256": "aef837e0d53bee7b18ddb260f5ab5fc908eb7759f6bf6b6b2beb5440234b533c"
-    },
-    {
-      "index": 2,
-      "file": "patches/0002-feat-event-wire-conversation-trajectory-backend.patch",
-      "sourceCommit": "013ba9db65dabdb3c76e37ee70b3232ca3830cf3",
-      "sourceTree": "41f175874fba23c8ab13991a12b8d56508ac409d",
-      "subject": "feat(event): wire conversation trajectory backend",
-      "bytes": 54608,
-      "sha256": "2d0e9dbfd1d84682f35a453a998b0f196527f7f7440db986e89fc033d5b7984c"
-    },
-    {
-      "index": 3,
-      "file": "patches/0003-build-event-vendor-reproducible-UI-packages.patch",
-      "sourceCommit": "b8bf0a992635cfc7e74c4fdbd47ed913055ecbf0",
-      "sourceTree": "48ab6606ca46e317821683d51f259d568ad607c5",
-      "subject": "build(event): vendor reproducible UI packages",
-      "bytes": 2141963,
-      "sha256": "4113864defd946b96fa6e67cba2a2ebde1004200eafebf0de05b1aada978d01b"
-    },
-    {
-      "index": 4,
-      "file": "patches/0004-feat-event-add-trajectory-frontend-client.patch",
-      "sourceCommit": "a2cc77ade6a9ff315a9a9cd67c4ded5ac9ad51c5",
-      "sourceTree": "b225afc31ec10f25db7f5e8a92dea41f39fafece",
-      "subject": "feat(event): add trajectory frontend client",
-      "bytes": 15867,
-      "sha256": "a32c640201095505b7d718dcd6d4d550f9bd91baa2266f6e4e3d530d1a30ef1f"
-    },
-    {
-      "index": 5,
-      "file": "patches/0005-feat-event-embed-trajectory-view-in-Nexent-chat.patch",
-      "sourceCommit": "50da5b7b1e58d41d9fc0970a1ed4f85d9f8ea6e2",
-      "sourceTree": "e2f49b658a64987022a95fb235f48414f78856ca",
-      "subject": "feat(event): embed trajectory view in Nexent chat",
-      "bytes": 28279,
-      "sha256": "6167ca0b1f8a390f36a9183d08bedca2c6c284270125be2b27c21a346029779a"
-    },
-    {
-      "index": 6,
-      "file": "patches/0006-docs-event-document-trajectory-UI-verification.patch",
-      "sourceCommit": "8c9be579a8db5b1a9c85d5095091228958aba89c",
-      "sourceTree": "48302081cef57e49a0dd5596e2d46952e441b332",
-      "subject": "docs(event): document trajectory UI verification",
-      "bytes": 3670,
-      "sha256": "35585db57690b25abb8cf4dc999279d6b5c5b21d7c935271c435060a8b5d5337"
-    },
-    {
-      "index": 7,
-      "file": "patches/0007-feat-event-verify-long-Nexent-trajectories.patch",
-      "sourceCommit": "8fddef9d76c94d1238e128b2c811a1cccf15fc47",
-      "sourceTree": "2ab5d1913c8d3b72777d9415816712d7069285e2",
-      "subject": "feat(event): verify long Nexent trajectories",
-      "bytes": 15652,
-      "sha256": "e799c557234e5cb8d8603102a8a46068432210072e2b8495893821a02ada0e33"
-    },
-    {
-      "index": 8,
-      "file": "patches/0008-feat-event-add-dual-Nexent-fork-controls.patch",
-      "sourceCommit": "986c526f93982445b518f21fee14405405996bec",
-      "sourceTree": "1a3e94eec4c24266f294fd65efbcc8c5ee81faa6",
-      "subject": "feat(event): add dual Nexent fork controls",
-      "bytes": 16818,
-      "sha256": "6999cd64e02170f3beb3020bac6d9b99ffdd8f34a85ce41349005b39f3ace4f2"
-    },
-    {
-      "index": 9,
-      "file": "patches/0009-docs-event-clarify-Runfold-package-installation.patch",
-      "sourceCommit": "54ae0144a776334019166137d14f231ce76d904e",
-      "sourceTree": "31c9fc070c80b8ee33ba165a42474e5cb1a19806",
-      "subject": "docs(event): clarify Runfold package installation",
-      "bytes": 2371,
-      "sha256": "126fdf2ca69be631699c290c455de325e2fae4f66335a736bc0abb217e82316c"
+      "file": "patches/0001-feat-event-integrate-Runfold-trajectory-support.patch",
+      "sourceCommit": "71928d1e49b60b050978015facf137d6b897f2ab",
+      "sourceTree": "196bcc22cc54d7c1ee638d6f28e0c5eeff514920",
+      "subject": "feat(event): integrate Runfold trajectory support",
+      "bytes": 2341464,
+      "sha256": "9d77c1643f5027dd296c26d00ad7d3ec5c7e99f35daaefaf336d316a43494a97"
     }
   ]
 }

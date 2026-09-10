@@ -1136,6 +1136,29 @@
     用 2 分 16 秒完成并通过完整验证；三个 v7 初始化步骤全部成功，check-run
     annotations API 返回空数组，不再有 Node 20 弃用注解。
 
+- [x] **R74** · 难度 中 · 风险 中 · 位置 `integrations/nexent/v2.5.0/`、
+  `scripts/verify-integration-artifacts.mjs`
+  - **问题**：Nexent README 把由 Release ZIP 重新建仓并经 `.gitattributes`
+    换行规范化后的 tree `b442446…` 写成官方 `v2.5.0` Git tag 的 tree；干净 clone
+    的真实 tree 是 `60986c…`，因此补丁虽可应用，应用前后的 tree 断言必然误报。
+    同时 9 个补丁增加了消费步骤，Python 验证说明又遗漏 backend test extra。
+  - **处理**：以官方 tag commit 为唯一规范基线，把 9 个已验证提交压成 1 个
+    consumer-facing binary mail patch；manifest 同时记录官方 tag 与 Release ZIP
+    重建的两组 tree、23 个 CRLF→LF 差异和原 9 个提交的审计来源；修正安装及重放
+    说明，并收紧集成产物门禁。
+  - **依赖**：R44、R54、R70；不改变 Nexent 集成功能代码与已验证的 38 文件结果。
+  - **结果**：已完成（2026-09-09）：规范基线改为官方 tag tree `60986c…`，交付
+    从 9 个补丁收敛为一个 2,341,464 字节的 binary mail patch；manifest v2 保留
+    原提交链，并单独记录 Release ZIP 重建基线 `b442446…` 与其 23 个纯换行差异。
+    Python 说明补装 `backend[test]`，产物门禁新增 schema、tree、来源 header、目录
+    一一对应和 squash provenance 断言。
+  - **验证**：官方 Release ZIP SHA-256 与 manifest 一致；官方 tag 与 ZIP 重建基线
+    的 diff 在 `--ignore-cr-at-eol` 下为空。正式单补丁在两份全新工作树均以
+    `git am --3way` 成功，分别精确得到 `196bcc…` 与 `31c9fc…`；Nexent 540/540
+    Python、27/27 frontend、TypeScript、production build 和可见 Event UI 通过。
+    本仓 3 个构建、1005 个行为测试、双语言文档、身份/产物门禁及 TypeScript、
+    Python 空白消费者验证均通过。
+
 ## 执行顺序
 
 按"容易改、风险小"优先，跨章节排列。
@@ -1178,6 +1201,7 @@
 | 33 | R71 | 去除 TypeScript 空白消费者安装中的无关 audit/fund 网络收尾 | R54 |
 | 34 | R72 | 为 Python 3.11 CI 安装声明的 Zstandard 测试依赖 | R35、R61 |
 | 35 | R73 | 升级 GitHub 官方 Actions，消除 Node 20 弃用兼容层 | R61、R72 |
+| 36 | R74 | 校正 Nexent 官方基线，合并补丁并修复重放说明 | R44、R54、R70 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 

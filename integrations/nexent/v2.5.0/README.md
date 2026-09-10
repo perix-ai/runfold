@@ -2,9 +2,11 @@
 
 This directory is the reproducible, reviewable delivery form of the Nexent
 changes that were validated locally in branch
-`codex/runfold-event-v2.5.0`. It was exported directly from the nine commits
-listed in [`manifest.json`](manifest.json); the generated patch bodies have not
-been edited after export.
+`codex/runfold-event-v2.5.0`. The consumer-facing artifact is one squashed Git
+mail patch generated directly against the official `v2.5.0` tag. The nine
+validated source commits remain listed as audit provenance in
+[`manifest.json`](manifest.json); the generated patch body has not been edited
+after export.
 
 The integration adds:
 
@@ -23,15 +25,14 @@ The integration adds:
 This remains a local Runfold interoperability experiment. It has not been
 submitted to, endorsed by, or deployed by the Nexent project.
 
-## Why patches
+## Why one patch
 
-The files under [`patches/`](patches/) are a standard Git mail patch series.
-The first eight commits preserve the validated implementation's authorship,
-dates, logical boundaries, and behavior while replacing only its public project
-identity; the ninth records installation before registry publication. The
-series includes binary patches for the two pinned frontend packages. A single
-squashed diff would lose that history; a Git bundle would unnecessarily
-redistribute the complete Nexent repository.
+The file under [`patches/`](patches/) is a standard Git binary mail patch. It
+contains the complete validated backend, SDK, UI, documentation, tests, and two
+pinned frontend package tarballs, so a consumer performs one atomic `git am`
+instead of coordinating nine dependent patches. The original logical commit
+subjects and trees remain in the manifest and in this repository's Git history.
+A Git bundle would unnecessarily redistribute the complete Nexent repository.
 
 This directory is therefore an integration artifact, not a second source of
 truth for Event. Event implementation and packages remain under
@@ -48,7 +49,7 @@ Run from this directory:
 
 ```bash
 shasum -a 256 -c SHA256SUMS
-test "$(find patches -type f -name '*.patch' | wc -l | tr -d ' ')" = 9
+test "$(find patches -type f -name '*.patch' | wc -l | tr -d ' ')" = 1
 ```
 
 [`series`](series) records the only supported application order.
@@ -65,38 +66,49 @@ recommended:
 git clone https://github.com/ModelEngine-Group/nexent.git
 cd nexent
 git switch --detach 86d75923dd549008d725d83db18a93d654c84fb0
-test "$(git rev-parse HEAD^{tree})" = b442446293b6793498dac09be0b86f1dd0d340c5
+test "$(git rev-parse HEAD^{tree})" = 60986c8030381ca88e52f11023bac6642861ffdb
 git switch -c runfold/event-trajectory-v2.5.0
 integration_dir=/absolute/path/to/integrations/nexent/v2.5.0
 while IFS= read -r patch; do
   git am --3way "$integration_dir/$patch" || exit
 done < "$integration_dir/series"
-test "$(git rev-parse HEAD^{tree})" = 31c9fc070c80b8ee33ba165a42474e5cb1a19806
+test "$(git rev-parse HEAD^{tree})" = 196bcc22cc54d7c1ee638d6f28e0c5eeff514920
 ```
 
 The full path in `integration_dir` is intentional: run the commands inside
 Nexent while the patches remain in this repository. If either tree assertion
-fails, stop instead of forcing the patches; the checked-out source is not the
+fails, stop instead of forcing the patch; the checked-out source is not the
 verified baseline or the replay is not identical.
 
-The series includes two frontend package tarballs built from the exact Runfold
+The GitHub Release ZIP has SHA-256
+`a4be5bc01472dd12947b2dce21a4b74ee58735cbd4de8668d367695b866ce77f`.
+Re-importing that archive into a new Git repository normalizes 23 upstream
+tracked files from CRLF to LF because Nexent's `.gitattributes` declares
+`* text=auto eol=lf`. That reconstruction therefore has baseline tree
+`b442446293b6793498dac09be0b86f1dd0d340c5` and result tree
+`31c9fc070c80b8ee33ba165a42474e5cb1a19806`. The content difference from the
+official tag is line endings only, and the patch applies to both, but the
+official Git tag and its `60986c…` tree are the canonical baseline.
+
+The patch includes two frontend package tarballs built from the exact Runfold
 source revision `d79ae963500b961d17a48503bc76df416f414660`. Rebuild both
-packages whenever their published contents change, then regenerate patch 0003
-and all descendant patches so the manifest's commit and tree chain remains
-replayable. Their package-level hashes are
-recorded in the manifest and in Nexent's resulting
-`frontend/vendor/SHA256SUMS`. The Python dependency is `runfold-event==0.1.0`,
+packages whenever their published contents change, then regenerate the single
+delivery patch and its manifest entry so the source and result trees remain
+replayable. Their package-level hashes are recorded in the manifest and in
+Nexent's resulting `frontend/vendor/SHA256SUMS`. The Python dependency is
+`runfold-event==0.1.0`,
 validated from Runfold commit `cb5916e02409e8c83e02ee4f99699c1be9c9fb40`;
-before registry publication, build and install that wheel from this repository
-before installing Nexent's `event` extra.
+the 2026-09-09 replay resolved that exact release from the package index. To
+validate an unpublished replacement, build and install its wheel before
+installing Nexent's `event` extra.
 
 ## Validate the applied integration
 
-Install the Event and quality extras, then run each Python file in its own
-process as required by Nexent's test isolation:
+Install the SDK Event/quality extras and the backend test dependencies, then run
+each Python file in its own process as required by Nexent's test isolation:
 
 ```bash
-uv pip install -e './sdk[event,quality]'
+uv pip install -e './sdk[event,quality]' -e './backend[test]'
 python -m pytest test/sdk/core/agents/test_event_trajectory.py -q
 python -m pytest test/sdk/core/agents/test_core_agent.py -q
 python -m pytest test/sdk/core/agents/test_run_agent.py -q
@@ -115,9 +127,17 @@ pnpm exec tsc --noEmit --incremental false
 pnpm build
 ```
 
-The original local acceptance produced 540/540 relevant Python tests and 27/27
-frontend tests, followed by TypeScript checking and a production frontend
-build. Detailed behavior and UI evidence remain in the Event task records:
+Nexent v2.5.0 ignores `pnpm-lock.yaml`, so the two vendored Runfold tarballs are
+byte-pinned while Nexent's wider frontend dependency graph is resolved from its
+declared version ranges at install time. Keep the generated lockfile with local
+replay evidence when diagnosing a future dependency-resolution difference.
+
+The 2026-09-09 independent replay from the official tag applied the nine-patch
+source series and the single delivery patch successfully to identical result
+tree `196bcc…`. It produced 540/540 relevant Python tests and 27/27 frontend
+tests, followed by TypeScript checking, a production frontend build, and an
+interactive `/zh/newchat` Trajectory UI render. Detailed behavior and UI
+evidence remain in the Event task records:
 [`R33`](../../../docs/event/tasks/R33-nexent-acceptance.md),
 [`R37`](../../../docs/event/tasks/R37-nexent-trajectory-ui.md),
 [`R38`](../../../docs/event/tasks/R38-nexent-long-trajectory.md), and
