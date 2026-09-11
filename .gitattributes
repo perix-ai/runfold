@@ -1,3 +1,6 @@
 # Git mail patches encode empty context lines as one leading space. Preserve
 # generated patch bytes; whitespace checks still apply to the files they create.
-integrations/nexent/**/patches/*.patch -whitespace
+# They must also never receive end-of-line conversion: a CRLF checkout breaks
+# their SHA-256 and makes `git apply` report trailing whitespace before failing
+# on the embedded binary tarballs.
+integrations/nexent/**/patches/*.patch -whitespace -text
