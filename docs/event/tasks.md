@@ -1211,6 +1211,19 @@
     可恢复，聊天快捷 Fork 创建 3803，控制台零错误，页脚显示
     `v2.5.1-runfold-acceptance`。默认 v2.5.0 路径 `--no-ui` 重跑无回归；
     `verify:integration-artifacts`、`verify:public-identity`、`verify:docs` 通过。
+- [x] **R77** · 难度 易 · 风险 低 · 位置 `.gitattributes`、`integrations/nexent/README.md`
+  - **问题**：人工反馈在应用补丁时出现 `xxx.patch:297: trailing whitespace.`。
+    补丁在仓库中没有尾随空白；复现表明是 Git 在检出时把补丁转成 CRLF 行尾，
+    `git apply` 先对新增行报尾随空白，随后在内嵌二进制 tarball 段失败，且补丁
+    SHA-256 也不再匹配。
+  - **处理**：为 `integrations/nexent/**/patches/*.patch` 增加 `-text`，禁止任何
+    行尾转换；集成索引 README 说明该现象的原因与处理方式。不修改补丁内容。
+  - **依赖**：R76。
+  - **结果**：已完成（2026-09-11）：`git check-attr` 显示补丁文件 `text: unset`；
+    把补丁人为转成 CRLF 后 `git apply` 复现出 `:296:`/`:297: trailing whitespace.`
+    与二进制段失败，原始字节版本在 `git am --3way` 与 `git apply` 下均零警告并
+    得到期望 tree `86ec7937…`。`verify:integration-artifacts`、`verify:docs`
+    通过。
 
 ## 执行顺序
 
@@ -1257,6 +1270,7 @@
 | 36 | R74 | 校正 Nexent 官方基线，合并补丁并修复重放说明 | R44、R54、R70 |
 | 37 | R75 | 提供 Nexent 一键人工验收并清理历史入口 | R74 |
 | 38 | R76 | 并列新增 Nexent v2.5.1 集成补丁与验收入口 | R75 |
+| 39 | R77 | 补丁文件禁止行尾转换，修复 CRLF 检出导致的应用失败 | R76 |
 
 ## 附录：2026-09-01 评审差距的处理记录
 
